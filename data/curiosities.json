@@ -1,162 +1,152 @@
 [
     {
         "id": 1,
-        "title": "¿Por qué el cielo es azul?",
-        "category": "Ciencia",
-        "fact": "La luz solar llega a la atmósfera de la Tierra y se dispersa en todas las direcciones al chocar con los gases y las partículas del aire. La luz azul se dispersa más que los otros colores debido a la dispersión de Rayleigh.",
+        "title": "Día vs Año en Venus",
+        "category": "Espacio",
+        "fact": "¡MWAHAHA! Un día en Venus dura más que su propio año. Tarda 243 días terrestres en girar una vez, pero solo 225 en dar la vuelta al sol.",
         "links": [
-            "https://www.nationalgeographic.es/ciencia"
+            "https://solarsystem.nasa.gov/planets/venus/in-depth/"
         ],
-        "image": "https://images.unsplash.com/photo-1501862700950-18382cd41497?auto=format&fit=crop&q=80&w=800"
+        "image": "https://images.unsplash.com/photo-1614732414444-af963b81f392?auto=format&fit=crop&q=80&w=800"
     },
     {
         "id": 2,
-        "title": "El corazón de una ballena azul",
-        "category": "Naturaleza",
-        "fact": "El corazón de una ballena azul es tan grande que un ser humano podría nadar a través de sus arterias. Pesa alrededor de 180 kg.",
+        "title": "Ocaso azul en Marte",
+        "category": "Espacio",
+        "fact": "En Marte, los atardeceres son azules. El polvo fino en la atmósfera dispersa la luz azul hacia adelante, creando un halo azulado alrededor del sol.",
         "links": [
-            "https://www.biopedia.com"
+            "https://science.nasa.gov/mars/lunar-and-solar-eclipses-on-mars/"
         ],
-        "image": "https://images.unsplash.com/photo-1568430462989-44163eb1752f?auto=format&fit=crop&q=80&w=800"
+        "image": "https://images.unsplash.com/photo-1614728894747-a83421e2b9c9?auto=format&fit=crop&q=80&w=800"
     },
     {
-        "id": 21,
-        "title": "Metal líquido: Galio",
-        "category": "Química",
-        "fact": "El Galio se funde a 29.76 °C, lo que significa que se hace líquido en la palma de tu mano.",
+        "id": 3,
+        "title": "Lluvia de Diamantes",
+        "category": "Espacio",
+        "fact": "En Neptuno y Urano, las presiones son tan brutales que literalmente llueven diamantes sólidos hacia el núcleo del planeta.",
         "links": [
-            "https://www.rsc.org/periodic-table/element/31/gallium"
-        ],
-        "image": "https://images.unsplash.com/photo-1554522432-8438096f9479?auto=format&fit=crop&q=80&w=800"
-    },
-    {
-        "id": 22,
-        "title": "El elemento más escaso",
-        "category": "Química",
-        "fact": "El Astato es el elemento más raro de la Tierra; se estima que hay menos de 28 gramos en toda la corteza terrestre.",
-        "links": [
-            "https://education.jlab.org/itselemental/ele085.html"
-        ],
-        "image": "https://images.unsplash.com/photo-1597401493245-c7a8a54238c0?auto=format&fit=crop&q=80&w=800"
-    },
-    {
-        "id": 23,
-        "title": "Frío absoluto",
-        "category": "Física",
-        "fact": "El cero absoluto (-273.15 °C) es la temperatura donde el movimiento atómico se detiene por completo.",
-        "links": [
-            "https://www.sciencedirect.com/topics/engineering/absolute-zero"
-        ],
-        "image": "https://images.unsplash.com/photo-1473081556163-2a17de81fc97?auto=format&fit=crop&q=80&w=800"
-    },
-    {
-        "id": 24,
-        "title": "Diamantes espaciales",
-        "category": "Física",
-        "fact": "Se cree que existen estrellas formadas casi totalmente por carbono cristalizado (diamante), llamadas enanas blancas pulsantes.",
-        "links": [
-            "https://www.space.com/24731-diamond-star-white-dwarf-pulsar.html"
+            "https://www.nature.com/articles/s41467-017-00836-1"
         ],
         "image": "https://images.unsplash.com/photo-1551376347-075b0121a65b?auto=format&fit=crop&q=80&w=800"
     },
     {
-        "id": 25,
-        "title": "Guerra de los 335 años",
-        "category": "Historia",
-        "fact": "Fue entre los Países Bajos y las Islas Sorlingas; terminó en 1986 sin que se disparara un solo tiro.",
+        "id": 4,
+        "title": "Silencio Absoluto",
+        "category": "Espacio",
+        "fact": "En el espacio no hay medio (aire) para que las ondas sonoras viajen. Es un silencio eterno y escalofriante.",
         "links": [
-            "https://www.historic-uk.com/HistoryUK/HistoryofBritain/The-Three-Hundred-And-Thirty-Five-Years-War/"
+            "https://www.nasa.gov/centers-and-facilities/goddard/is-there-sound-in-outer-space/"
         ],
-        "image": "https://images.unsplash.com/photo-1464692805480-a69dfaafdb0d?auto=format&fit=crop&q=80&w=800"
+        "image": "https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?auto=format&fit=crop&q=80&w=800"
     },
     {
-        "id": 26,
-        "title": "Ejército de un solo hombre",
-        "category": "Historia",
-        "fact": "Durante la invasión de Noruega en 1940, un solo fuerte detuvo a la flota alemana por horas.",
+        "id": 5,
+        "title": "Huellas Eternas",
+        "category": "Espacio",
+        "fact": "Como no hay viento ni agua para erosionarlas, las huellas de los astronautas en la Luna durarán millones de años.",
         "links": [
-            "https://www.visitnorway.com/listings/oscarsborg-fortress/3364/"
+            "https://www.rmg.co.uk/stories/topics/moon-facts"
         ],
-        "image": "https://images.unsplash.com/photo-1548126466-4470dfd32211?auto=format&fit=crop&q=80&w=800"
+        "image": "https://images.unsplash.com/photo-1522030239044-6a87071277c8?auto=format&fit=crop&q=80&w=800"
     },
     {
-        "id": 27,
-        "title": "Zanahorias naranjas",
-        "category": "Historia",
-        "fact": "Originalmente eran púrpuras; los holandeses las cultivaron de color naranja en el siglo XVII por honor a la Casa de Orange.",
+        "id": 6,
+        "title": "Corazón Gigante",
+        "category": "Animales",
+        "fact": "El corazón de una ballena azul es del tamaño de un coche de golf. Sus latidos se escuchan a kilómetros bajo el agua.",
         "links": [
-            "https://www.economist.com/the-economist-explains/2018/09/26/why-are-carrots-orange"
+            "https://www.nationalgeographic.com/animals/mammals/facts/blue-whale"
         ],
-        "image": "https://images.unsplash.com/photo-1444312645910-fee9755c3c1e?auto=format&fit=crop&q=80&w=800"
+        "image": "https://images.unsplash.com/photo-1568430462989-44163eb1752f?auto=format&fit=crop&q=80&w=800"
     },
     {
-        "id": 28,
-        "title": "Cleopatra y el iPhone",
-        "category": "Historia",
-        "fact": "Cronológicamente, Cleopatra vivió más cerca de la invención del iPhone que de la construcción de la Gran Pirámide.",
+        "id": 7,
+        "title": "La Medusa Inmortal",
+        "category": "Animales",
+        "fact": "La Turritopsis dohrnii puede revertir su ciclo de vida y volver a ser un pólipo cuando está enferma o vieja. ¡Inmortalidad biológica!",
         "links": [
-            "https://www.smithsonianmag.com/history/rehabilitating-cleopatra-70190630/"
+            "https://www.amnh.org/explore/news-blogs/on-exhibit-posts/the-immortal-jellyfish"
         ],
-        "image": "https://images.unsplash.com/photo-1503177119275-0aa32b3a9368?auto=format&fit=crop&q=80&w=800"
+        "image": "https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&q=80&w=800"
     },
     {
-        "id": 29,
-        "title": "Ojos de avestruz",
+        "id": 8,
+        "title": "Sangre Azul de Pulpo",
+        "category": "Animales",
+        "fact": "Los pulpos tienen sangre azul porque usan hemocianina rica en cobre para transportar oxígeno en aguas frías.",
+        "links": [
+            "https://www.nhm.ac.uk/discover/octopuses-keep-surprising-us.html"
+        ],
+        "image": "https://images.unsplash.com/photo-1545671913-b89ac1b4ac10?auto=format&fit=crop&q=80&w=800"
+    },
+    {
+        "id": 9,
+        "title": "Tiburones Nadadores",
+        "category": "Animales",
+        "fact": "Muchos tiburones deben nadar constantemente para forzar agua rica en oxígeno a través de sus branquias o morirían asfixiados.",
+        "links": [
+            "https://www.oceana.org/blog/shark-conundrum-can-they-ever-stop-swimming/"
+        ],
+        "image": "https://images.unsplash.com/photo-1560273074-c93173ec71dd?auto=format&fit=crop&q=80&w=800"
+    },
+    {
+        "id": 10,
+        "title": "Árboles Inteligentes",
         "category": "Naturaleza",
-        "fact": "El ojo de un avestruz es más grande que su cerebro.",
+        "fact": "Los árboles se comunican bajo tierra a través de redes de hongos, compartiendo nutrientes y advertencias sobre plagas.",
         "links": [
-            "https://www.nationalgeographic.com/animals/birds/facts/ostrich"
+            "https://www.scientificamerican.com/article/mother-trees-are-intelligent-they-learn-and-remember/"
         ],
-        "image": "https://images.unsplash.com/photo-1520626330050-dfb9933583ac?auto=format&fit=crop&q=80&w=800"
+        "image": "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&q=80&w=800"
     },
     {
-        "id": 30,
-        "title": "Superficie de Plutón vs Rusia",
-        "category": "Geografía",
-        "fact": "Rusia tiene más superficie terrestre (17 millones de km²) que el planeta enano Plutón (16.6 millones de km²).",
+        "id": 11,
+        "title": "Miel de 3,000 años",
+        "category": "Historia",
+        "fact": "La miel arqueológica sigue siendo comestible. Su baja humedad y pH ácido crean una barrera eterna contra bacterias.",
         "links": [
-            "https://www.nasa.gov/audience/forstudents/k-4/stories/nasa-knows/what-is-pluto-k4.html"
+            "https://www.smithsonianmag.com/science-nature/the-science-behind-honeys-eternal-shelf-life-12107901/"
         ],
-        "image": "https://images.unsplash.com/photo-1549413203-9d101a147e8b?auto=format&fit=crop&q=80&w=800"
+        "image": "https://images.unsplash.com/photo-1587049352846-4a222e784d38?auto=format&fit=crop&q=80&w=800"
     },
     {
-        "id": 51,
-        "title": "Primer ratón de madera",
-        "category": "Tecnología",
-        "fact": "Douglas Engelbart inventó el primer ratón de computadora en 1964 y estaba hecho de madera.",
+        "id": 12,
+        "title": "Energía Cerebral",
+        "category": "Cuerpo Humano",
+        "fact": "El cerebro humano genera suficiente electricidad (unos 20 vatios) para encender una bombilla LED pequeña.",
         "links": [
-            "https://www.computerhistory.org/revolution/input-output/14/350"
-        ],
-        "image": "https://images.unsplash.com/photo-1527864550417-7da917e6cde9?auto=format&fit=crop&q=80&w=800"
-    },
-    {
-        "id": 52,
-        "title": "Capacidad del cerebro",
-        "category": "Tecnología",
-        "fact": "El cerebro humano tiene una capacidad de almacenamiento estimada en 2.5 petabytes (2.5 millones de gigabytes).",
-        "links": [
-            "https://www.scientificamerican.com/article/what-is-the-memory-capacity/"
+            "https://www.healthline.com/health/how-much-electrical-energy-does-the-human-brain-produce"
         ],
         "image": "https://images.unsplash.com/photo-1507413245164-6160d8298b31?auto=format&fit=crop&q=80&w=800"
     },
     {
-        "id": 53,
-        "title": "Origen del Bug",
-        "category": "Tecnología",
-        "fact": "El término 'bug' se popularizó cuando Grace Hopper encontró una polilla real bloqueando un relé del ordenador Harvard Mark II.",
+        "id": 13,
+        "title": "Ácido Estomacal",
+        "category": "Cuerpo Humano",
+        "fact": "Tu ácido gástrico es tan fuerte que podría disolver metal. ¡Por suerte tu estómago se regenera constantemente!",
         "links": [
-            "https://www.nationalgeographic.org/thisday/sep9/first-computer-bug/"
+            "https://pubmed.ncbi.nlm.nih.gov/9110531/"
         ],
-        "image": "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&q=80&w=800"
+        "image": "https://images.unsplash.com/photo-1576086213369-97a306d36557?auto=format&fit=crop&q=80&w=800"
     },
     {
-        "id": 54,
-        "title": "00000000",
-        "category": "Tecnología",
-        "fact": "Durante 20 años, la contraseña de los misiles nucleares de EE. UU. fue simplemente '00000000'.",
+        "id": 14,
+        "title": "Kilómetros de Sangre",
+        "category": "Cuerpo Humano",
+        "fact": "Si extendieras todos los vasos sanguíneos de un adulto, medirían más de 96,000 kilómetros. ¡Dos vueltas a la Tierra!",
         "links": [
-            "https://www.todayifoundout.com/index.php/2013/11/nearly-20-years-nuclear-launch-code-00000000/"
+            "https://www.fi.edu/heart/blood-vessels"
         ],
-        "image": "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=800"
+        "image": "https://images.unsplash.com/photo-1530210124550-912dc1381cb8?auto=format&fit=crop&q=80&w=800"
+    },
+    {
+        "id": 15,
+        "title": "ADN de Plátano",
+        "category": "Ciencia",
+        "fact": "Compartimos un 50% de nuestros genes con los plátanos. ¡No somos tan diferentes de una fruta de desayuno!",
+        "links": [
+            "https://apps.jgi.doe.gov/education-genomics/human-banana-dna-comparison/"
+        ],
+        "image": "https://images.unsplash.com/photo-1528825871115-3581a5387919?auto=format&fit=crop&q=80&w=800"
     }
 ]

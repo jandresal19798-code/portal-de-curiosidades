@@ -214,14 +214,20 @@ document.addEventListener('DOMContentLoaded', () => {
             if (msg.includes('ciencia') || msg.includes('atomo'))
                 response = "¡Átomos! ¿Sabías que somos un 99% espacio vacío? Si quitáramos el espacio, ¡toda la humanidad cabría en una manzana! 🍎⚡";
 
-            if (msg.includes('animal') || msg.includes('bicho'))
-                response = "¡Criaturas fascinantes! El oso de agua (tardígrado) puede sobrevivir en el vacío del espacio. ¡He intentado crear uno gigante pero se escapó! 🔬🌌";
+            if (msg.includes('animal') || msg.includes('bicho') || msg.includes('mar'))
+                response = "¡Bestias fascinantes! ¿Sabías que los pulpos tienen 3 corazones y sangre azul? ¡Y la medusa inmortal puede resetear su vida! ¡He intentado inyectarme su ADN pero solo me dio hambre de plancton! 🐙💧";
+
+            if (msg.includes('espacio') || msg.includes('marte') || msg.includes('luna'))
+                response = "¡El cosmos es aterrador! En Marte los atardeceres son azules y en la Luna tus huellas durarán millones de años porque no hay viento. ¡MWAHAHA! 🌌🌚";
+
+            if (msg.includes('cuerpo') || msg.includes('bio'))
+                response = "¡Máquinas biológicas! Generas electricidad suficiente para una bombilla y tus ácidos estomacales podrían disolver metal. ¡Impresionante! 🧠⚡";
 
             if (msg.includes('historia') || msg.includes('tiempo'))
                 response = "¡El tiempo es relativo! ¿Sabías que los vikingos nunca usaron cascos con cuernos? ¡Fue un invento de la ópera del siglo XIX! 🎭🕰️";
 
             if (msg.includes('hola') || msg.includes('quien'))
-                response = "¡Soy el Dr. Curioso! El científico más brillante (y algo despeinado) de este servidor. ¡Pregúntame algo antes de que explote mi laboratorio! 🧪💥";
+                response = "¡Soy el Dr. Curioso! El científico más brillante (y algo despeinado) de este servidor. ¡Pregúntame sobre el espacio, animales o el cuerpo humano! 🧪💥";
 
             const randomIntro = introductions[Math.floor(Math.random() * introductions.length)];
 
