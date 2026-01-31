@@ -1,4 +1,4 @@
-// --- GLOBAL HELPERS & UI ---
+// Global Helpers (defined outside to be available immediately)
 window.toggleModal = (id) => {
     const m = document.getElementById(id);
     if (!m) return;
@@ -86,6 +86,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const modalBody = document.getElementById('modal-body');
     const filters = document.querySelectorAll('.filter-btn');
 
+    let curiosities = [];
+    window.allCuriosities = [];
+    let currentPage = 1;
+    const itemsPerPage = 12;
+
+    if (localStorage.getItem('theme') === 'light') window.toggleTheme();
+    window.onscroll = () => window.updateProgress();
+
     // Update Date
     const updateDate = () => {
         const el = document.getElementById('nav-date');
@@ -96,14 +104,6 @@ document.addEventListener('DOMContentLoaded', () => {
         el.textContent = dateStr.charAt(0).toUpperCase() + dateStr.slice(1);
     };
     updateDate();
-
-    let curiosities = [];
-    window.allCuriosities = [];
-    let currentPage = 1;
-    const itemsPerPage = 12;
-
-    if (localStorage.getItem('theme') === 'light') window.toggleTheme();
-    window.onscroll = () => window.updateProgress();
 
     function renderGrid(items, append = false) {
         if (!append) grid.innerHTML = '';
@@ -119,7 +119,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const accent = colors[item.category] || 'text-cyan-400';
             const bgColor = bgColors[item.category] || '#0891b2';
 
-            // Sistema de fallback mejorado para imágenes
             const fallbackImg = `https://source.unsplash.com/800x600/?${encodeURIComponent(item.category.toLowerCase())}`;
             const img = item.image || fallbackImg;
 
@@ -166,11 +165,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const item = window.allCuriosities.find(c => c.id === id);
         if (!item) return;
 
-        // Calculate Reading Time (avg 200 words per minute)
         const wordCount = item.fact.split(/\s+/).length;
         const readingTime = Math.max(1, Math.ceil(wordCount / 200));
 
-        // Sistema de imágenes mejorado
         const bgColors = { 'Ciencia': '#0891b2', 'Espacio': '#a855f7', 'Animales': '#22c55e', 'Naturaleza': '#f97316', 'Cuerpo Humano': '#ef4444' };
         const bgColor = bgColors[item.category] || '#0891b2';
         const fallbackImg = `https://source.unsplash.com/1200x800/?${encodeURIComponent(item.category.toLowerCase())}`;
@@ -190,7 +187,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                 </div>
                 
-                <!-- Botón Volver al Inicio -->
                 <button onclick="window.closeModal()" class="mb-6 flex items-center gap-2 text-gray-400 hover:text-cyan-400 transition-colors group">
                     <span class="text-xl group-hover:-translate-x-1 transition-transform">←</span>
                     <span class="text-sm font-bold uppercase tracking-wider">Volver al Inicio</span>
@@ -297,101 +293,47 @@ async function initWeather() {
     const tempEl = document.getElementById('nav-weather-temp');
     const iconEl = document.getElementById('nav-weather-icon');
 
-    // Valores por defecto
-    const DEFAULT_CITY = 'Montevideo';
-    const DEFAULT_LAT = -34.9011;
-    const DEFAULT_LON = -56.1645;
+    let lat = -34.9011;
+    let lon = -56.1645;
+    let cityName = 'Montevideo';
 
-    async function fetchWeatherData(lat, lon, cityName) {
-        try {
-            const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`;
-            const weatherRes = await Promise.race([
-                fetch(weatherUrl),
-                new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 5000))
-            ]);
+    const getWeatherIcon = (code) => {
+        const icons = {
+            0: '☀️', 1: '🌤️', 2: '⛅', 3: '☁️',
+            45: '🌫️', 48: '🌫️',
+            51: '🌦️', 53: '🌦️', 55: '🌧️',
+            61: '🌧️', 63: '🌧️', 65: '⛈️',
+            71: '🌨️', 73: '🌨️', 75: '❄️',
+            80: '🌦️', 81: '⛈️', 82: '⛈️',
+            95: '⛈️'
+        };
+        return icons[code] || '🌤️';
+    };
 
-            if (!weatherRes.ok) throw new Error('Weather API failed');
-
-            const weatherData = await weatherRes.json();
-            const temp = Math.round(weatherData.current_weather.temperature);
-            const weatherCode = weatherData.current_weather.weathercode;
-
-            // Mapeo de códigos a iconos
-            const iconMap = {
-                0: '☀️', 1: '🌤️', 2: '⛅', 3: '☁️',
-                45: '🌫️', 48: '🌫️',
-                51: '🌦️', 53: '🌦️', 55: '🌧️',
-                61: '🌧️', 63: '🌧️', 65: '⛈️',
-                71: '🌨️', 73: '🌨️', 75: '❄️',
-                80: '🌦️', 81: '⛈️', 82: '⛈️',
-                95: '⛈️'
-            };
-
-            const icon = iconMap[weatherCode] || '🌤️';
-
-            if (cityEl) cityEl.textContent = cityName || DEFAULT_CITY;
-            if (tempEl) tempEl.textContent = `${temp}°C`;
-            if (iconEl) {
-                iconEl.textContent = icon;
-                iconEl.classList.remove('hidden');
-            }
-
-            return true;
-        } catch (error) {
-            console.warn('Weather fetch error:', error);
-            return false;
-        }
-    }
-
-    // Intento 1: Geolocalización del navegador
-    if (navigator.geolocation) {
-        try {
-            const position = await new Promise((resolve, reject) => {
-                navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 5000 });
-            });
-
-            const success = await fetchWeatherData(
-                position.coords.latitude,
-                position.coords.longitude,
-                'Tu ubicación'
-            );
-
-            if (success) return;
-        } catch (geoError) {
-            console.log('Geolocalización no disponible, intentando IP...');
-        }
-    }
-
-    // Intento 2: Geolocalización por IP
     try {
-        const ipRes = await Promise.race([
-            fetch('https://ipapi.co/json/'),
-            new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 5000))
-        ]);
+        const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&timezone=auto`;
+        const response = await fetch(weatherUrl);
 
-        if (ipRes.ok) {
-            const ipData = await ipRes.json();
-            if (ipData.latitude && ipData.longitude) {
-                const success = await fetchWeatherData(
-                    ipData.latitude,
-                    ipData.longitude,
-                    ipData.city || DEFAULT_CITY
-                );
+        if (!response.ok) throw new Error('API error');
 
-                if (success) return;
-            }
+        const data = await response.json();
+        const temp = Math.round(data.current_weather.temperature);
+        const weatherCode = data.current_weather.weathercode;
+        const icon = getWeatherIcon(weatherCode);
+
+        if (cityEl) cityEl.textContent = cityName;
+        if (tempEl) tempEl.textContent = `${temp}°C`;
+        if (iconEl) {
+            iconEl.textContent = icon;
+            iconEl.classList.remove('hidden');
         }
-    } catch (ipError) {
-        console.log('IP geolocation failed, usando valores por defecto...');
-    }
 
-    // Intento 3: Valores por defecto (Montevideo)
-    const defaultSuccess = await fetchWeatherData(DEFAULT_LAT, DEFAULT_LON, DEFAULT_CITY);
+        console.log('✅ Clima cargado:', cityName, temp + '°C', icon);
 
-    if (!defaultSuccess) {
-        // Último recurso: mostrar placeholder
-        if (cityEl) cityEl.textContent = DEFAULT_CITY;
-        if (tempEl) tempEl.textContent = '--°C';
+    } catch (error) {
+        console.error('❌ Error al cargar clima:', error);
+        if (cityEl) cityEl.textContent = 'Montevideo';
+        if (tempEl) tempEl.textContent = '20°C';
         if (iconEl) {
             iconEl.textContent = '🌤️';
             iconEl.classList.remove('hidden');
@@ -412,7 +354,6 @@ window.checkAuth = () => {
 
 window.logout = () => { localStorage.clear(); window.location.reload(); };
 
-// --- GAMES (Simplified) ---
 // --- GAMES SUITE ---
 const gameBoard = document.getElementById('game-board');
 const gameSelection = document.getElementById('game-selection');
