@@ -72,24 +72,39 @@
                 </div>
             </div>
 
-            <div id="game-selection" class="grid md:grid-cols-2 gap-8">
-                <div class="glass-card p-10 flex items-center justify-between group cursor-pointer"
-                    onclick="startQuiz()">
-                    <div>
-                        <h3 class="text-xl font-bold mb-2 group-hover:text-cyan-400 transition-colors">Mental-Quiz 🧠
-                        </h3>
-                        <p class="text-gray-500 text-sm">¿Qué tanto sabes realmente del mundo?</p>
-                    </div>
-                    <div class="text-3xl opacity-50 group-hover:opacity-100 transition-opacity">→</div>
+            <div id="game-selection" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="glass-card p-6 flex flex-col justify-between group cursor-pointer" onclick="startQuiz()">
+                    <div class="text-4xl mb-4">🧠</div>
+                    <h3 class="text-xl font-bold mb-2 group-hover:text-cyan-400 transition-colors">Mental-Quiz</h3>
+                    <p class="text-gray-500 text-sm mb-4">¿Qué tanto sabes del mundo?</p>
+                    <div class="text-cyan-400 font-bold">JUGAR →</div>
                 </div>
-                <div class="glass-card p-10 flex items-center justify-between group cursor-pointer"
-                    onclick="startMemory()">
-                    <div>
-                        <h3 class="text-xl font-bold mb-2 group-hover:text-purple-400 transition-colors">Bio-Memoria 🧬
-                        </h3>
-                        <p class="text-gray-500 text-sm">Entrena tu cerebro con patrones biológicos</p>
-                    </div>
-                    <div class="text-3xl opacity-50 group-hover:opacity-100 transition-opacity">→</div>
+                <div class="glass-card p-6 flex flex-col justify-between group cursor-pointer" onclick="startMemory()">
+                    <div class="text-4xl mb-4">🧬</div>
+                    <h3 class="text-xl font-bold mb-2 group-hover:text-purple-400 transition-colors">Bio-Memoria</h3>
+                    <p class="text-gray-500 text-sm mb-4">Entrena tu cerebro con patrones.</p>
+                    <div class="text-purple-400 font-bold">JUGAR →</div>
+                </div>
+                <div class="glass-card p-6 flex flex-col justify-between group cursor-pointer"
+                    onclick="startAtomHunter()">
+                    <div class="text-4xl mb-4">⚛️</div>
+                    <h3 class="text-xl font-bold mb-2 group-hover:text-green-400 transition-colors">Caza-Átomos</h3>
+                    <p class="text-gray-500 text-sm mb-4">Reflejos a nivel subatómico.</p>
+                    <div class="text-green-400 font-bold">JUGAR →</div>
+                </div>
+                <div class="glass-card p-6 flex flex-col justify-between group cursor-pointer"
+                    onclick="startMathChallenge()">
+                    <div class="text-4xl mb-4">🔢</div>
+                    <h3 class="text-xl font-bold mb-2 group-hover:text-orange-400 transition-colors">Cerebro Veloz</h3>
+                    <p class="text-gray-500 text-sm mb-4">Cálculo mental contra reloj.</p>
+                    <div class="text-orange-400 font-bold">JUGAR →</div>
+                </div>
+                <div class="glass-card p-6 flex flex-col justify-between group cursor-pointer"
+                    onclick="startGravitySort()">
+                    <div class="text-4xl mb-4">🌌</div>
+                    <h3 class="text-xl font-bold mb-2 group-hover:text-blue-400 transition-colors">Gravedad Zero</h3>
+                    <p class="text-gray-500 text-sm mb-4">Ordena por masa planetaria.</p>
+                    <div class="text-blue-400 font-bold">JUGAR →</div>
                 </div>
             </div>
 
@@ -106,6 +121,9 @@
                 <div class="flex gap-2 overflow-x-auto pb-2 no-scrollbar text-xs">
                     <button class="filter-btn active bg-cyan-400 text-black px-4 py-2 rounded-full font-bold"
                         data-category="all">Todos</button>
+                    <button
+                        class="filter-btn bg-white/5 hover:bg-white/10 px-4 py-2 rounded-full border border-white/5 transition-colors"
+                        data-category="Matemáticas">Matemáticas</button>
                     <button
                         class="filter-btn bg-white/5 hover:bg-white/10 px-4 py-2 rounded-full border border-white/5 transition-colors"
                         data-category="Ciencia">Ciencia</button>

@@ -7,20 +7,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let curiosities = [];
 
-    function renderGrid(items) {
-        grid.innerHTML = '';
+    let currentPage = 1;
+    const itemsPerPage = 12;
+
+    function renderGrid(items, append = false) {
+        if (!append) grid.innerHTML = '';
+
         if (items.length === 0) {
-            grid.innerHTML = '<p class="col-span-full text-center text-gray-400 py-10">No se encontraron curiosidades en esta categoría.</p>';
+            grid.innerHTML = '<p class="col-span-full text-center text-gray-400 py-10">No se encontraron curiosidades.</p>';
             return;
         }
 
-        grid.innerHTML = items.map(item => {
+        const start = (currentPage - 1) * itemsPerPage;
+        const end = start + itemsPerPage;
+        const pageItems = items.slice(start, end);
+
+        const html = pageItems.map(item => {
             const colors = {
                 'Ciencia': 'text-cyan-400',
                 'Espacio': 'text-purple-400',
                 'Animales': 'text-green-400',
                 'Naturaleza': 'text-orange-400',
-                'Cuerpo Humano': 'text-red-400'
+                'Cuerpo Humano': 'text-red-400',
+                'Matemáticas': 'text-blue-400'
             };
             const accent = colors[item.category] || 'text-cyan-400';
 
@@ -40,6 +49,36 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
             `;
         }).join('');
+
+        if (append) {
+            grid.insertAdjacentHTML('beforeend', html);
+        } else {
+            grid.innerHTML = html;
+        }
+
+        // Add "Load More" button if there are more items
+        updateLoadMoreButton(items.length);
+    }
+
+    function updateLoadMoreButton(totalItems) {
+        let btn = document.getElementById('load-more');
+        if (currentPage * itemsPerPage < totalItems) {
+            if (!btn) {
+                btn = document.createElement('button');
+                btn.id = 'load-more';
+                btn.className = 'col-span-full mt-12 py-4 px-10 rounded-full border border-white/10 hover:bg-white/5 font-bold transition-all';
+                btn.innerText = 'Cargar más descubrimientos';
+                btn.onclick = () => {
+                    currentPage++;
+                    const cat = document.querySelector('.filter-btn.active').dataset.category;
+                    const filtered = cat === 'all' ? curiosities : curiosities.filter(c => c.category === cat);
+                    renderGrid(filtered, true);
+                };
+                grid.after(btn);
+            }
+        } else {
+            if (btn) btn.remove();
+        }
     }
 
     // Load Curiosities with artificial delay for skeleton demo
@@ -66,6 +105,7 @@ document.addEventListener('DOMContentLoaded', () => {
             btn.classList.add('active', 'bg-cyan-400', 'text-black');
             btn.classList.remove('bg-white/5', 'text-gray-400');
 
+            currentPage = 1; // Reset to page 1
             const cat = btn.dataset.category;
             const filtered = cat === 'all' ? curiosities : curiosities.filter(c => c.category === cat);
             renderGrid(filtered);
@@ -407,4 +447,166 @@ function startMemory() {
             `;
         }
     };
+}
+
+function startAtomHunter() {
+    const board = document.getElementById('game-board');
+    const selection = document.getElementById('game-selection');
+    selection.classList.add('hidden');
+    board.classList.remove('hidden');
+
+    let score = 0;
+    let totalAtoms = 10;
+
+    board.innerHTML = `
+        <h3 class="text-cyan-400 font-bold mb-4">Caza 10 Átomos Inestables</h3>
+        <p class="text-sm text-gray-500 mb-4">¡Rápido, antes de que desaparezcan!</p>
+        <div id="atom-field" class="relative w-full h-[300px] bg-black/20 rounded-2xl overflow-hidden cursor-crosshair">
+            <div id="atom" class="absolute w-12 h-12 bg-cyan-400 rounded-full flex items-center justify-center text-2xl shadow-[0_0_20px_rgba(0,242,255,0.5)] transition-all duration-200" onclick="hitAtom()">⚛️</div>
+        </div>
+        <p class="mt-4">Puntuación: <span id="atom-score">0</span> / ${totalAtoms}</p>
+    `;
+
+    const atom = document.getElementById('atom');
+    const field = document.getElementById('atom-field');
+
+    function moveAtom() {
+        const x = Math.random() * (field.clientWidth - 50);
+        const y = Math.random() * (field.clientHeight - 50);
+        atom.style.left = `${x}px`;
+        atom.style.top = `${y}px`;
+    }
+
+    window.hitAtom = () => {
+        score++;
+        document.getElementById('atom-score').innerText = score;
+        if (score >= totalAtoms) {
+            board.innerHTML = `
+                <h3 class="text-cyan-400 text-3xl font-bold mb-4">¡REFLEJOS CUÁNTICOS!</h3>
+                <div class="links-section">
+                    <p><b>Dato Químico Secreto:</b></p>
+                    <p>¡Eres más rápido que un neutrón! ¿Sabías que los átomos son 99.99% espacio vacío? Si quitáramos el espacio de todos los humanos, cabríamos en un terrón de azúcar.</p>
+                </div>
+                <button onclick="location.reload()" class="btn-glow px-8 py-3 rounded-full mt-6">Volver</button>
+            `;
+        } else {
+            moveAtom();
+        }
+    };
+    moveAtom();
+}
+
+function startMathChallenge() {
+    const board = document.getElementById('game-board');
+    const selection = document.getElementById('game-selection');
+    selection.classList.add('hidden');
+    board.classList.remove('hidden');
+
+    let current = 0;
+    let questions = [];
+    for (let i = 0; i < 5; i++) {
+        const a = Math.floor(Math.random() * 20) + 1;
+        const b = Math.floor(Math.random() * 20) + 1;
+        questions.push({ q: `${a} + ${b} = ?`, s: a + b });
+    }
+
+    function showMath() {
+        if (current >= questions.length) {
+            board.innerHTML = `
+                <h3 class="text-orange-400 text-3xl font-bold mb-4">¡GENIO MATEMÁTICO!</h3>
+                <div class="links-section text-left">
+                    <p><b>Dato Matemático Secreto:</b></p>
+                    <p>¿Sabías que el número 0 fue inventado independientemente por los Mayas y los Indios? Sin él, ¡la computación moderna no existiría!</p>
+                </div>
+                <button onclick="location.reload()" class="btn-glow px-8 py-3 rounded-full mt-6 text-white">Volver</button>
+            `;
+            return;
+        }
+        const q = questions[current];
+        board.innerHTML = `
+            <h3 class="text-2xl font-bold mb-6">${q.q}</h3>
+            <input type="number" id="math-ans" class="bg-white/10 border border-cyan-400 p-4 rounded-xl text-center mb-6" autofocus>
+            <br>
+            <button onclick="checkMath(${q.s})" class="btn-glow px-10 py-3 rounded-full">Responder</button>
+        `;
+        document.getElementById('math-ans').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') checkMath(q.s);
+        });
+    }
+
+    window.checkMath = (answer) => {
+        const input = document.getElementById('math-ans').value;
+        if (parseInt(input) === answer) {
+            current++;
+            showMath();
+        } else {
+            alert("¡Error de cálculo! Reintenta.");
+        }
+    };
+    showMath();
+}
+
+function startGravitySort() {
+    const board = document.getElementById('game-board');
+    const selection = document.getElementById('game-selection');
+    selection.classList.add('hidden');
+    board.classList.remove('hidden');
+
+    const planets = [
+        { name: 'Sol', mass: 1000 },
+        { name: 'Júpiter', mass: 500 },
+        { name: 'Tierra', mass: 100 },
+        { name: 'Marte', mass: 50 },
+        { name: 'Luna', mass: 10 }
+    ];
+    let shuffled = [...planets].sort(() => Math.random() - 0.5);
+    let userOrder = [];
+
+    function renderSort() {
+        board.innerHTML = `
+            <h3 class="text-blue-400 font-bold mb-4">Gravedad Zero: Ordena por Masa</h3>
+            <p class="text-xs text-gray-500 mb-6">(De menor a mayor peso)</p>
+            <div class="flex flex-wrap justify-center gap-4 mb-8">
+                ${shuffled.map(p => `<button onclick="pickPlanet('${p.name}')" class="px-6 py-2 bg-white/5 border border-white/10 rounded-full hover:bg-cyan-400 hover:text-black transition-all">${p.name}</button>`).join('')}
+            </div>
+            <div class="text-cyan-400 font-bold min-h-[40px]">
+                ${userOrder.join(' < ')}
+            </div>
+            ${userOrder.length > 0 ? `<button onclick="resetSort()" class="text-xs text-red-400 mt-4 underline">Reiniciar selección</button>` : ''}
+        `;
+
+        if (userOrder.length === planets.length) {
+            const correct = planets.slice().sort((a, b) => a.mass - b.mass).map(p => p.name).join(',');
+            const user = userOrder.join(',');
+            if (correct === user) {
+                board.innerHTML = `
+                    <h3 class="text-blue-400 text-3xl font-bold mb-4">¡MAESTRO ESTELAR!</h3>
+                    <div class="links-section">
+                        <p><b>Dato Cósmico Secreto:</b></p>
+                        <p>¿Sabías que Júpiter es tan grande que dentro de él cabrían todos los demás planetas del sistema solar dos veces? ¡Es el rey de la gravedad!</p>
+                    </div>
+                    <button onclick="location.reload()" class="btn-glow px-8 py-3 rounded-full mt-6">Volver</button>
+                `;
+            } else {
+                alert("El orden no es correcto... ¡La gravedad te ha fallado!");
+                resetSort();
+            }
+        }
+    }
+
+    window.pickPlanet = (name) => {
+        if (!userOrder.includes(name)) {
+            userOrder.push(name);
+            shuffled = shuffled.filter(p => p.name !== name);
+            renderSort();
+        }
+    };
+
+    window.resetSort = () => {
+        userOrder = [];
+        shuffled = [...planets].sort(() => Math.random() - 0.5);
+        renderSort();
+    };
+
+    renderSort();
 }
