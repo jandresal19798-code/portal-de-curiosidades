@@ -224,26 +224,42 @@ document.addEventListener('DOMContentLoaded', () => {
     // Marquee Logic
     function initMarquee(items) {
         const content = document.getElementById('marquee-content');
-        const facts = items.map(i => `<div class="marquee-item"><span>💡 SABÍAS QUE:</span> ${i.fact}</div>`).join('');
+        if (!content) return;
+
+        // Take a random sample of 20 items to keep it readable and performant
+        const sample = [...items].sort(() => 0.5 - Math.random()).slice(0, 20);
+
+        const facts = sample.map(i => `<div class="marquee-item"><span>💡 SABÍAS QUE:</span> ${i.fact}</div>`).join('');
         // Double the content for smooth infinite loop
         content.innerHTML = facts + facts;
     }
 
-    // Weather Logic (Switching to Open-Meteo to avoid Auth issues)
+    // Weather Logic (Open-Meteo + Reverse Geocoding)
     const DEFAULT_CITY = 'Montevideo';
     const DEFAULT_LAT = -34.9011;
     const DEFAULT_LON = -56.1645;
 
-    async function fetchWeather(lat, lon, city = null) {
-        // Using Open-Meteo which doesn't require API Key for basic data
+    async function fetchWeather(lat, lon, overrideCity = null) {
         const apiUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat || DEFAULT_LAT}&longitude=${lon || DEFAULT_LON}&current_weather=true&hourly=relativehumidity_2m,windspeed_10m`;
 
         try {
+            // First get the actual city name if we have coordinates
+            let cityName = overrideCity || DEFAULT_CITY;
+            if (lat && lon && !overrideCity) {
+                try {
+                    const geoRes = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=10&addressdetails=1`);
+                    const geoData = await geoRes.json();
+                    cityName = geoData.address.city || geoData.address.town || geoData.address.village || "Ubicación Local";
+                } catch (err) {
+                    cityName = "Ubicación Local";
+                }
+            }
+
             const response = await fetch(apiUrl);
             const data = await response.json();
             if (data.current_weather) {
-                updateWeatherUI(data, city || (lat ? "Tu ubicación" : DEFAULT_CITY));
-                console.log(`Clima actualizado via Open-Meteo: ${new Date().toLocaleTimeString()}`);
+                updateWeatherUI(data, cityName);
+                console.log(`Clima actualizado en ${cityName}: ${new Date().toLocaleTimeString()}`);
             }
         } catch (error) {
             console.error("Error actualizando clima:", error);

@@ -86,9 +86,13 @@ body {
     }
 }
 
-/* Marquee Animation - Slower for better reading */
+/* Marquee Animation - Optimized for 20 items */
 #marquee-content {
-    animation: marquee 120s linear infinite;
+    animation: marquee 180s linear infinite;
+}
+
+#marquee-content:hover {
+    animation-play-state: paused;
 }
 
 @keyframes marquee {
