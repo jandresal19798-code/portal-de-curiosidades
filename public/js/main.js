@@ -229,48 +229,67 @@ document.addEventListener('DOMContentLoaded', () => {
         content.innerHTML = facts + facts;
     }
 
-    // Weather Logic (OpenWeatherMap)
-    const WEATHER_API_KEY = 'af4b2558bbfe75ccf2f3ec22e32e43b9';
+    // Weather Logic (Switching to Open-Meteo to avoid Auth issues)
     const DEFAULT_CITY = 'Montevideo';
+    const DEFAULT_LAT = -34.9011;
+    const DEFAULT_LON = -56.1645;
 
     async function fetchWeather(lat, lon, city = null) {
-        let url = `https://api.openweathermap.org/data/2.5/weather?units=metric&lang=es&appid=${WEATHER_API_KEY}`;
-        if (city) url += `&q=${city}`;
-        else if (lat && lon) url += `&lat=${lat}&lon=${lon}`;
-        else url += `&q=${DEFAULT_CITY}`;
+        // Using Open-Meteo which doesn't require API Key for basic data
+        const apiUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat || DEFAULT_LAT}&longitude=${lon || DEFAULT_LON}&current_weather=true&hourly=relativehumidity_2m,windspeed_10m`;
 
         try {
-            const response = await fetch(url);
+            const response = await fetch(apiUrl);
             const data = await response.json();
-            if (data.cod === 200) {
-                updateWeatherUI(data);
-                console.log(`Clima actualizado: ${new Date().toLocaleTimeString()}`);
+            if (data.current_weather) {
+                updateWeatherUI(data, city || (lat ? "Tu ubicación" : DEFAULT_CITY));
+                console.log(`Clima actualizado via Open-Meteo: ${new Date().toLocaleTimeString()}`);
             }
         } catch (error) {
             console.error("Error actualizando clima:", error);
         }
     }
 
-    function updateWeatherUI(data) {
-        const t = Math.round(data.main.temp);
-        const iconUrl = `https://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png`;
+    function updateWeatherUI(data, cityName) {
+        const weather = data.current_weather;
+        const t = Math.round(weather.temperature);
+
+        // Mapping Open-Meteo codes to icons
+        const iconMap = {
+            0: '01d', 1: '02d', 2: '03d', 3: '04d',
+            45: '50d', 48: '50d',
+            51: '09d', 53: '09d', 55: '09d',
+            61: '10d', 63: '10d', 65: '10d',
+            71: '13d', 73: '13d', 75: '13d',
+            80: '09d', 81: '09d', 82: '09d',
+            95: '11d'
+        };
+        const iconCode = iconMap[weather.weathercode] || '03d';
+        const iconUrl = `https://openweathermap.org/img/wn/${iconCode}@2x.png`;
 
         // Nav Widget
         const navIcon = document.getElementById('nav-weather-icon');
-        navIcon.src = iconUrl;
-        navIcon.classList.remove('hidden');
-        document.getElementById('nav-weather-city').textContent = data.name;
+        if (navIcon) {
+            navIcon.src = iconUrl;
+            navIcon.classList.remove('hidden');
+        }
+        document.getElementById('nav-weather-city').textContent = cityName;
         document.getElementById('nav-weather-temp').textContent = `${t}°C`;
 
         // Full Widget
         const fullIcon = document.getElementById('icono-full');
         if (fullIcon) {
             fullIcon.src = iconUrl;
-            document.getElementById('ciudad-full').textContent = data.name.toUpperCase();
+            document.getElementById('ciudad-full').textContent = cityName.toUpperCase();
             document.getElementById('temp-full').textContent = `${t}°C`;
-            document.getElementById('desc-full').textContent = data.weather[0].description;
-            document.getElementById('humedad-full').textContent = `${data.main.humidity}%`;
-            document.getElementById('viento-full').textContent = `${(data.wind.speed * 3.6).toFixed(1)} km/h`;
+
+            const descMap = { 0: 'Despejado', 1: 'Principalmente despejado', 2: 'Parcialmente nublado', 3: 'Nublado', 45: 'Niebla', 61: 'Lluvia ligera' };
+            document.getElementById('desc-full').textContent = descMap[weather.weathercode] || 'Nublado';
+
+            // Getting humidity from hourly (approx)
+            const humidity = data.hourly ? data.hourly.relativehumidity_2m[0] : '--';
+            document.getElementById('humedad-full').textContent = `${humidity}%`;
+            document.getElementById('viento-full').textContent = `${weather.windspeed} km/h`;
 
             // Dynamic Background based on temp
             const glow = document.getElementById('widget-glow');
