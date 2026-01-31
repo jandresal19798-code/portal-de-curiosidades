@@ -16,10 +16,10 @@ curiosities = [
         "category": "Espacio",
         "fact": "Un día en Venus dura más que su propio año. Tarda 243 días terrestres en girar una vez, pero solo 225 en dar la vuelta al sol.",
         "links": ["https://solarsystem.nasa.gov/planets/venus/in-depth/"],
-        "image": "https://image.pollinations.ai/prompt/Venus%20planet%20surface%20space%20realistic?width=800&height=600&nologo=true",
+        "image": "https://picsum.photos/seed/venus1/800/600",
         "images": [
-            "https://image.pollinations.ai/prompt/Venus%20planet%20surface%20space%20realistic?width=800&height=600&nologo=true",
-            "https://image.pollinations.ai/prompt/Venus%20atmosphere%20yellow%20clouds?width=800&height=600&nologo=true"
+            "https://picsum.photos/seed/venus1/800/600",
+            "https://picsum.photos/seed/venus2/800/600"
         ]
     },
     {
@@ -28,10 +28,10 @@ curiosities = [
         "category": "Espacio",
         "fact": "En Marte, los atardeceres son azules. El polvo fino en la atmósfera dispersa la luz azul hacia adelante, creando un halo azulado.",
         "links": ["https://science.nasa.gov/mars/lunar-and-solar-eclipses-on-mars/"],
-        "image": "https://image.pollinations.ai/prompt/Mars%20blue%20sunset%20red%20planet?width=800&height=600&nologo=true",
+        "image": "https://picsum.photos/seed/mars1/800/600",
         "images": [
-             "https://image.pollinations.ai/prompt/Mars%20blue%20sunset%20red%20planet?width=800&height=600&nologo=true",
-             "https://image.pollinations.ai/prompt/Martian%20landscape%20rover?width=800&height=600&nologo=true"
+             "https://picsum.photos/seed/mars1/800/600",
+             "https://picsum.photos/seed/mars2/800/600"
         ]
     },
     {
@@ -40,10 +40,10 @@ curiosities = [
         "category": "Espacio",
         "fact": "En Neptuno y Urano, las presiones son tan brutales que literalmente llueven diamantes sólidos hacia el núcleo del planeta.",
         "links": ["https://www.nature.com/articles/s41467-017-00836-1"],
-        "image": "https://image.pollinations.ai/prompt/Neptune%20diamond%20rain%20blue%20giant?width=800&height=600&nologo=true",
+        "image": "https://picsum.photos/seed/neptune1/800/600",
         "images": [
-            "https://image.pollinations.ai/prompt/Neptune%20diamond%20rain%20blue%20giant?width=800&height=600&nologo=true",
-            "https://image.pollinations.ai/prompt/Uranus%20planet%20icy?width=800&height=600&nologo=true"
+            "https://picsum.photos/seed/neptune1/800/600",
+            "https://picsum.photos/seed/neptune2/800/600"
         ]
     },
     {
@@ -52,7 +52,7 @@ curiosities = [
         "category": "Espacio",
         "fact": "En el espacio no hay aire para que las ondas sonoras viajen. Es un silencio eterno y escalofriante.",
         "links": ["https://www.nasa.gov/centers-and-facilities/goddard/is-there-sound-in-outer-space/"],
-        "image": "https://image.pollinations.ai/prompt/Deep%20space%20silence%20stars%20void?width=800&height=600&nologo=true"
+        "image": "https://picsum.photos/seed/space1/800/600"
     }
 ]
 
