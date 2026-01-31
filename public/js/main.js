@@ -79,11 +79,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 'Matemáticas': 'text-blue-400'
             };
             const accent = colors[item.category] || 'text-cyan-400';
-            const imgUrl = item.image && item.image.startsWith('http') ? item.image : `https://images.unsplash.com/photo-1532187875605-1fc6367b913e?auto=format&fit=crop&q=80&w=800&sig=${item.id}`;
+            // Default high-quality fallback image
+            const fallbackImg = `https://images.unsplash.com/photo-1532187875605-1fc6367b913e?auto=format&fit=crop&q=80&w=800&sig=${item.id}`;
+            const imgUrl = item.image && item.image.includes('unsplash.com') ? item.image : fallbackImg;
 
             return `
                 <div class="glass-card overflow-hidden flex flex-col animate-in">
-                    <div class="h-56 bg-cover bg-center" style="background-image: url('${imgUrl}')"></div>
+                    <div class="h-56 overflow-hidden bg-gray-900">
+                        <img src="${imgUrl}" 
+                             alt="${item.title}" 
+                             class="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
+                             onerror="this.onerror=null; this.src='${fallbackImg}';">
+                    </div>
                     <div class="p-6 flex-grow">
                         <span class="${accent} text-[10px] font-bold uppercase tracking-[0.2em] mb-2 block">${item.category}</span>
                         <h3 class="text-xl font-bold mb-3 leading-snug">${item.title}</h3>
@@ -174,9 +181,15 @@ document.addEventListener('DOMContentLoaded', () => {
         };
         const accent = colors[item.category] || 'text-cyan-400';
 
+        const fallbackImg = `https://images.unsplash.com/photo-1532187875605-1fc6367b913e?auto=format&fit=crop&q=80&w=800&sig=${item.id}`;
+        const imgUrl = item.image && item.image.includes('unsplash.com') ? item.image : fallbackImg;
+
         modalBody.innerHTML = `
             <div class="animate-in">
-                <div class="h-80 md:h-[450px] w-[calc(100%+6rem)] -ml-12 -mt-12 mb-10 bg-cover bg-center relative" style="background-image: url('${item.image}')">
+                <div class="h-80 md:h-[450px] w-[calc(100%+6rem)] -ml-12 -mt-12 mb-10 overflow-hidden relative bg-gray-900">
+                    <img src="${imgUrl}" 
+                         class="w-full h-full object-cover" 
+                         onerror="this.onerror=null; this.src='${fallbackImg}';">
                     <div class="absolute inset-0 bg-gradient-to-t from-[#05070a] via-transparent to-transparent"></div>
                 </div>
                 <span class="${accent} text-xs font-bold uppercase tracking-[0.3em] mb-4 block">${item.category}</span>
@@ -331,27 +344,29 @@ document.addEventListener('DOMContentLoaded', () => {
     const DEFAULT_LON = -56.1645;
 
     async function fetchWeather(lat, lon, overrideCity = null) {
-        const apiUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat || DEFAULT_LAT}&longitude=${lon || DEFAULT_LON}&current_weather=true&hourly=relativehumidity_2m,windspeed_10m`;
+        const finalLat = (lat !== null && lat !== undefined) ? lat : DEFAULT_LAT;
+        const finalLon = (lon !== null && lon !== undefined) ? lon : DEFAULT_LON;
+        const apiUrl = `https://api.open-meteo.com/v1/forecast?latitude=${finalLat}&longitude=${finalLon}&current_weather=true&hourly=relativehumidity_2m,windspeed_10m`;
+
+        console.log(`Buscando clima en coord: ${finalLat}, ${finalLon}`);
 
         try {
             // First get the actual city name if we have coordinates
             let cityName = overrideCity || DEFAULT_CITY;
-            if (lat && lon && !overrideCity) {
+            if (lat !== null && lon !== null && !overrideCity) {
                 try {
-                    // Added User-Agent (Policy requirements for Nominatim) and better lat/lon handling
-                    const geoRes = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${parseFloat(lat).toFixed(4)}&lon=${parseFloat(lon).toFixed(4)}&zoom=10&addressdetails=1`, {
-                        headers: { 'User-Agent': 'Curiosphere/1.0 (contact@curiosphere.app)' }
+                    // Try to get a more precise location
+                    const geoRes = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=10`, {
+                        headers: { 'User-Agent': 'CurioSphere-App-Agent/1.1' }
                     });
                     const geoData = await geoRes.json();
-                    cityName = geoData.address.city ||
+                    cityName = geoData.display_name.split(',')[0] ||
+                        geoData.address.city ||
                         geoData.address.town ||
-                        geoData.address.village ||
-                        geoData.address.suburb ||
-                        geoData.address.state ||
-                        "Tu ubicación";
+                        "Tu Ciudad";
                 } catch (err) {
-                    console.error("Geocoding failed:", err);
-                    cityName = "Ubicación detectada";
+                    console.warn("Geocoding failed, using generic label.");
+                    cityName = "Zona Local";
                 }
             }
 
@@ -885,3 +900,4 @@ function startGravitySort() {
 
     renderSort();
 }
+});
