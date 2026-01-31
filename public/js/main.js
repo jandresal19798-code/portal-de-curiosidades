@@ -179,7 +179,20 @@ document.addEventListener('DOMContentLoaded', () => {
     // Bot Logic
     window.toggleBot = () => {
         const chat = document.getElementById('bot-chat');
+        const container = document.getElementById('bot-messages');
         chat.classList.toggle('active');
+
+        if (chat.classList.contains('active') && container.innerHTML === "") {
+            const intros = [
+                "¡MWAHAHA! ¿Quién osa interrumpir mi fusión nuclear?",
+                "¡Eureka! ¡Has llegado justo a tiempo para mi experimento número 402!",
+                "¡Por los pelos de Einstein! ¡Un humano ha entrado en mi laboratorio!",
+                "¡Cuidado donde pisas! ¡Esa mancha verde es... bueno, mejor no preguntes!",
+                "¡Rápido! ¡Pásame la llave de 12 dimensiones! Ah, eres tú..."
+            ];
+            const welcome = intros[Math.floor(Math.random() * intros.length)];
+            container.innerHTML = `<div class="msg-bot"><b>Dr. Curioso 🧪:</b> ${welcome} ¿En qué locura científica puedo ayudarte hoy?</div>`;
+        }
     };
 
     window.botMessage = (e) => {
@@ -188,14 +201,32 @@ document.addEventListener('DOMContentLoaded', () => {
             const msg = input.value.toLowerCase();
             const container = document.getElementById('bot-messages');
 
-            // Simple bot logic
-            let response = "¡Qué interesante! Pregúntame sobre historia, ciencia o animales.";
-            if (msg.includes('ciencia')) response = "La ciencia nos dice que somos polvo de estrellas. ✨";
-            if (msg.includes('animales')) response = "¡Los pulpos tienen 3 corazones! 🐙";
-            if (msg.includes('historia')) response = "Cleopatra vivió más cerca del iPhone que de las pirámides. 🏛️";
+            // Mad Scientist logic
+            const introductions = [
+                "¡MWAHAHA! ¡Mis experimentos dicen que... ",
+                "¡Eureka! ¡Has activado mi comunicador cuántico! ",
+                "¡Cuidado con las pociones! Pero mira esto: ",
+                "¡Por los pelos de Einstein! Escucha bien: "
+            ];
 
-            container.innerHTML += `<div style="margin-bottom:10px"><b>Tú:</b> ${input.value}</div>`;
-            container.innerHTML += `<div style="margin-bottom:10px; color:var(--primary)"><b>Bot Curioso:</b> ${response}</div>`;
+            let response = "¡No me interrumpas, estoy mezclando plutonio! Pero si insistes... pregunta sobre átomos, viajes en el tiempo o bichejos raros.";
+
+            if (msg.includes('ciencia') || msg.includes('atomo'))
+                response = "¡Átomos! ¿Sabías que somos un 99% espacio vacío? Si quitáramos el espacio, ¡toda la humanidad cabría en una manzana! 🍎⚡";
+
+            if (msg.includes('animal') || msg.includes('bicho'))
+                response = "¡Criaturas fascinantes! El oso de agua (tardígrado) puede sobrevivir en el vacío del espacio. ¡He intentado crear uno gigante pero se escapó! 🔬🌌";
+
+            if (msg.includes('historia') || msg.includes('tiempo'))
+                response = "¡El tiempo es relativo! ¿Sabías que los vikingos nunca usaron cascos con cuernos? ¡Fue un invento de la ópera del siglo XIX! 🎭🕰️";
+
+            if (msg.includes('hola') || msg.includes('quien'))
+                response = "¡Soy el Dr. Curioso! El científico más brillante (y algo despeinado) de este servidor. ¡Pregúntame algo antes de que explote mi laboratorio! 🧪💥";
+
+            const randomIntro = introductions[Math.floor(Math.random() * introductions.length)];
+
+            container.innerHTML += `<div class="msg-user"><b>Tú:</b> ${input.value}</div>`;
+            container.innerHTML += `<div class="msg-bot"><b>Dr. Curioso 🧪:</b> ${randomIntro}${response}</div>`;
             input.value = '';
             container.scrollTop = container.scrollHeight;
         }
