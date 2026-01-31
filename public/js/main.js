@@ -105,6 +105,10 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     updateDate();
 
+    function getPlaceholderSVG(category, bgColor, width, height, fontSize) {
+        return `data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22${width}%22 height=%22${height}%22%3E%3Cdefs%3E%3ClinearGradient id=%22grad%22 x1=%220%25%22 y1=%220%25%22 x2=%22100%25%22 y2=%22100%25%22%3E%3Cstop offset=%220%25%22 style=%22stop-color:${bgColor};stop-opacity:0.3%22/%3E%3Cstop offset=%22100%25%22 style=%22stop-color:${bgColor};stop-opacity:0.6%22/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width=%22${width}%22 height=%22${height}%22 fill=%22url(%23grad)%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 font-family=%22Arial%22 font-size=%22${fontSize}%22 fill=%22white%22 text-anchor=%22middle%22 dominant-baseline=%22middle%22 opacity=%220.8%22%3E${encodeURIComponent(category)}%3C/text%3E%3C/svg%3E`;
+    }
+
     function renderGrid(items, append = false) {
         if (!append) grid.innerHTML = '';
         if (items.length === 0) {
@@ -113,16 +117,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         const pageItems = items.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
-
         const html = pageItems.map(item => {
             const colors = { 'Ciencia': 'text-cyan-400', 'Espacio': 'text-purple-400', 'Animales': 'text-green-400', 'Naturaleza': 'text-orange-400', 'Cuerpo Humano': 'text-red-400' };
             const bgColors = { 'Ciencia': '#0891b2', 'Espacio': '#a855f7', 'Animales': '#22c55e', 'Naturaleza': '#f97316', 'Cuerpo Humano': '#ef4444' };
             const accent = colors[item.category] || 'text-cyan-400';
             const bgColor = bgColors[item.category] || '#0891b2';
 
-            // Generar placeholder SVG como fallback final
-            const placeholderSVG = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='600'%3E%3Cdefs%3E%3ClinearGradient id='grad' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:${bgColor};stop-opacity:0.3'/%3E%3Cstop offset='100%25' style='stop-color:${bgColor};stop-opacity:0.6'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='800' height='600' fill='url(%23grad)'/%3E%3Ctext x='50%25' y='50%25' font-family='Arial' font-size='24' fill='white' text-anchor='middle' dominant-baseline='middle' opacity='0.8'%3E${encodeURIComponent(item.category)}%3C/text%3E%3C/svg%3E`;
-
+            // Generar placeholder SVG seguro
+            const placeholderSVG = getPlaceholderSVG(item.category, bgColor, 800, 600, 24);
             const img = item.image || placeholderSVG;
 
             return `
@@ -174,9 +176,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const bgColors = { 'Ciencia': '#0891b2', 'Espacio': '#a855f7', 'Animales': '#22c55e', 'Naturaleza': '#f97316', 'Cuerpo Humano': '#ef4444' };
         const bgColor = bgColors[item.category] || '#0891b2';
 
-        // Generar placeholder SVG
-        const placeholderSVG = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1200' height='800'%3E%3Cdefs%3E%3ClinearGradient id='grad' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:${bgColor};stop-opacity:0.4'/%3E%3Cstop offset='100%25' style='stop-color:${bgColor};stop-opacity:0.7'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='1200' height='800' fill='url(%23grad)'/%3E%3Ctext x='50%25' y='50%25' font-family='Arial' font-size='48' font-weight='bold' fill='white' text-anchor='middle' dominant-baseline='middle' opacity='0.9'%3E${encodeURIComponent(item.category)}%3C/text%3E%3C/svg%3E`;
-
+        // Generar placeholder SVG seguro
+        const placeholderSVG = getPlaceholderSVG(item.category, bgColor, 1200, 800, 48);
         const img = item.image || placeholderSVG;
 
         modalBody.innerHTML = `
