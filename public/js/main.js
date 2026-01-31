@@ -310,8 +310,35 @@ async function initWeather() {
         return icons[code] || '🌤️';
     };
 
+    const getWeatherImage = (code) => {
+        const imageMap = {
+            0: '01d', 1: '02d', 2: '03d', 3: '04d',
+            45: '50d', 48: '50d',
+            51: '09d', 53: '09d', 55: '10d',
+            61: '10d', 63: '10d', 65: '11d',
+            71: '13d', 73: '13d', 75: '13d',
+            80: '09d', 81: '11d', 82: '11d',
+            95: '11d'
+        };
+        const iconCode = imageMap[code] || '02d';
+        return `https://openweathermap.org/img/wn/${iconCode}@4x.png`;
+    };
+
+    const getWeatherDescription = (code) => {
+        const descriptions = {
+            0: 'Despejado', 1: 'Mayormente despejado', 2: 'Parcialmente nublado', 3: 'Nublado',
+            45: 'Niebla', 48: 'Niebla con escarcha',
+            51: 'Llovizna ligera', 53: 'Llovizna moderada', 55: 'Llovizna intensa',
+            61: 'Lluvia ligera', 63: 'Lluvia moderada', 65: 'Lluvia intensa',
+            71: 'Nevada ligera', 73: 'Nevada moderada', 75: 'Nevada intensa',
+            80: 'Chubascos ligeros', 81: 'Chubascos moderados', 82: 'Chubascos intensos',
+            95: 'Tormenta'
+        };
+        return descriptions[code] || 'Desconocido';
+    };
+
     try {
-        const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&timezone=auto`;
+        const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&hourly=relativehumidity_2m&timezone=auto`;
         const response = await fetch(weatherUrl);
 
         if (!response.ok) throw new Error('API error');
@@ -319,7 +346,11 @@ async function initWeather() {
         const data = await response.json();
         const temp = Math.round(data.current_weather.temperature);
         const weatherCode = data.current_weather.weathercode;
+        const windSpeed = Math.round(data.current_weather.windspeed);
+        const humidity = data.hourly.relativehumidity_2m[0] || 0;
         const icon = getWeatherIcon(weatherCode);
+        const weatherImage = getWeatherImage(weatherCode);
+        const description = getWeatherDescription(weatherCode);
 
         if (cityEl) cityEl.textContent = cityName;
         if (tempEl) tempEl.textContent = `${temp}°C`;
@@ -328,7 +359,25 @@ async function initWeather() {
             iconEl.classList.remove('hidden');
         }
 
-        console.log('✅ Clima cargado:', cityName, temp + '°C', icon);
+        // Actualizar modal expandido
+        const ciudadFull = document.getElementById('ciudad-full');
+        const tempFull = document.getElementById('temp-full');
+        const descFull = document.getElementById('desc-full');
+        const iconoFull = document.getElementById('icono-full');
+        const humedadEl = document.getElementById('humedad-full');
+        const vientoEl = document.getElementById('viento-full');
+
+        if (ciudadFull) ciudadFull.textContent = cityName.toUpperCase();
+        if (tempFull) tempFull.textContent = `${temp}°C`;
+        if (descFull) descFull.textContent = description;
+        if (iconoFull) {
+            iconoFull.src = weatherImage;
+            iconoFull.alt = description;
+        }
+        if (humedadEl) humedadEl.textContent = `${humidity}%`;
+        if (vientoEl) vientoEl.textContent = `${windSpeed} KM/H`;
+
+        console.log('✅ Clima cargado:', cityName, temp + '°C', `Humedad: ${humidity}%`, `Viento: ${windSpeed} km/h`);
 
     } catch (error) {
         console.error('❌ Error al cargar clima:', error);
@@ -404,22 +453,37 @@ window.manualWeatherSearch = async () => {
             return descriptions[code] || 'Desconocido';
         };
 
+        const getWeatherImage = (code) => {
+            const imageMap = {
+                0: '01d', 1: '02d', 2: '03d', 3: '04d',
+                45: '50d', 48: '50d',
+                51: '09d', 53: '09d', 55: '10d',
+                61: '10d', 63: '10d', 65: '11d',
+                71: '13d', 73: '13d', 75: '13d',
+                80: '09d', 81: '11d', 82: '11d',
+                95: '11d'
+            };
+            const iconCode = imageMap[code] || '02d';
+            return `https://openweathermap.org/img/wn/${iconCode}@4x.png`;
+        };
+
         const icon = getWeatherIcon(weatherCode);
         const description = getWeatherDescription(weatherCode);
+        const weatherImage = getWeatherImage(weatherCode);
 
         // Actualizar modal expandido
         const ciudadFull = document.getElementById('ciudad-full');
         const tempFull = document.getElementById('temp-full');
         const descFull = document.getElementById('desc-full');
         const iconoFull = document.getElementById('icono-full');
-        const humedadEl = document.getElementById('humedad');
-        const vientoEl = document.getElementById('viento');
+        const humedadEl = document.getElementById('humedad-full');
+        const vientoEl = document.getElementById('viento-full');
 
         if (ciudadFull) ciudadFull.textContent = `${cityName.toUpperCase()}, ${country}`;
         if (tempFull) tempFull.textContent = `${temp}°C`;
         if (descFull) descFull.textContent = description;
         if (iconoFull) {
-            iconoFull.textContent = icon;
+            iconoFull.src = weatherImage;
             iconoFull.alt = description;
         }
         if (humedadEl) humedadEl.textContent = `${humidity}%`;
