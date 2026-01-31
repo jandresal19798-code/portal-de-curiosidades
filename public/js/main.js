@@ -115,11 +115,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const html = pageItems.map(item => {
             const colors = { 'Ciencia': 'text-cyan-400', 'Espacio': 'text-purple-400', 'Animales': 'text-green-400', 'Naturaleza': 'text-orange-400', 'Cuerpo Humano': 'text-red-400' };
+            const bgColors = { 'Ciencia': '#0891b2', 'Espacio': '#a855f7', 'Animales': '#22c55e', 'Naturaleza': '#f97316', 'Cuerpo Humano': '#ef4444' };
             const accent = colors[item.category] || 'text-cyan-400';
-            const img = item.image || `https://images.unsplash.com/photo-1532187875605-1fc6367b913e?w=800&sig=${item.id}`;
+            const bgColor = bgColors[item.category] || '#0891b2';
+
+            // Sistema de fallback mejorado para imágenes
+            const fallbackImg = `https://source.unsplash.com/800x600/?${encodeURIComponent(item.category.toLowerCase())}`;
+            const img = item.image || fallbackImg;
+
             return `
                 <div class="glass-card overflow-hidden flex flex-col animate-in">
-                    <div class="h-56 overflow-hidden bg-gray-900"><img src="${img}" class="w-full h-full object-cover hover:scale-110 transition-transform"></div>
+                    <div class="h-56 overflow-hidden bg-gray-900 relative">
+                        <img src="${img}" 
+                             alt="${item.title}"
+                             class="w-full h-full object-cover hover:scale-110 transition-transform"
+                             onerror="this.onerror=null; this.src='${fallbackImg}'; if(this.src==='${fallbackImg}') this.parentElement.style.background='linear-gradient(135deg, ${bgColor}22, ${bgColor}44)';"
+                             loading="lazy">
+                    </div>
                     <div class="p-6 flex-grow">
                         <span class="${accent} text-[10px] font-bold uppercase tracking-widest mb-2 block">${item.category}</span>
                         <h3 class="text-xl font-bold mb-3">${item.title}</h3>
@@ -158,10 +170,20 @@ document.addEventListener('DOMContentLoaded', () => {
         const wordCount = item.fact.split(/\s+/).length;
         const readingTime = Math.max(1, Math.ceil(wordCount / 200));
 
+        // Sistema de imágenes mejorado
+        const bgColors = { 'Ciencia': '#0891b2', 'Espacio': '#a855f7', 'Animales': '#22c55e', 'Naturaleza': '#f97316', 'Cuerpo Humano': '#ef4444' };
+        const bgColor = bgColors[item.category] || '#0891b2';
+        const fallbackImg = `https://source.unsplash.com/1200x800/?${encodeURIComponent(item.category.toLowerCase())}`;
+        const img = item.image || fallbackImg;
+
         modalBody.innerHTML = `
             <div class="animate-in">
-                <div class="h-[450px] w-[calc(100%+6rem)] -ml-12 -mt-12 mb-10 overflow-hidden relative group/hero">
-                    <img src="${item.image || ''}" class="w-full h-full object-cover group-hover/hero:scale-110 transition-transform duration-700">
+                <div class="h-[450px] w-[calc(100%+6rem)] -ml-12 -mt-12 mb-10 overflow-hidden relative group/hero" style="background: linear-gradient(135deg, ${bgColor}22, ${bgColor}44);">
+                    <img src="${img}" 
+                         alt="${item.title}"
+                         class="w-full h-full object-cover group-hover/hero:scale-110 transition-transform duration-700"
+                         onerror="this.onerror=null; this.src='${fallbackImg}'; if(this.src==='${fallbackImg}') this.style.opacity='0.3';"
+                         loading="lazy">
                     <div class="absolute inset-0 bg-gradient-to-t from-[#05070a] via-[#05070a]/20 to-transparent"></div>
                     <div class="absolute bottom-8 left-0 px-12">
                          <span class="bg-cyan-400 text-black text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-tighter">Lectura: ${readingTime} min</span>
