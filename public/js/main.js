@@ -833,10 +833,70 @@ window.checkAuth = () => {
         btns.classList.add('hidden');
         info.classList.remove('hidden');
         document.getElementById('user-name').innerText = user.name;
+        if (user.role === 'admin') {
+            document.getElementById('admin-btn').classList.remove('hidden');
+            document.getElementById('user-role-badge').innerText = 'Administrador';
+            document.getElementById('user-role-badge').className = 'text-[8px] bg-red-600/30 text-red-400 px-2 rounded uppercase tracking-tighter border border-red-600/50';
+        }
     }
 };
 
 window.logout = () => { localStorage.clear(); window.location.reload(); };
+
+window.openAdmin = async () => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+        alert('Debes iniciar sesión como administrador');
+        return;
+    }
+
+    try {
+        const res = await fetch('/api/admin/dashboard', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (!res.ok) {
+            alert('Acceso denegado. No tienes permisos de administrador.');
+            return;
+        }
+
+        const data = await res.json();
+        renderAdminDashboard(data);
+        toggleModal('admin-modal');
+    } catch (err) {
+        console.error('Error al cargar dashboard:', err);
+        alert('Error al cargar el panel de administración');
+    }
+};
+
+function renderAdminDashboard(data) {
+    const usersList = document.getElementById('admin-users-list');
+    const actionsList = document.getElementById('admin-actions-list');
+
+    usersList.innerHTML = data.users.map(user => `
+        <div class="glass-card p-4 flex justify-between items-center">
+            <div>
+                <div class="font-bold text-sm">${user.name}</div>
+                <div class="text-xs text-gray-500">${user.email}</div>
+                <div class="text-[10px] mt-1 ${user.role === 'admin' ? 'text-red-400' : 'text-cyan-400'}">${user.role.toUpperCase()}</div>
+            </div>
+            <div class="text-right">
+                <div class="text-[10px] text-gray-500">${new Date(user.createdAt).toLocaleDateString()}</div>
+                <div class="text-[10px] ${user.verified ? 'text-green-400' : 'text-yellow-400'}">
+                    ${user.verified ? '✓ Verificado' : 'Pendiente'}
+                </div>
+            </div>
+        </div>
+    `).join('') || '<p class="text-gray-500 text-sm">No hay usuarios registrados.</p>';
+
+    actionsList.innerHTML = data.actions.map(action => `
+        <div class="p-2 border-b border-white/5 hover:bg-white/5">
+            <span class="text-cyan-400">[${new Date(action.timestamp).toLocaleTimeString()}]</span>
+            <span class="text-gray-300">${action.email}</span>
+            <span class="text-gray-500">- ${action.action}</span>
+        </div>
+    `).join('') || '<p class="text-gray-500 text-sm">No hay acciones registradas.</p>';
+}
 
 // --- GAMES SUITE (ENHANCED) ---
 const gameBoard = document.getElementById('game-board');
@@ -1071,3 +1131,184 @@ function renderUserRankings() {
 
 // Add ranking to initialization
 window.addEventListener('load', renderUserRankings);
+
+// --- ADMIN FUNCTIONS ---
+
+window.switchAdminTab = (tabName) => {
+    document.querySelectorAll('.admin-tab').forEach(tab => {
+        tab.classList.remove('active', 'border-cyan-400', 'text-cyan-400');
+        tab.classList.add('text-gray-500');
+    });
+    document.querySelectorAll('.admin-tab-content').forEach(content => {
+        content.classList.add('hidden');
+    });
+
+    event.target.classList.add('active', 'border-cyan-400', 'text-cyan-400');
+    event.target.classList.remove('text-gray-500');
+    document.getElementById(`tab-${tabName}`).classList.remove('hidden');
+};
+
+let adminData = null;
+let editingCuriosityId = null;
+
+function renderAdminDashboard(data) {
+    adminData = data;
+
+    document.getElementById('stat-users').textContent = data.stats?.totalUsers || data.users?.length || 0;
+    document.getElementById('stat-curiosities').textContent = data.stats?.totalCuriosities || data.curiosities?.length || 0;
+    document.getElementById('stat-comments').textContent = data.stats?.totalComments || 0;
+    document.getElementById('stat-actions').textContent = data.actions?.length || 0;
+
+    const users = data.users || [];
+    document.getElementById('users-count').textContent = `${users.length} usuarios`;
+
+    const usersList = document.getElementById('admin-users-list');
+    usersList.innerHTML = users.length ? users.map(user => `
+        <div class="glass-card p-3 flex justify-between items-center hover:bg-white/5 transition-colors">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-400 to-purple-500 flex items-center justify-center font-bold text-black text-sm">
+                    ${user.name?.charAt(0).toUpperCase() || '?'}
+                </div>
+                <div>
+                    <div class="font-bold text-sm flex items-center gap-2">
+                        ${user.name || 'Sin nombre'}
+                        ${user.role === 'admin' ? '<span class="text-[8px] bg-red-500/20 text-red-400 px-1.5 py-0.5 rounded border border-red-500/30">ADMIN</span>' : ''}
+                    </div>
+                    <div class="text-xs text-gray-500">${user.email}</div>
+                </div>
+            </div>
+            <div class="flex items-center gap-3">
+                <div class="text-right">
+                    <div class="text-[10px] text-gray-600">${new Date(user.createdAt).toLocaleDateString()}</div>
+                    <div class="text-[10px] ${user.verified ? 'text-green-400' : 'text-yellow-400'}">
+                        ${user.verified ? '✓ Verificado' : '⏳ Pendiente'}
+                    </div>
+                </div>
+                ${user.role !== 'admin' ? `
+                    <button onclick="deleteUser(${user.id})" class="text-red-500 hover:text-red-400 text-xs px-2 py-1 rounded border border-red-500/30 hover:bg-red-500/10 transition-colors">✕</button>
+                ` : ''}
+            </div>
+        </div>
+    `).join('') : '<p class="text-gray-500 text-sm text-center py-8">No hay usuarios registrados.</p>';
+
+    const curiosities = data.curiosities || [];
+    const curiositiesList = document.getElementById('admin-curiosities-list');
+    curiositiesList.innerHTML = curiosities.length ? curiosities.map(c => `
+        <div class="glass-card p-3 flex justify-between items-center hover:bg-white/5 transition-colors">
+            <div class="flex items-center gap-3">
+                <img src="${c.image || c.images?.[0] || ''}" class="w-12 h-12 rounded-lg object-cover bg-white/10"
+                    onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2248%22 height=%2248%22%3E%3Crect width=%2248%22 height=%2248%22 fill=%22%23000%22 opacity=%220.3%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 font-family=%22Arial%22 font-size=%2210%22 fill=%22white%22 text-anchor=%22middle%22 dominant-baseline=%22middle%22%3E${c.category?.charAt(0) || '?'}%3C/text%3E%3C/svg%3E'">
+                <div>
+                    <div class="font-bold text-sm">${c.title}</div>
+                    <div class="text-[10px] text-gray-500 flex items-center gap-2">
+                        <span class="text-cyan-400">${c.category}</span>
+                        <span>•</span>
+                        <span>ID: ${c.id}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <button onclick="editCuriosity(${c.id})" class="text-cyan-400 hover:text-cyan-300 text-xs px-2 py-1 rounded border border-cyan-500/30 hover:bg-cyan-500/10 transition-colors">Editar</button>
+                <button onclick="deleteCuriosity(${c.id})" class="text-red-500 hover:text-red-400 text-xs px-2 py-1 rounded border border-red-500/30 hover:bg-red-500/10 transition-colors">✕</button>
+            </div>
+        </div>
+    `).join('') : '<p class="text-gray-500 text-sm text-center py-8">No hay curiosidades. ¡Agrega la primera!</p>';
+
+    const actions = data.actions || [];
+    document.getElementById('actions-count').textContent = `${actions.length} acciones`;
+
+    const actionsList = document.getElementById('admin-actions-list');
+    actionsList.innerHTML = actions.length ? actions.map(action => `
+        <div class="p-2 border-b border-white/5 hover:bg-white/5 flex items-start gap-2">
+            <span class="text-cyan-400 whitespace-nowrap">${new Date(action.timestamp).toLocaleTimeString()}</span>
+            <span class="text-purple-400">${action.email || 'Sistema'}</span>
+            <span class="text-gray-400">- ${action.action}</span>
+        </div>
+    `).join('') : '<p class="text-gray-500 text-sm text-center py-8">No hay acciones registradas.</p>';
+}
+
+window.openAddCuriosityModal = () => {
+    editingCuriosityId = null;
+    document.getElementById('curiosity-form-title').textContent = 'Nueva Curiosidad';
+    document.getElementById('curiosity-form').reset();
+    toggleModal('curiosity-form-modal');
+};
+
+window.editCuriosity = (id) => {
+    const curiosity = adminData.curiosities.find(c => c.id === id);
+    if (!curiosity) return;
+
+    editingCuriosityId = id;
+    document.getElementById('curiosity-form-title').textContent = 'Editar Curiosidad';
+    document.getElementById('curiosity-title').value = curiosity.title || '';
+    document.getElementById('curiosity-category').value = curiosity.category || 'Ciencia';
+    document.getElementById('curiosity-fact').value = curiosity.fact || '';
+    document.getElementById('curiosity-image').value = curiosity.image || curiosity.images?.[0] || '';
+    document.getElementById('curiosity-link').value = curiosity.links?.[0] || '';
+    toggleModal('curiosity-form-modal');
+};
+
+window.deleteCuriosity = async (id) => {
+    if (!confirm('¿Estás seguro de eliminar esta curiosidad?')) return;
+
+    try {
+        const res = await API.deleteCuriosity(id);
+        if (res.error) {
+            alert('Error: ' + res.error);
+        } else {
+            window.openAdmin();
+        }
+    } catch (err) {
+        alert('Error al eliminar');
+    }
+};
+
+window.deleteUser = async (id) => {
+    if (!confirm('¿Estás seguro de eliminar este usuario?')) return;
+
+    try {
+        const res = await API.deleteUser(id);
+        if (res.error) {
+            alert('Error: ' + res.error);
+        } else {
+            window.openAdmin();
+        }
+    } catch (err) {
+        alert('Error al eliminar usuario');
+    }
+};
+
+document.getElementById('curiosity-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const curiosity = {
+        title: document.getElementById('curiosity-title').value,
+        category: document.getElementById('curiosity-category').value,
+        fact: document.getElementById('curiosity-fact').value,
+        image: document.getElementById('curiosity-image').value || `https://picsum.photos/seed/${Date.now()}/800/600`,
+        links: document.getElementById('curiosity-link').value ? [document.getElementById('curiosity-link').value] : []
+    };
+
+    try {
+        let res;
+        if (editingCuriosityId) {
+            res = await API.updateCuriosity(editingCuriosityId, curiosity);
+        } else {
+            res = await API.addCuriosity(curiosity);
+        }
+
+        if (res.error) {
+            alert('Error: ' + res.error);
+        } else {
+            toggleModal('curiosity-form-modal');
+            window.openAdmin();
+            window.allCuriosities = null;
+            API.getCuriosities().then(data => {
+                window.allCuriosities = data;
+                renderGrid(data);
+            });
+        }
+    } catch (err) {
+        alert('Error al guardar');
+    }
+});

@@ -196,8 +196,116 @@ app.get('/api/admin/dashboard', authenticateToken, (req, res) => {
 
     const users = getData(USERS_FILE).map(({ password, ...u }) => u);
     const actions = getData(ACTIONS_FILE);
+    const curiosities = getData(CURIOSITIES_FILE);
+    const comments = getData(COMMENTS_FILE);
 
-    res.json({ users, actions });
+    const totalComments = Object.values(comments).reduce((acc, arr) => acc + arr.length, 0);
+
+    res.json({ users, actions, curiosities, stats: { totalUsers: users.length, totalCuriosities: curiosities.length, totalComments } });
+});
+
+// --- ADMIN CRUD CURIOSITIES ---
+
+app.post('/api/admin/curiosities', authenticateToken, (req, res) => {
+    if (req.user.role !== 'admin') return res.status(403).json({ error: 'Acceso denegado' });
+
+    try {
+        const curiosities = getData(CURIOSITIES_FILE);
+        const newCuriosity = {
+            id: Date.now(),
+            ...req.body,
+            createdAt: new Date().toISOString()
+        };
+        curiosities.push(newCuriosity);
+        saveData(CURIOSITIES_FILE, curiosities);
+        logAction(req.user.id, req.user.email, `Creó curiosidad: ${newCuriosity.title}`);
+
+        res.status(201).json(newCuriosity);
+    } catch (error) {
+        res.status(500).json({ error: 'Error al crear curiosidad' });
+    }
+});
+
+app.put('/api/admin/curiosities/:id', authenticateToken, (req, res) => {
+    if (req.user.role !== 'admin') return res.status(403).json({ error: 'Acceso denegado' });
+
+    try {
+        const curiosities = getData(CURIOSITIES_FILE);
+        const idx = curiosities.findIndex(c => c.id === parseInt(req.params.id));
+        if (idx === -1) return res.status(404).json({ error: 'Curiosidad no encontrada' });
+
+        curiosities[idx] = { ...curiosities[idx], ...req.body, updatedAt: new Date().toISOString() };
+        saveData(CURIOSITIES_FILE, curiosities);
+        logAction(req.user.id, req.user.email, `Actualizó curiosidad: ${curiosities[idx].title}`);
+
+        res.json(curiosities[idx]);
+    } catch (error) {
+        res.status(500).json({ error: 'Error al actualizar curiosidad' });
+    }
+});
+
+app.delete('/api/admin/curiosities/:id', authenticateToken, (req, res) => {
+    if (req.user.role !== 'admin') return res.status(403).json({ error: 'Acceso denegado' });
+
+    try {
+        let curiosities = getData(CURIOSITIES_FILE);
+        const curiosity = curiosities.find(c => c.id === parseInt(req.params.id));
+        if (!curiosity) return res.status(404).json({ error: 'Curiosidad no encontrada' });
+
+        curiosities = curiosities.filter(c => c.id !== parseInt(req.params.id));
+        saveData(CURIOSITIES_FILE, curiosities);
+        logAction(req.user.id, req.user.email, `Eliminó curiosidad: ${curiosity.title}`);
+
+        res.json({ message: 'Curiosidad eliminada' });
+    } catch (error) {
+        res.status(500).json({ error: 'Error al eliminar curiosidad' });
+    }
+});
+
+// --- ADMIN USERS MANAGEMENT ---
+
+app.delete('/api/admin/users/:id', authenticateToken, (req, res) => {
+    if (req.user.role !== 'admin') return res.status(403).json({ error: 'Acceso denegado' });
+
+    try {
+        let users = getData(USERS_FILE);
+        const userId = parseInt(req.params.id);
+
+        if (userId === req.user.id) {
+            return res.status(400).json({ error: 'No puedes eliminarte a ti mismo' });
+        }
+
+        const user = users.find(u => u.id === userId);
+        if (!user) return res.status(404).json({ error: 'Usuario no encontrado' });
+
+        users = users.filter(u => u.id !== userId);
+        saveData(USERS_FILE, users);
+        logAction(req.user.id, req.user.email, `Eliminó usuario: ${user.email}`);
+
+        res.json({ message: 'Usuario eliminado' });
+    } catch (error) {
+        res.status(500).json({ error: 'Error al eliminar usuario' });
+    }
+});
+
+app.put('/api/admin/users/:id/role', authenticateToken, (req, res) => {
+    if (req.user.role !== 'admin') return res.status(403).json({ error: 'Acceso denegado' });
+
+    try {
+        const users = getData(USERS_FILE);
+        const userId = parseInt(req.params.id);
+        const user = users.find(u => u.id === userId);
+
+        if (!user) return res.status(404).json({ error: 'Usuario no encontrado' });
+
+        user.role = req.body.role;
+        saveData(USERS_FILE, users);
+        logAction(req.user.id, req.user.email, `Cambió rol de ${user.email} a ${user.role}`);
+
+        res.json({ message: 'Rol actualizado', user: { ...user, password: undefined } });
+    } catch (error) {
+        res.status(500).json({ error: 'Error al actualizar rol' });
+    }
 });
 
 // Rutas API originales protegidas

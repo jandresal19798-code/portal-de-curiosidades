@@ -384,27 +384,107 @@
     <!-- ADMIN CONSOLE -->
     <div id="admin-modal"
         class="modal hidden fixed inset-0 z-[120] flex items-center justify-center p-4 bg-black/90 backdrop-blur-xl">
-        <div class="glass-card p-8 w-full max-w-5xl h-[80vh] flex flex-col relative overflow-hidden">
+        <div class="glass-card p-8 w-full max-w-6xl h-[85vh] flex flex-col relative overflow-hidden">
             <button onclick="toggleModal('admin-modal')"
                 class="absolute top-6 right-6 text-gray-400 hover:text-white">✕</button>
-            <h2 class="playfair text-4xl mb-8 border-b border-white/10 pb-4">Consola de Control <span
-                    class="text-red-500 text-sm font-sans uppercase tracking-widest ml-4">Nivel Admin</span></h2>
+            <h2 class="playfair text-3xl mb-2 border-b border-white/10 pb-4 flex items-center gap-4">
+                <span>⚡ Consola de Control</span>
+                <span class="text-red-500 text-xs font-sans uppercase tracking-widest bg-red-500/10 px-3 py-1 rounded-full border border-red-500/30">Administrador</span>
+            </h2>
 
-            <div class="flex-grow overflow-auto grid md:grid-cols-2 gap-8">
-                <div>
-                    <h3 class="text-cyan-400 font-bold mb-4 uppercase text-xs tracking-widest">Usuarios Registrados</h3>
-                    <div id="admin-users-list" class="space-y-4">
-                        <!-- Users here -->
-                    </div>
+            <!-- Stats Cards -->
+            <div id="admin-stats" class="grid grid-cols-4 gap-4 mb-6">
+                <div class="glass-card p-4 text-center border-l-4 border-cyan-400">
+                    <div class="text-2xl font-bold text-cyan-400" id="stat-users">0</div>
+                    <div class="text-[10px] uppercase text-gray-500 tracking-wider">Usuarios</div>
                 </div>
-                <div>
-                    <h3 class="text-purple-400 font-bold mb-4 uppercase text-xs tracking-widest">Acciones del Sistema
-                    </h3>
-                    <div id="admin-actions-list" class="space-y-2 text-[10px] font-mono">
-                        <!-- Actions here -->
-                    </div>
+                <div class="glass-card p-4 text-center border-l-4 border-purple-400">
+                    <div class="text-2xl font-bold text-purple-400" id="stat-curiosities">0</div>
+                    <div class="text-[10px] uppercase text-gray-500 tracking-wider">Curiosidades</div>
+                </div>
+                <div class="glass-card p-4 text-center border-l-4 border-green-400">
+                    <div class="text-2xl font-bold text-green-400" id="stat-comments">0</div>
+                    <div class="text-[10px] uppercase text-gray-500 tracking-wider">Comentarios</div>
+                </div>
+                <div class="glass-card p-4 text-center border-l-4 border-yellow-400">
+                    <div class="text-2xl font-bold text-yellow-400" id="stat-actions">0</div>
+                    <div class="text-[10px] uppercase text-gray-500 tracking-wider">Acciones</div>
                 </div>
             </div>
+
+            <!-- Tabs -->
+            <div class="flex gap-2 mb-4 border-b border-white/10 pb-2" id="admin-tabs">
+                <button onclick="switchAdminTab('users')" class="admin-tab active px-4 py-2 text-xs font-bold uppercase tracking-wider border-b-2 border-cyan-400 text-cyan-400">Usuarios</button>
+                <button onclick="switchAdminTab('curiosities')" class="admin-tab px-4 py-2 text-xs font-bold uppercase tracking-wider text-gray-500 hover:text-white transition-colors">Curiosidades</button>
+                <button onclick="switchAdminTab('actions')" class="admin-tab px-4 py-2 text-xs font-bold uppercase tracking-wider text-gray-500 hover:text-white transition-colors">Logs</button>
+            </div>
+
+            <!-- Users Tab -->
+            <div id="tab-users" class="admin-tab-content flex-grow overflow-auto">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-cyan-400 font-bold uppercase text-xs tracking-widest">Usuarios Registrados</h3>
+                    <span class="text-[10px] text-gray-500" id="users-count">0 usuarios</span>
+                </div>
+                <div id="admin-users-list" class="space-y-2">
+                    <!-- Users here -->
+                </div>
+            </div>
+
+            <!-- Curiosities Tab -->
+            <div id="tab-curiosities" class="admin-tab-content hidden flex-grow overflow-auto">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-purple-400 font-bold uppercase text-xs tracking-widest">Gestionar Curiosidades</h3>
+                    <button onclick="openAddCuriosityModal()" class="btn-glow px-4 py-2 rounded-full text-xs font-bold">+ Nueva Curiosidad</button>
+                </div>
+                <div id="admin-curiosities-list" class="space-y-2">
+                    <!-- Curiosities here -->
+                </div>
+            </div>
+
+            <!-- Actions Tab -->
+            <div id="tab-actions" class="admin-tab-content hidden flex-grow overflow-auto">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-green-400 font-bold uppercase text-xs tracking-widest">Registro de Acciones</h3>
+                    <span class="text-[10px] text-gray-500" id="actions-count">0 acciones</span>
+                </div>
+                <div id="admin-actions-list" class="space-y-1 text-[10px] font-mono">
+                    <!-- Actions here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Curiosity Modal -->
+    <div id="curiosity-form-modal"
+        class="modal hidden fixed inset-0 z-[130] flex items-center justify-center p-4 bg-black/90 backdrop-blur-md">
+        <div class="glass-card p-8 w-full max-w-2xl relative">
+            <button onclick="toggleModal('curiosity-form-modal')"
+                class="absolute top-4 right-4 text-gray-400 hover:text-white">✕</button>
+            <h2 class="playfair text-2xl mb-6" id="curiosity-form-title">Nueva Curiosidad</h2>
+            <form id="curiosity-form" class="space-y-4">
+                <input type="text" id="curiosity-title" placeholder="Título" required
+                    class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 outline-none focus:border-cyan-400">
+                <select id="curiosity-category" required
+                    class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 outline-none focus:border-cyan-400 text-white">
+                    <option value="Ciencia">Ciencia</option>
+                    <option value="Espacio">Espacio</option>
+                    <option value="Animales">Animales</option>
+                    <option value="Naturaleza">Naturaleza</option>
+                    <option value="Cuerpo Humano">Cuerpo Humano</option>
+                    <option value="Matemáticas">Matemáticas</option>
+                    <option value="Química">Química</option>
+                </select>
+                <textarea id="curiosity-fact" placeholder="Hecho curioso (máx 500 caracteres)" maxlength="500" required
+                    class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 outline-none focus:border-cyan-400 h-32 resize-none"></textarea>
+                <input type="url" id="curiosity-image" placeholder="URL de imagen (opcional)"
+                    class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 outline-none focus:border-cyan-400">
+                <input type="url" id="curiosity-link" placeholder="Enlace de referencia (opcional)"
+                    class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 outline-none focus:border-cyan-400">
+                <div class="flex gap-4 pt-4">
+                    <button type="submit" class="btn-glow flex-1 py-3 rounded-xl font-bold">Guardar</button>
+                    <button type="button" onclick="toggleModal('curiosity-form-modal')" class="px-6 py-3 rounded-xl font-bold border border-white/10 hover:bg-white/5">Cancelar</button>
+                </div>
+            </form>
         </div>
     </div>
 
