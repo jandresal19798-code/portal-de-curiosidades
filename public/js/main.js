@@ -377,6 +377,10 @@ document.addEventListener('DOMContentLoaded', () => {
             if (weatherData && (weatherData.current_weather || weatherData.weather_code !== undefined)) {
                 updateWeatherUI(weatherData, cityName);
                 console.log(`Clima cargado en ${cityName}`);
+
+                // Cache coords for refresh
+                localStorage.setItem('last_lat', finalLat);
+                localStorage.setItem('last_lon', finalLon);
             }
         } catch (error) {
             console.error("Error en servicio meteorológico:", error);
@@ -442,30 +446,56 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function initWeather() {
+    async function initWeather() {
         console.log("Iniciando servicio de clima...");
+
+        const setWeatherByIP = async () => {
+            try {
+                // IP Geolocation fallback (much more reliable for web)
+                const res = await fetch('https://ipapi.co/json/');
+                const data = await res.json();
+                if (data.latitude && data.longitude) {
+                    console.log(`Ubicación por IP detectada: ${data.city}`);
+                    fetchWeather(data.latitude, data.longitude, data.city);
+                } else {
+                    fetchWeather(null, null, DEFAULT_CITY);
+                }
+            } catch (err) {
+                console.warn("Fallo geolocalización por IP:", err);
+                fetchWeather(null, null, DEFAULT_CITY);
+            }
+        };
+
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(
                 (pos) => {
-                    console.log(`Coords obtenidas: ${pos.coords.latitude}, ${pos.coords.longitude}`);
+                    console.log(`Coords obtenidas por GPS: ${pos.coords.latitude}, ${pos.coords.longitude}`);
                     fetchWeather(pos.coords.latitude, pos.coords.longitude);
                 },
                 (err) => {
-                    console.warn("Geolocalización rechazada o fallida:", err.message);
-                    fetchWeather(null, null, DEFAULT_CITY);
+                    console.warn("Geolocalización navegador rechazada o fallida:", err.message);
+                    setWeatherByIP();
                 },
-                { timeout: 10000 }
+                { timeout: 7000 }
             );
         } else {
             console.warn("Navegador no soporta geolocalización");
-            fetchWeather(null, null, DEFAULT_CITY);
+            setWeatherByIP();
         }
 
-        // Refresh every 15 mins
+        // Refresh every 30 mins
         setInterval(() => {
-            const currentCity = document.getElementById('nav-weather-city').textContent;
-            fetchWeather(null, null, currentCity);
-        }, 900000);
+            const currentItem = document.getElementById('nav-weather-city').textContent;
+            if (currentItem === DEFAULT_CITY || currentItem === 'Zona Local') {
+                initWeather();
+            } else {
+                // Just refresh weather, don't re-geolocate if we have a city
+                const lat = localStorage.getItem('last_lat');
+                const lon = localStorage.getItem('last_lon');
+                if (lat && lon) fetchWeather(lat, lon, currentItem);
+                else initWeather();
+            }
+        }, 1800000);
     }
 
 
