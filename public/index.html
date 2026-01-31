@@ -24,11 +24,11 @@
                     <span class="text-cyan-400">●</span> CURIOSPHERE
                 </div>
                 <!-- Weather Widget Integrated in Nav -->
-                <div id="weather-widget"
-                    class="hidden md:flex items-center gap-4 text-xs font-bold bg-white/5 px-4 py-2 rounded-full border border-white/10">
-                    <span id="weather-city" class="text-cyan-400">Madrid</span>
-                    <span id="weather-temp">--°C</span>
-                    <span id="weather-desc" class="text-gray-400">--</span>
+                <div id="weather-widget-nav"
+                    class="hidden md:flex items-center gap-3 text-[10px] font-bold bg-white/5 px-4 py-2 rounded-full border border-white/10 cursor-pointer hover:bg-white/10 transition-all">
+                    <img id="nav-weather-icon" src="" alt="clima" class="w-6 h-6 hidden">
+                    <span id="nav-weather-city" class="text-cyan-400">Montevideo</span>
+                    <span id="nav-weather-temp" class="text-white">--°C</span>
                 </div>
             </div>
             <div class="hidden md:flex gap-8 font-medium text-sm text-gray-400">
@@ -144,6 +144,30 @@
                 <div class="glass-card overflow-hidden h-[450px] skeleton"></div>
                 <div class="glass-card overflow-hidden h-[450px] skeleton"></div>
                 <div class="glass-card overflow-hidden h-[450px] skeleton"></div>
+            </div>
+
+            <!-- New Full Weather Widget in Explore Section -->
+            <div class="mt-32 flex justify-center">
+                <div id="clima-full-widget"
+                    class="clima-widget glass-card p-8 w-full max-w-sm text-center relative overflow-hidden no-hover">
+                    <div class="clima-header relative z-10">
+                        <h2 id="ciudad-full" class="text-xl font-bold tracking-widest mb-2">MONTEVIDEO</h2>
+                    </div>
+                    <img id="icono-full" src="" alt=""
+                        class="mx-auto w-24 h-24 relative z-10 transition-transform hover:scale-110">
+                    <div class="temp-principal text-6xl font-black my-4 relative z-10" id="temp-full">--°C</div>
+                    <div class="descripcion capitalize text-gray-400 mb-8 font-medium relative z-10" id="desc-full">
+                        Cargando...</div>
+                    <div class="detalles-extra flex justify-around border-t border-white/10 pt-6 relative z-10">
+                        <div class="dato-item text-xs text-gray-500 uppercase font-bold">Humedad <span id="humedad-full"
+                                class="block text-lg text-white mt-1">--%</span></div>
+                        <div class="dato-item text-xs text-gray-500 uppercase font-bold">Viento <span id="viento-full"
+                                class="block text-lg text-white mt-1">-- km/h</span></div>
+                    </div>
+                    <!-- Background Glow -->
+                    <div id="widget-glow"
+                        class="absolute inset-0 opacity-20 pointer-events-none transition-all duration-1000"></div>
+                </div>
             </div>
         </section>
     </main>

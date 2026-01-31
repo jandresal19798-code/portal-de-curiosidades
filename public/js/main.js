@@ -229,41 +229,74 @@ document.addEventListener('DOMContentLoaded', () => {
         content.innerHTML = facts + facts;
     }
 
-    // Weather Logic
-    async function initWeather() {
-        const weatherCity = document.getElementById('weather-city');
-        const weatherTemp = document.getElementById('weather-temp');
-        const weatherDesc = document.getElementById('weather-desc');
+    // Weather Logic (OpenWeatherMap)
+    const WEATHER_API_KEY = 'af4b2558bbfe75ccf2f3ec22e32e43b9';
+    const DEFAULT_CITY = 'Montevideo';
 
-        // Fallback to a fixed location if geolocation fails or is denied (e.g. Madrid)
-        const defaultLat = 40.4168;
-        const defaultLon = -3.7038;
+    async function fetchWeather(lat, lon, city = null) {
+        let url = `https://api.openweathermap.org/data/2.5/weather?units=metric&lang=es&appid=${WEATHER_API_KEY}`;
+        if (city) url += `&q=${city}`;
+        else if (lat && lon) url += `&lat=${lat}&lon=${lon}`;
+        else url += `&q=${DEFAULT_CITY}`;
 
-        const updateWeather = async (lat, lon, label = "Tu ubicación") => {
-            try {
-                const data = await API.getWeather(lat, lon);
-                const weather = data.current_weather;
-                const codes = {
-                    0: '☀️ Despejado', 1: '🌤️ Mayormente despejado', 2: '⛅ Parcialmente nublado', 3: '☁️ Nublado',
-                    45: '🌫️ Niebla', 61: '🌦️ Lluvia ligera', 80: '🌧️ Chubascos'
-                };
-
-                weatherCity.innerText = label;
-                weatherTemp.innerText = `${weather.temperature}°C`;
-                weatherDesc.innerText = codes[weather.weathercode] || '☁️ Nublado';
-            } catch (e) {
-                weatherCity.innerText = "Clima no disponible";
+        try {
+            const response = await fetch(url);
+            const data = await response.json();
+            if (data.cod === 200) {
+                updateWeatherUI(data);
+                console.log(`Clima actualizado: ${new Date().toLocaleTimeString()}`);
             }
-        };
+        } catch (error) {
+            console.error("Error actualizando clima:", error);
+        }
+    }
 
-        if ("geolocation" in navigator) {
+    function updateWeatherUI(data) {
+        const t = Math.round(data.main.temp);
+        const iconUrl = `https://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png`;
+
+        // Nav Widget
+        const navIcon = document.getElementById('nav-weather-icon');
+        navIcon.src = iconUrl;
+        navIcon.classList.remove('hidden');
+        document.getElementById('nav-weather-city').textContent = data.name;
+        document.getElementById('nav-weather-temp').textContent = `${t}°C`;
+
+        // Full Widget
+        const fullIcon = document.getElementById('icono-full');
+        if (fullIcon) {
+            fullIcon.src = iconUrl;
+            document.getElementById('ciudad-full').textContent = data.name.toUpperCase();
+            document.getElementById('temp-full').textContent = `${t}°C`;
+            document.getElementById('desc-full').textContent = data.weather[0].description;
+            document.getElementById('humedad-full').textContent = `${data.main.humidity}%`;
+            document.getElementById('viento-full').textContent = `${(data.wind.speed * 3.6).toFixed(1)} km/h`;
+
+            // Dynamic Background based on temp
+            const glow = document.getElementById('widget-glow');
+            if (t <= 13) glow.style.background = 'linear-gradient(180deg, #1e3c72 0%, #2a5298 100%)';
+            else if (t <= 22) glow.style.background = 'linear-gradient(180deg, #4facfe 0%, #00f2fe 100%)';
+            else if (t <= 29) glow.style.background = 'linear-gradient(180deg, #f6d365 0%, #fda085 100%)';
+            else glow.style.background = 'linear-gradient(180deg, #ff0844 0%, #ffb199 100%)';
+            glow.style.opacity = '0.3';
+        }
+    }
+
+    function initWeather() {
+        if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(
-                (position) => updateWeather(position.coords.latitude, position.coords.longitude),
-                () => updateWeather(defaultLat, defaultLon, "Madrid (Default)")
+                (pos) => fetchWeather(pos.coords.latitude, pos.coords.longitude),
+                () => fetchWeather(null, null, DEFAULT_CITY)
             );
         } else {
-            updateWeather(defaultLat, defaultLon, "Madrid (Default)");
+            fetchWeather(null, null, DEFAULT_CITY);
         }
+
+        // Refresh every 15 mins
+        setInterval(() => {
+            const currentCity = document.getElementById('nav-weather-city').textContent;
+            fetchWeather(null, null, currentCity);
+        }, 900000);
     }
 
     // Bot Logic
