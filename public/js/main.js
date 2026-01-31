@@ -350,40 +350,48 @@ document.addEventListener('DOMContentLoaded', () => {
 
         console.log(`Buscando clima en coord: ${finalLat}, ${finalLon}`);
 
+        // Try to get city name in parallel or use default
+        let cityName = overrideCity || DEFAULT_CITY;
+
+        const weatherPromise = fetch(apiUrl).then(r => r.json());
+
+        // Geocoding promise (parallel)
+        const geoPromise = (lat !== null && lon !== null && !overrideCity)
+            ? fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=10`, {
+                headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) CurioSphere/1.1' }
+            }).then(r => r.json()).catch(() => null)
+            : Promise.resolve(null);
+
         try {
-            // First get the actual city name if we have coordinates
-            let cityName = overrideCity || DEFAULT_CITY;
-            if (lat !== null && lon !== null && !overrideCity) {
-                try {
-                    // Try to get a more precise location
-                    const geoRes = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=10`, {
-                        headers: { 'User-Agent': 'CurioSphere-App-Agent/1.1' }
-                    });
-                    const geoData = await geoRes.json();
-                    cityName = geoData.display_name.split(',')[0] ||
-                        geoData.address.city ||
-                        geoData.address.town ||
-                        "Tu Ciudad";
-                } catch (err) {
-                    console.warn("Geocoding failed, using generic label.");
-                    cityName = "Zona Local";
-                }
+            const [weatherData, geoData] = await Promise.all([weatherPromise, geoPromise]);
+
+            if (geoData) {
+                cityName = geoData.display_name?.split(',')[0] ||
+                    geoData.address?.city ||
+                    geoData.address?.town ||
+                    "Zona Local";
             }
 
-            const response = await fetch(apiUrl);
-            const data = await response.json();
-            if (data.current_weather) {
-                updateWeatherUI(data, cityName);
-                console.log(`Clima actualizado en ${cityName}: ${new Date().toLocaleTimeString()}`);
+            if (weatherData && (weatherData.current_weather || weatherData.weather_code !== undefined)) {
+                updateWeatherUI(weatherData, cityName);
+                console.log(`Clima cargado en ${cityName}`);
             }
         } catch (error) {
-            console.error("Error actualizando clima:", error);
+            console.error("Error en servicio meteorológico:", error);
+            const tempEl = document.getElementById('nav-weather-temp');
+            if (tempEl && tempEl.textContent === '--°C') {
+                tempEl.textContent = 'Error';
+            }
         }
     }
 
     function updateWeatherUI(data, cityName) {
-        const weather = data.current_weather;
-        const t = Math.round(weather.temperature);
+        const weather = data.current_weather || data;
+        if (!weather || (weather.temperature === undefined && data.temperature === undefined)) return;
+
+        const temp = weather.temperature !== undefined ? weather.temperature : data.temperature;
+        const t = Math.round(temp);
+        const wCode = (weather.weathercode !== undefined) ? weather.weathercode : weather.weather_code;
 
         // Mapping Open-Meteo codes to icons
         const iconMap = {
@@ -395,7 +403,7 @@ document.addEventListener('DOMContentLoaded', () => {
             80: '09d', 81: '09d', 82: '09d',
             95: '11d'
         };
-        const iconCode = iconMap[weather.weathercode] || '03d';
+        const iconCode = iconMap[wCode] || '03d';
         const iconUrl = `https://openweathermap.org/img/wn/${iconCode}@2x.png`;
 
         // Nav Widget
@@ -414,8 +422,8 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('ciudad-full').textContent = cityName.toUpperCase();
             document.getElementById('temp-full').textContent = `${t}°C`;
 
-            const descMap = { 0: 'Despejado', 1: 'Principalmente despejado', 2: 'Parcialmente nublado', 3: 'Nublado', 45: 'Niebla', 61: 'Lluvia ligera' };
-            document.getElementById('desc-full').textContent = descMap[weather.weathercode] || 'Nublado';
+            const descMap = { 0: 'Despejado', 1: 'Casi despejado', 2: 'Algo nublado', 3: 'Nublado', 45: 'Niebla', 61: 'Lluvia leve', 95: 'Tormenta' };
+            document.getElementById('desc-full').textContent = descMap[wCode] || 'Condiciones variables';
 
             // Getting humidity from hourly (approx)
             const humidity = data.hourly ? data.hourly.relativehumidity_2m[0] : '--';
