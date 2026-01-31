@@ -121,38 +121,87 @@
             </div>
 
             <div id="game-selection" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                <div class="glass-card p-6 flex flex-col justify-between group cursor-pointer" onclick="startQuiz()">
-                    <div class="text-4xl mb-4">🧠</div>
-                    <h3 class="text-xl font-bold mb-2 group-hover:text-cyan-400 transition-colors">Mental-Quiz</h3>
-                    <p class="text-gray-500 text-sm mb-4">¿Qué tanto sabes del mundo?</p>
-                    <div class="text-cyan-400 font-bold">JUGAR →</div>
+                <!-- 1. Quiz -->
+                <div class="card-holo p-6 flex flex-col justify-between group cursor-pointer min-h-[220px]"
+                    onclick="startQuiz()">
+                    <div class="text-4xl mb-4 group-hover:scale-110 transition-transform duration-300">🪐</div>
+                    <div>
+                        <h3 class="text-xl font-bold mb-2 group-hover:text-cyan-400 transition-colors">Quiz Galáctico
+                        </h3>
+                        <p class="text-gray-500 text-sm mb-4">Pon a prueba tu conocimiento universal.</p>
+                    </div>
+                    <div
+                        class="text-cyan-400 font-bold text-xs uppercase tracking-widest group-hover:translate-x-2 transition-transform">
+                        Jugar Ahora →</div>
                 </div>
-                <div class="glass-card p-6 flex flex-col justify-between group cursor-pointer" onclick="startMemory()">
-                    <div class="text-4xl mb-4">🧬</div>
-                    <h3 class="text-xl font-bold mb-2 group-hover:text-purple-400 transition-colors">Bio-Memoria</h3>
-                    <p class="text-gray-500 text-sm mb-4">Entrena tu cerebro con patrones.</p>
-                    <div class="text-purple-400 font-bold">JUGAR →</div>
+
+                <!-- 2. Memory -->
+                <div class="card-holo p-6 flex flex-col justify-between group cursor-pointer min-h-[220px]"
+                    onclick="startMemory()">
+                    <div class="text-4xl mb-4 group-hover:scale-110 transition-transform duration-300">🧬</div>
+                    <div>
+                        <h3 class="text-xl font-bold mb-2 group-hover:text-purple-400 transition-colors">Bio-Memoria
+                        </h3>
+                        <p class="text-gray-500 text-sm mb-4">Secuencias de ADN y patrones.</p>
+                    </div>
+                    <div
+                        class="text-purple-400 font-bold text-xs uppercase tracking-widest group-hover:translate-x-2 transition-transform">
+                        Entrenar →</div>
                 </div>
-                <div class="glass-card p-6 flex flex-col justify-between group cursor-pointer"
+
+                <!-- 3. Atom Hunter -->
+                <div class="card-holo p-6 flex flex-col justify-between group cursor-pointer min-h-[220px]"
                     onclick="startAtomHunter()">
-                    <div class="text-4xl mb-4">⚛️</div>
-                    <h3 class="text-xl font-bold mb-2 group-hover:text-green-400 transition-colors">Caza-Átomos</h3>
-                    <p class="text-gray-500 text-sm mb-4">Reflejos a nivel subatómico.</p>
-                    <div class="text-green-400 font-bold">JUGAR →</div>
+                    <div class="text-4xl mb-4 group-hover:scale-110 transition-transform duration-300">⚛️</div>
+                    <div>
+                        <h3 class="text-xl font-bold mb-2 group-hover:text-green-400 transition-colors">Caza-Átomos</h3>
+                        <p class="text-gray-500 text-sm mb-4">Atrapa partículas subatómicas.</p>
+                    </div>
+                    <div
+                        class="text-green-400 font-bold text-xs uppercase tracking-widest group-hover:translate-x-2 transition-transform">
+                        Cazar →</div>
                 </div>
-                <div class="glass-card p-6 flex flex-col justify-between group cursor-pointer"
+
+                <!-- 4. Math -->
+                <div class="card-holo p-6 flex flex-col justify-between group cursor-pointer min-h-[220px]"
                     onclick="startMathChallenge()">
-                    <div class="text-4xl mb-4">🔢</div>
-                    <h3 class="text-xl font-bold mb-2 group-hover:text-orange-400 transition-colors">Cerebro Veloz</h3>
-                    <p class="text-gray-500 text-sm mb-4">Cálculo mental contra reloj.</p>
-                    <div class="text-orange-400 font-bold">JUGAR →</div>
+                    <div class="text-4xl mb-4 group-hover:scale-110 transition-transform duration-300">🧮</div>
+                    <div>
+                        <h3 class="text-xl font-bold mb-2 group-hover:text-yellow-400 transition-colors">Rapidez
+                            Matemática</h3>
+                        <p class="text-gray-500 text-sm mb-4">Cálculos a la velocidad de la luz.</p>
+                    </div>
+                    <div
+                        class="text-yellow-400 font-bold text-xs uppercase tracking-widest group-hover:translate-x-2 transition-transform">
+                        Calcular →</div>
                 </div>
-                <div class="glass-card p-6 flex flex-col justify-between group cursor-pointer"
+
+                <!-- 5. Gravity -->
+                <div class="card-holo p-6 flex flex-col justify-between group cursor-pointer min-h-[220px]"
                     onclick="startGravitySort()">
-                    <div class="text-4xl mb-4">🌌</div>
-                    <h3 class="text-xl font-bold mb-2 group-hover:text-blue-400 transition-colors">Gravedad Zero</h3>
-                    <p class="text-gray-500 text-sm mb-4">Ordena por masa planetaria.</p>
-                    <div class="text-blue-400 font-bold">JUGAR →</div>
+                    <div class="text-4xl mb-4 group-hover:scale-110 transition-transform duration-300">🌌</div>
+                    <div>
+                        <h3 class="text-xl font-bold mb-2 group-hover:text-blue-400 transition-colors">Gravedad Zero
+                        </h3>
+                        <p class="text-gray-500 text-sm mb-4">Ordena cuerpos celestes por masa.</p>
+                    </div>
+                    <div
+                        class="text-blue-400 font-bold text-xs uppercase tracking-widest group-hover:translate-x-2 transition-transform">
+                        Ordenar →</div>
+                </div>
+
+                <!-- 6. Chrono (NEW) -->
+                <div class="card-holo p-6 flex flex-col justify-between group cursor-pointer min-h-[220px]"
+                    onclick="startChronoExplorer()">
+                    <div class="text-4xl mb-4 group-hover:scale-110 transition-transform duration-300">⏳</div>
+                    <div>
+                        <h3 class="text-xl font-bold mb-2 group-hover:text-red-400 transition-colors">Crono-Explorador
+                        </h3>
+                        <p class="text-gray-500 text-sm mb-4">Viaja y ordena la línea temporal.</p>
+                    </div>
+                    <div
+                        class="text-red-400 font-bold text-xs uppercase tracking-widest group-hover:translate-x-2 transition-transform">
+                        Viajar →</div>
                 </div>
             </div>
 

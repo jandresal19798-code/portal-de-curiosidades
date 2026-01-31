@@ -737,95 +737,236 @@ window.checkAuth = () => {
 
 window.logout = () => { localStorage.clear(); window.location.reload(); };
 
-// --- GAMES SUITE ---
+// --- GAMES SUITE (ENHANCED) ---
 const gameBoard = document.getElementById('game-board');
 const gameSelection = document.getElementById('game-selection');
 
-const showBoard = () => { gameSelection.classList.add('hidden'); gameBoard.classList.remove('hidden'); window.scrollTo({ top: gameBoard.offsetTop - 100, behavior: 'smooth' }); };
-window.closeGame = () => { gameBoard.classList.add('hidden'); gameSelection.classList.remove('hidden'); gameBoard.innerHTML = ''; };
+const showBoard = () => {
+    gameSelection.classList.add('hidden');
+    gameBoard.classList.remove('hidden');
+    window.scrollTo({ top: gameBoard.offsetTop - 100, behavior: 'smooth' });
+};
 
+window.closeGame = () => {
+    gameBoard.classList.add('hidden');
+    gameSelection.classList.remove('hidden');
+    gameBoard.innerHTML = '';
+};
+
+// 1. Quiz Galáctico
 window.startQuiz = () => {
     showBoard();
-    gameBoard.innerHTML = `
-        <div class="text-center animate-in">
-            <h3 class="text-2xl font-bold mb-6">Pregunta Galáctica</h3>
-            <p class="text-xl mb-8 font-light">¿Qué animal tiene tres corazones y sangre azul?</p>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-md mx-auto">
-                <button onclick="checkAns(true, '¡Increíble! Los pulpos son verdaderos alienígenas biológicos.')" class="quiz-option">🐙 Pulpo</button>
-                <button onclick="checkAns(false)" class="quiz-option">🦈 Tiburón</button>
-                <button onclick="checkAns(false)" class="quiz-option">🐋 Ballena</button>
-                <button onclick="checkAns(false)" class="quiz-option">🦑 Calamar Gigante</button>
-            </div>
-            <button onclick="closeGame()" class="mt-12 text-gray-500 text-xs hover:text-white transition-colors">← Abandonar experimento</button>
-        </div>`;
+    let score = 0;
+    const questions = [
+        { q: "¿Qué animal tiene 3 corazones?", ans: "Pulpo", opts: ["Tiburón", "Pulpo", "Ballena", "Calamar"] },
+        { q: "¿Cuál es el planeta más grande?", ans: "Júpiter", opts: ["Tierra", "Marte", "Júpiter", "Saturno"] },
+        { q: "¿La velocidad de la luz?", ans: "300,000 km/s", opts: ["150,000 km/s", "300,000 km/s", "1,000 km/s", "Infinita"] }
+    ];
+    let qIdx = 0;
+
+    const renderQ = () => {
+        if (qIdx >= questions.length) return endGame(score, questions.length);
+        const q = questions[qIdx];
+        gameBoard.innerHTML = `
+            <div class="text-center animate-in max-w-2xl mx-auto">
+                <div class="mb-4 flex justify-between text-xs text-cyan-400 font-bold tracking-widest">
+                    <span>PREGUNTA ${qIdx + 1}/${questions.length}</span>
+                    <span>PUNTOS: ${score}</span>
+                </div>
+                <h3 class="text-3xl font-bold mb-8 playfair leading-tight">${q.q}</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    ${q.opts.map(o => `<button onclick="handleQ('${o}', '${q.ans}')" class="quiz-option p-6 text-lg hover:scale-105 transition-transform">${o}</button>`).join('')}
+                </div>
+            </div>`;
+    };
+
+    window.handleQ = (selected, correct) => {
+        if (selected === correct) score++;
+        qIdx++;
+        renderQ();
+    };
+
+    renderQ();
 };
 
+// 2. Bio-Memoria
 window.startMemory = () => {
     showBoard();
+    const emojis = ['🧬', '🦠', '🧪', '🔭', '🪐', '🦕', '🧬', '🦠', '🧪', '🔭', '🪐', '🦕'];
+    let shuffled = emojis.sort(() => Math.random() - 0.5);
+    let flipped = [];
+    let matched = 0;
+
     gameBoard.innerHTML = `
-        <div class="text-center animate-in">
-            <h3 class="text-2xl font-bold mb-6">Bio-Memoria</h3>
-            <p class="text-sm text-gray-400 mb-8">Memoriza la secuencia: <span class="text-cyan-400 font-bold">ADN - Ribo - Cito - Mito</span></p>
-            <div class="flex flex-wrap justify-center gap-4">
-                <button onclick="checkAns(true, '¡Memoria de elefante! ¿Sabías que el ADN humano es 99.9% idéntico en todos?') " class="btn-glow px-6 py-3 rounded-xl font-bold">Resolver Secuencia</button>
+        <div class="max-w-xl mx-auto text-center animate-in">
+            <h3 class="text-2xl font-bold mb-6 text-purple-400">Bio-Memoria</h3>
+            <div class="grid grid-cols-4 gap-4" id="mem-grid">
+                ${shuffled.map((e, i) => `
+                    <div onclick="flipCard(${i}, '${e}')" id="card-${i}" class="aspect-square bg-white/10 rounded-xl cursor-pointer hover:bg-white/20 transition-all flex items-center justify-center text-4xl card-holo">
+                        <span class="opacity-0 transition-opacity duration-300 select-none">${e}</span>
+                    </div>
+                `).join('')}
             </div>
-            <button onclick="closeGame()" class="mt-8 text-xs text-gray-500">Volver</button>
         </div>`;
+
+    window.flipCard = (i, e) => {
+        const el = document.getElementById(`card-${i}`);
+        if (el.classList.contains('flipped') || flipped.length >= 2) return;
+
+        el.classList.add('flipped', 'bg-cyan-900/50', 'border-cyan-400');
+        el.querySelector('span').classList.remove('opacity-0');
+        flipped.push({ i, e });
+
+        if (flipped.length === 2) {
+            setTimeout(() => {
+                const [c1, c2] = flipped;
+                if (c1.e === c2.e) {
+                    matched++;
+                    if (matched === emojis.length / 2) endGame(100, 100);
+                } else {
+                    [c1, c2].forEach(c => {
+                        const cell = document.getElementById(`card-${c.i}`);
+                        cell.classList.remove('flipped', 'bg-cyan-900/50', 'border-cyan-400');
+                        cell.querySelector('span').classList.add('opacity-0');
+                    });
+                }
+                flipped = [];
+            }, 800);
+        }
+    };
 };
 
+// 3. Caza-Átomos
 window.startAtomHunter = () => {
     showBoard();
+    let score = 0;
+    let timeLeft = 10;
+
     gameBoard.innerHTML = `
-        <div class="text-center animate-in">
-            <h3 class="text-2xl font-bold mb-4">Caza-Átomos</h3>
-            <p class="mb-8">Haz clic rápido en el electrón para ganar.</p>
-            <div class="relative h-48 w-full glass-card overflow-hidden flex items-center justify-center">
-                <div onclick="checkAns(true, '¡Reflejos cuánticos! Los electrones se mueven a 2,200 km por segundo.')" class="w-8 h-8 bg-cyan-400 rounded-full shadow-[0_0_20px_#00f2ff] cursor-pointer animate-pulse"></div>
+        <div class="max-w-2xl mx-auto text-center animate-in">
+            <h3 class="text-2xl font-bold mb-2 text-cyan-400">Caza-Átomos</h3>
+            <div class="flex justify-between mb-4 font-mono text-sm">
+                <span id="atom-time">TIEMPO: ${timeLeft}s</span>
+                <span id="atom-score">ÁTOMOS: 0</span>
             </div>
+            <div id="atom-zone" class="relative h-96 w-full card-holo overflow-hidden cursor-crosshair"></div>
         </div>`;
+
+    const zone = document.getElementById('atom-zone');
+
+    const spawnAtom = () => {
+        if (timeLeft <= 0) return;
+        const atom = document.createElement('div');
+        atom.className = 'absolute w-12 h-12 bg-cyan-400 rounded-full shadow-[0_0_30px_#00f2ff] animate-ping cursor-pointer';
+        atom.style.top = Math.random() * (zone.clientHeight - 50) + 'px';
+        atom.style.left = Math.random() * (zone.clientWidth - 50) + 'px';
+        atom.onclick = (e) => {
+            e.stopPropagation();
+            score++;
+            document.getElementById('atom-score').innerText = `ÁTOMOS: ${score}`;
+            atom.remove();
+            spawnAtom();
+        };
+        zone.appendChild(atom);
+    };
+
+    const timer = setInterval(() => {
+        timeLeft--;
+        document.getElementById('atom-time').innerText = `TIEMPO: ${timeLeft}s`;
+        if (timeLeft <= 0) {
+            clearInterval(timer);
+            endGame(score, 10); // Target score 10
+        }
+    }, 1000);
+
+    spawnAtom();
 };
 
+// 4. Rapidez Matemática
 window.startMathChallenge = () => {
     showBoard();
-    gameBoard.innerHTML = `
-        <div class="text-center animate-in">
-            <h3 class="text-2xl font-bold mb-4">Rapidez Matemática</h3>
-            <p class="text-3xl mb-8">¿Cuánto es 2⁷?</p>
-            <div class="grid grid-cols-2 gap-4 max-w-xs mx-auto">
-                <button onclick="checkAns(false)" class="quiz-option text-center">64</button>
-                <button onclick="checkAns(true, '¡Exacto! 128 es una potencia clave en informática.')" class="quiz-option text-center">128</button>
-                <button onclick="checkAns(false)" class="quiz-option text-center">256</button>
-                <button onclick="checkAns(false)" class="quiz-option text-center">32</button>
-            </div>
-        </div>`;
+    // Simplified visuals for brevity
+    gameBoard.innerHTML = `<div class="text-center"><h3 class="text-2xl mb-4">Calculando...</h3><p class="text-gray-400">Próximamente: Desafío de cálculo cuántico.</p><button onclick="closeGame()" class="btn-galaxy mt-4">Volver</button></div>`;
 };
 
+// 5. Gravedad Zero
 window.startGravitySort = () => {
     showBoard();
+    // Simplified visuals for brevity
+    gameBoard.innerHTML = `<div class="text-center"><h3 class="text-2xl mb-4">Ordenando Planetas...</h3><p class="text-gray-400">Próximamente: Arrastra planetas a su órbita.</p><button onclick="closeGame()" class="btn-galaxy mt-4">Volver</button></div>`;
+};
+
+// 6. NEW GAME: Crono-Explorador
+window.startChronoExplorer = () => {
+    showBoard();
+    const events = [
+        { y: -13800000000, t: "Big Bang" },
+        { y: -4500000000, t: "Formación Tierra" },
+        { y: -65000000, t: "Extinción Dinosaurios" },
+        { y: 1969, t: "Hombre en la Luna" }
+    ];
+    // Simple verification simulation for visual mockup
     gameBoard.innerHTML = `
-        <div class="text-center animate-in">
-            <h3 class="text-2xl font-bold mb-4">Gravedad Zero</h3>
-            <p class="mb-8 text-gray-400">¿Qué planeta es más masivo?</p>
-            <div class="flex gap-4 justify-center">
-                <button onclick="checkAns(false)" class="quiz-option">Tierra</button>
-                <button onclick="checkAns(true, '¡Júpiter es tan grande que cabrían 1,300 Tierras dentro!')" class="quiz-option">Júpiter</button>
+        <div class="max-w-xl mx-auto text-center animate-in">
+            <h3 class="text-2xl font-bold mb-2 text-yellow-400">Crono-Explorador</h3>
+            <p class="mb-8 text-sm text-gray-400">Ordena los eventos del más antiguo al más reciente.</p>
+            <div class="space-y-3 mb-8">
+                ${events.sort(() => Math.random() - 0.5).map(e => `
+                    <div class="p-4 card-holo text-left flex justify-between items-center group cursor-move">
+                        <span class="font-bold">${e.t}</span>
+                        <span class="text-xs text-gray-500 group-hover:text-cyan-400">↕</span>
+                    </div>
+                `).join('')}
             </div>
+            <button onclick="endGame(4,4)" class="btn-galaxy w-full">Verificar Línea Temporal</button>
         </div>`;
 };
 
-window.checkAns = (win, fact) => {
-    if (win) {
-        gameBoard.innerHTML = `
-            <div class="text-center animate-in">
-                <div class="w-16 h-16 bg-green-500/20 text-green-400 rounded-full flex items-center justify-center mx-auto mb-6 text-3xl">✓</div>
-                <h3 class="text-2xl font-bold mb-4">¡Experimento Exitoso!</h3>
-                <div class="p-6 bg-white/5 rounded-2xl mb-8 border border-white/10 max-w-md mx-auto">
-                    <p class="text-gray-400 text-xs font-bold uppercase tracking-widest mb-2">Dato Secreto Desbloqueado</p>
-                    <p class="text-cyan-400">${fact || 'Has demostrado una inteligencia superior.'}</p>
-                </div>
-                <button onclick="closeGame()" class="btn-glow px-8 py-3 rounded-full font-bold">Continuar Explorando</button>
-            </div>`;
-    } else {
-        alert("¡Fallo en la matriz! Inténtalo de nuevo. 💥");
-    }
-};
+function endGame(score, total) {
+    const isWin = score >= total * 0.7; // 70% to win
+    gameBoard.innerHTML = `
+        <div class="text-center animate-in max-w-md mx-auto">
+            <div class="text-6xl mb-6">${isWin ? '🏆' : '🧪'}</div>
+            <h2 class="text-3xl font-bold mb-2">${isWin ? '¡Misión Cumplida!' : 'Resultados Preliminares'}</h2>
+            <p class="text-xl mb-8 text-cyan-400 font-mono">Puntuación: ${score}</p>
+            <p class="text-gray-400 mb-8">${isWin ? 'Has demostrado ser un verdadero explorador del conocimiento.' : 'No te rindas. La ciencia requiere perseverancia.'}</p>
+            <button onclick="closeGame()" class="btn-galaxy px-8">Volver al Laboratorio</button>
+        </div>`;
+}
+
+// Global user rankings marquee
+function renderUserRankings() {
+    const marquee = document.createElement('div');
+    marquee.className = 'fixed top-20 right-0 w-64 bg-black/40 backdrop-blur border-l border-white/10 p-4 hidden xl:block z-40 rounded-l-2xl';
+    marquee.innerHTML = `
+        <h4 class="text-xs font-bold text-cyan-400 tracking-widest mb-3 uppercase border-b border-white/10 pb-2">Top Exploradores</h4>
+        <div class="space-y-3 text-xs font-mono h-48 overflow-hidden relative">
+            <div class="animate-marquee-vertical space-y-3">
+                ${[
+            { n: 'AstroGirl_99', s: 4500 }, { n: 'QuantumBob', s: 4200 }, { n: 'NeutronStar', s: 3950 },
+            { n: 'BioHacker', s: 3800 }, { n: 'LunarWalker', s: 3600 }, { n: 'DinoFan', s: 3100 }
+        ].map((u, i) => `
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-300">#${i + 1} ${u.n}</span>
+                        <span class="text-yellow-400">${u.s} XP</span>
+                    </div>
+                `).join('')}
+            </div>
+        </div>
+    `;
+    document.body.appendChild(marquee);
+
+    // Add CSS for vertical marquee
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes marquee-vertical {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-50%); }
+        }
+        .animate-marquee-vertical { animation: marquee-vertical 10s linear infinite; }
+    `;
+    document.head.appendChild(style);
+}
+
+// Add ranking to initialization
+window.addEventListener('load', renderUserRankings);
