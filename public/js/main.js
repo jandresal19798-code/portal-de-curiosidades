@@ -365,11 +365,13 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const [weatherData, geoData] = await Promise.all([weatherPromise, geoPromise]);
 
-            if (geoData) {
-                cityName = geoData.display_name?.split(',')[0] ||
-                    geoData.address?.city ||
-                    geoData.address?.town ||
-                    "Zona Local";
+            if (geoData && !geoData.error && geoData.address) {
+                const a = geoData.address;
+                // Prioritize city-level labels over street-level labels
+                cityName = a.city || a.town || a.village || a.municipality || a.suburb || a.county ||
+                    geoData.display_name?.split(',')[0] || cityName;
+            } else if (geoData && geoData.error) {
+                console.warn("Nominatim error:", geoData.error);
             }
 
             if (weatherData && (weatherData.current_weather || weatherData.weather_code !== undefined)) {
@@ -441,12 +443,21 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function initWeather() {
+        console.log("Iniciando servicio de clima...");
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(
-                (pos) => fetchWeather(pos.coords.latitude, pos.coords.longitude),
-                () => fetchWeather(null, null, DEFAULT_CITY)
+                (pos) => {
+                    console.log(`Coords obtenidas: ${pos.coords.latitude}, ${pos.coords.longitude}`);
+                    fetchWeather(pos.coords.latitude, pos.coords.longitude);
+                },
+                (err) => {
+                    console.warn("Geolocalización rechazada o fallida:", err.message);
+                    fetchWeather(null, null, DEFAULT_CITY);
+                },
+                { timeout: 10000 }
             );
         } else {
+            console.warn("Navegador no soporta geolocalización");
             fetchWeather(null, null, DEFAULT_CITY);
         }
 
