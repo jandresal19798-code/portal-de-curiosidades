@@ -288,13 +288,95 @@ window.checkAuth = () => {
 window.logout = () => { localStorage.clear(); window.location.reload(); };
 
 // --- GAMES (Simplified) ---
+// --- GAMES SUITE ---
+const gameBoard = document.getElementById('game-board');
+const gameSelection = document.getElementById('game-selection');
+
+const showBoard = () => { gameSelection.classList.add('hidden'); gameBoard.classList.remove('hidden'); window.scrollTo({ top: gameBoard.offsetTop - 100, behavior: 'smooth' }); };
+window.closeGame = () => { gameBoard.classList.add('hidden'); gameSelection.classList.remove('hidden'); gameBoard.innerHTML = ''; };
+
 window.startQuiz = () => {
-    const board = document.getElementById('game-board');
-    document.getElementById('game-selection').classList.add('hidden');
-    board.classList.remove('hidden');
-    board.innerHTML = `<h3>¿Cuántos corazones tiene un pulpo?</h3><div class="flex gap-2 justify-center mt-4"><button onclick="checkAns(true)" class="quiz-option">3</button><button onclick="checkAns(false)" class="quiz-option">1</button></div>`;
+    showBoard();
+    gameBoard.innerHTML = `
+        <div class="text-center animate-in">
+            <h3 class="text-2xl font-bold mb-6">Pregunta Galáctica</h3>
+            <p class="text-xl mb-8 font-light">¿Qué animal tiene tres corazones y sangre azul?</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-md mx-auto">
+                <button onclick="checkAns(true, '¡Increíble! Los pulpos son verdaderos alienígenas biológicos.')" class="quiz-option">🐙 Pulpo</button>
+                <button onclick="checkAns(false)" class="quiz-option">🦈 Tiburón</button>
+                <button onclick="checkAns(false)" class="quiz-option">🐋 Ballena</button>
+                <button onclick="checkAns(false)" class="quiz-option">🦑 Calamar Gigante</button>
+            </div>
+            <button onclick="closeGame()" class="mt-12 text-gray-500 text-xs hover:text-white transition-colors">← Abandonar experimento</button>
+        </div>`;
 };
-window.checkAns = (win) => {
-    alert(win ? "¡Correcto! 🐙" : "¡Error! 💥");
-    location.reload();
+
+window.startMemory = () => {
+    showBoard();
+    gameBoard.innerHTML = `
+        <div class="text-center animate-in">
+            <h3 class="text-2xl font-bold mb-6">Bio-Memoria</h3>
+            <p class="text-sm text-gray-400 mb-8">Memoriza la secuencia: <span class="text-cyan-400 font-bold">ADN - Ribo - Cito - Mito</span></p>
+            <div class="flex flex-wrap justify-center gap-4">
+                <button onclick="checkAns(true, '¡Memoria de elefante! ¿Sabías que el ADN humano es 99.9% idéntico en todos?') " class="btn-glow px-6 py-3 rounded-xl font-bold">Resolver Secuencia</button>
+            </div>
+            <button onclick="closeGame()" class="mt-8 text-xs text-gray-500">Volver</button>
+        </div>`;
+};
+
+window.startAtomHunter = () => {
+    showBoard();
+    gameBoard.innerHTML = `
+        <div class="text-center animate-in">
+            <h3 class="text-2xl font-bold mb-4">Caza-Átomos</h3>
+            <p class="mb-8">Haz clic rápido en el electrón para ganar.</p>
+            <div class="relative h-48 w-full glass-card overflow-hidden flex items-center justify-center">
+                <div onclick="checkAns(true, '¡Reflejos cuánticos! Los electrones se mueven a 2,200 km por segundo.')" class="w-8 h-8 bg-cyan-400 rounded-full shadow-[0_0_20px_#00f2ff] cursor-pointer animate-pulse"></div>
+            </div>
+        </div>`;
+};
+
+window.startMathChallenge = () => {
+    showBoard();
+    gameBoard.innerHTML = `
+        <div class="text-center animate-in">
+            <h3 class="text-2xl font-bold mb-4">Rapidez Matemática</h3>
+            <p class="text-3xl mb-8">¿Cuánto es 2⁷?</p>
+            <div class="grid grid-cols-2 gap-4 max-w-xs mx-auto">
+                <button onclick="checkAns(false)" class="quiz-option text-center">64</button>
+                <button onclick="checkAns(true, '¡Exacto! 128 es una potencia clave en informática.')" class="quiz-option text-center">128</button>
+                <button onclick="checkAns(false)" class="quiz-option text-center">256</button>
+                <button onclick="checkAns(false)" class="quiz-option text-center">32</button>
+            </div>
+        </div>`;
+};
+
+window.startGravitySort = () => {
+    showBoard();
+    gameBoard.innerHTML = `
+        <div class="text-center animate-in">
+            <h3 class="text-2xl font-bold mb-4">Gravedad Zero</h3>
+            <p class="mb-8 text-gray-400">¿Qué planeta es más masivo?</p>
+            <div class="flex gap-4 justify-center">
+                <button onclick="checkAns(false)" class="quiz-option">Tierra</button>
+                <button onclick="checkAns(true, '¡Júpiter es tan grande que cabrían 1,300 Tierras dentro!')" class="quiz-option">Júpiter</button>
+            </div>
+        </div>`;
+};
+
+window.checkAns = (win, fact) => {
+    if (win) {
+        gameBoard.innerHTML = `
+            <div class="text-center animate-in">
+                <div class="w-16 h-16 bg-green-500/20 text-green-400 rounded-full flex items-center justify-center mx-auto mb-6 text-3xl">✓</div>
+                <h3 class="text-2xl font-bold mb-4">¡Experimento Exitoso!</h3>
+                <div class="p-6 bg-white/5 rounded-2xl mb-8 border border-white/10 max-w-md mx-auto">
+                    <p class="text-gray-400 text-xs font-bold uppercase tracking-widest mb-2">Dato Secreto Desbloqueado</p>
+                    <p class="text-cyan-400">${fact || 'Has demostrado una inteligencia superior.'}</p>
+                </div>
+                <button onclick="closeGame()" class="btn-glow px-8 py-3 rounded-full font-bold">Continuar Explorando</button>
+            </div>`;
+    } else {
+        alert("¡Fallo en la matriz! Inténtalo de nuevo. 💥");
+    }
 };
