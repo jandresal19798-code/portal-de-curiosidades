@@ -106,7 +106,8 @@ document.addEventListener('DOMContentLoaded', () => {
     updateDate();
 
     function getPlaceholderSVG(category, bgColor, width, height, fontSize) {
-        return `data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22${width}%22 height=%22${height}%22%3E%3Cdefs%3E%3ClinearGradient id=%22grad%22 x1=%220%25%22 y1=%220%25%22 x2=%22100%25%22 y2=%22100%25%22%3E%3Cstop offset=%220%25%22 style=%22stop-color:${bgColor};stop-opacity:0.3%22/%3E%3Cstop offset=%22100%25%22 style=%22stop-color:${bgColor};stop-opacity:0.6%22/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width=%22${width}%22 height=%22${height}%22 fill=%22url(%23grad)%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 font-family=%22Arial%22 font-size=%22${fontSize}%22 fill=%22white%22 text-anchor=%22middle%22 dominant-baseline=%22middle%22 opacity=%220.8%22%3E${encodeURIComponent(category)}%3C/text%3E%3C/svg%3E`;
+        const encodedColor = encodeURIComponent(bgColor);
+        return `data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22${width}%22 height=%22${height}%22%3E%3Cdefs%3E%3ClinearGradient id=%22grad%22 x1=%220%25%22 y1=%220%25%22 x2=%22100%25%22 y2=%22100%25%22%3E%3Cstop offset=%220%25%22 style=%22stop-color:${encodedColor};stop-opacity:0.3%22/%3E%3Cstop offset=%22100%25%22 style=%22stop-color:${encodedColor};stop-opacity:0.6%22/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width=%22${width}%22 height=%22${height}%22 fill=%22url(%23grad)%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 font-family=%22Arial%22 font-size=%22${fontSize}%22 fill=%22white%22 text-anchor=%22middle%22 dominant-baseline=%22middle%22 opacity=%220.8%22%3E${encodeURIComponent(category)}%3C/text%3E%3C/svg%3E`;
     }
 
     function renderGrid(items, append = false) {
