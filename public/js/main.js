@@ -421,6 +421,15 @@ function initAuth() {
                     window.toggleModal('verify-modal');
                     // Store email for verification
                     localStorage.setItem('pending_email', email);
+
+                    // DEV HELP: Pre-fill token if returned
+                    if (data.token) {
+                        alert(`¡Modo Pruebas! Tu token de verificación es: ${data.token}`);
+                        setTimeout(() => {
+                            const tokenInput = document.getElementById('verify-token');
+                            if (tokenInput) tokenInput.value = data.token;
+                        }, 500);
+                    }
                 } else {
                     alert('Error: ' + data.error);
                 }

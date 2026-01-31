@@ -145,7 +145,11 @@ app.post('/api/auth/register', async (req, res) => {
         // Simulación de envío de mail (En producción usar Transporter real)
         console.log(`[MAIL] Verificación enviada a ${email}: Token ${newUser.id}`);
 
-        res.status(201).json({ message: 'Registrado con éxito. Revisa tu consola para el token de simulación.' });
+        // DEV: Devolvemos el token para facilitar pruebas
+        res.status(201).json({
+            message: 'Registrado con éxito. Revisa la consola o usa este token para verificar.',
+            token: newUser.id
+        });
     } catch (e) {
         res.status(500).json({ error: 'Error en el registro' });
     }
