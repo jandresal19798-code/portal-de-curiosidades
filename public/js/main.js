@@ -19,17 +19,23 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function renderGrid(items) {
-        grid.innerHTML = items.map(item => `
-            <div class="card" onclick="openDetail(${item.id})">
-                <img src="${item.image}" alt="${item.title}" class="card-image">
-                <span class="card-category">${item.category}</span>
-                <h3>${item.title}</h3>
-                <div class="card-footer">
-                    <span>${item.likes} ❤️</span>
-                    <span>Ver más &rarr;</span>
-                </div>
+        grid.innerHTML = items.slice(0, 8).map(item => `
+            <div class="daily-card" onclick="openDetail(${item.id})">
+                <img src="${item.image}" alt="${item.title}">
+                <h4>${item.title}</h4>
             </div>
         `).join('');
+
+        // Render Trending Sidebar
+        const sidebar = document.getElementById('trending-list');
+        if (sidebar) {
+            sidebar.innerHTML = items.slice(8, 13).map(item => `
+                <div class="trending-item">
+                    <img src="${item.image}" alt="thumb" class="trending-thumb">
+                    <p>${item.title}</p>
+                </div>
+            `).join('');
+        }
     }
 
     // Filter Logic

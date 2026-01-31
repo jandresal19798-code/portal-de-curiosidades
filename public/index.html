@@ -15,76 +15,76 @@
 </head>
 
 <body>
+    <header class="main-header">
+        <div class="top-bar">
+            <div class="date-user">
+                <span id="header-date">VIERNES, 30 DE ENERO, 2026</span>
+                <img src="https://ui-avatars.com/api/?name=Dr+Curioso&background=2dd4bf&color=fff" alt="User"
+                    class="user-pill">
+            </div>
+        </div>
+        <nav class="nav-container">
+            <div class="logo-area">
+                <span class="logo-icon">🌀</span>
+                <h1>THE DAILY CURIOSITY</h1>
+            </div>
+            <div class="nav-links">
+                <a href="#home" class="active">INICIO</a>
+                <a href="#news">NOTICIAS</a>
+                <a href="#explore">CURIOSIDADES</a>
+                <a href="#history">HISTORIA</a>
+                <a href="#tech">TECNOLOGÍA</a>
+                <a href="#contact">CONTACTO</a>
+            </div>
+            <div class="nav-search">
+                <span>🔍</span>
+            </div>
+        </nav>
+    </header>
+
     <div id="app">
-        <header>
-            <nav class="glass">
-                <div class="logo">
-                    <span class="icon">✨</span>
-                    <h1>CurioSphere</h1>
-                </div>
-                <div class="nav-links">
-                    <a href="#home">Inicio</a>
-                    <a href="#explore">Explorar</a>
-                </div>
-            </nav>
-        </header>
-
         <main>
-            <section id="home" class="hero">
-                <div class="hero-content">
-                    <h2 class="reveal">Explora lo <span class="highlight">Increíble</span></h2>
-                    <p class="reveal-delay">Bienvenido a CurioSphere, el laboratorio digital del Dr. Curioso. Aquí la
-                        ciencia, el espacio y la naturaleza se encuentran en un estallido de conocimiento.</p>
-                    <div class="hero-btns">
-                        <a href="#explore" class="btn-primary">Descubrir Ahora</a>
-                        <a href="#games" class="btn-secondary">Zona de Juegos 🎮</a>
+            <section class="featured-section">
+                <div class="featured-main glass">
+                    <div class="featured-text">
+                        <h2>EXPLORE THE UNKNOWN</h2>
                     </div>
                 </div>
-                <div class="hero-visual">
-                    <div class="orb"></div>
-                    <div class="orb-ring"></div>
+                <div class="featured-side glass">
+                    <p>Tesoros Perdidos Desenterrados</p>
+                </div>
+                <div class="featured-side glass artifact">
+                    <img src="https://images.unsplash.com/photo-1543157145-f78c636d023c?auto=format&fit=crop&w=300"
+                        alt="Artifact">
+                </div>
+                <div class="featured-actions">
+                    <button class="btn-teal">ESCRIBIR</button>
+                    <div class="social-icons">
+                        <span>f</span> <span>t</span> <span>y</span> <span>i</span>
+                    </div>
+                    <button class="btn-teal outline">SUSCRIBIRSE</button>
+                    <button class="btn-teal solid">SUSCRIBE</button>
                 </div>
             </section>
 
-            <section id="games" class="games-section">
-                <div class="section-header">
-                    <h2>Zona de Juegos 🧪</h2>
-                    <p>Pon a prueba tu cerebro con los experimentos del Dr. Curioso</p>
-                </div>
-                <div class="game-container glass">
-                    <div id="game-selection">
-                        <button onclick="startQuiz()" class="btn-game">Mental-Quiz 🧠</button>
-                        <button onclick="startMemory()" class="btn-game">Bio-Memoria 🧬</button>
+            <div class="content-layout">
+                <section class="stories-column">
+                    <div class="column-header">
+                        <h3>NOTICIAS PRINCIPALES</h3>
+                        <h3>CURIOSIDADES</h3>
                     </div>
-                    <div id="game-board" class="hidden">
-                        <!-- Games injected here -->
+                    <div id="curiosity-grid" class="daily-grid">
+                        <!-- Rediseñado via JS -->
                     </div>
-                </div>
-            </section>
+                </section>
 
-            <section id="explore">
-                <div class="section-header">
-                    <h2>Descubrimientos Recientes</h2>
-                    <div id="weather-widget" class="weather-glass">
-                        <span id="weather-city">Cargando clima...</span>
-                        <span id="weather-temp"></span>
-                        <span id="weather-desc"></span>
+                <aside class="trending-sidebar">
+                    <h3>TENDENCIAS AHORA</h3>
+                    <div id="trending-list" class="trending-list">
+                        <!-- Inyectado via JS -->
                     </div>
-                    <div class="filters">
-                        <button class="filter-btn active" data-category="all">Todos</button>
-                        <button class="filter-btn" data-category="Ciencia">Ciencia</button>
-                        <button class="filter-btn" data-category="Espacio">Espacio</button>
-                        <button class="filter-btn" data-category="Animales">Animales</button>
-                        <button class="filter-btn" data-category="Naturaleza">Naturaleza</button>
-                        <button class="filter-btn" data-category="Cuerpo Humano">Cuerpo Humano</button>
-                    </div>
-                </div>
-
-                <div id="curiosity-grid" class="grid">
-                    <!-- Cards will be injected here -->
-                    <div class="loader">Cargando curiosidades...</div>
-                </div>
-            </section>
+                </aside>
+            </div>
         </main>
 
         <!-- Bot de Curiosidades -->
