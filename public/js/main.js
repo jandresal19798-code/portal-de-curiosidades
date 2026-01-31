@@ -32,10 +32,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 'Matemáticas': 'text-blue-400'
             };
             const accent = colors[item.category] || 'text-cyan-400';
+            const imgUrl = item.image && item.image.startsWith('http') ? item.image : `https://images.unsplash.com/photo-1532187875605-1fc6367b913e?auto=format&fit=crop&q=80&w=800&sig=${item.id}`;
 
             return `
                 <div class="glass-card overflow-hidden flex flex-col animate-in">
-                    <div class="h-56 bg-cover bg-center" style="background-image: url('${item.image}')"></div>
+                    <div class="h-56 bg-cover bg-center" style="background-image: url('${imgUrl}')"></div>
                     <div class="p-6 flex-grow">
                         <span class="${accent} text-[10px] font-bold uppercase tracking-[0.2em] mb-2 block">${item.category}</span>
                         <h3 class="text-xl font-bold mb-3 leading-snug">${item.title}</h3>
@@ -247,11 +248,20 @@ document.addEventListener('DOMContentLoaded', () => {
             let cityName = overrideCity || DEFAULT_CITY;
             if (lat && lon && !overrideCity) {
                 try {
-                    const geoRes = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=10&addressdetails=1`);
+                    // Added User-Agent (Policy requirements for Nominatim) and better lat/lon handling
+                    const geoRes = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${parseFloat(lat).toFixed(4)}&lon=${parseFloat(lon).toFixed(4)}&zoom=10&addressdetails=1`, {
+                        headers: { 'User-Agent': 'Curiosphere/1.0 (contact@curiosphere.app)' }
+                    });
                     const geoData = await geoRes.json();
-                    cityName = geoData.address.city || geoData.address.town || geoData.address.village || "Ubicación Local";
+                    cityName = geoData.address.city ||
+                        geoData.address.town ||
+                        geoData.address.village ||
+                        geoData.address.suburb ||
+                        geoData.address.state ||
+                        "Tu ubicación";
                 } catch (err) {
-                    cityName = "Ubicación Local";
+                    console.error("Geocoding failed:", err);
+                    cityName = "Ubicación detectada";
                 }
             }
 
