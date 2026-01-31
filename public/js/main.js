@@ -1255,7 +1255,6 @@ window.deleteCuriosity = async (id) => {
         if (res.error) {
             alert('Error: ' + res.error);
         } else {
-            toggleModal('curiosity-form-modal');
             window.openAdmin();
             window.allCuriosities = null;
             API.getCuriosities().then(data => {
@@ -1264,9 +1263,9 @@ window.deleteCuriosity = async (id) => {
             });
         }
     } catch (err) {
-        alert('Error al guardar');
+        alert('Error al eliminar');
     }
-});
+};
 
 window.resetUserPassword = async (id) => {
     if (!confirm('¿Restablecer la contraseña de este usuario? Se generará una nueva contraseña.')) return;
