@@ -57,7 +57,13 @@ window.toggleBot = () => {
     if (!chat || !container) return;
     chat.classList.toggle('hidden');
     if (!chat.classList.contains('hidden') && container.innerHTML === "") {
-        container.innerHTML = `<div class="msg-bot"><b>Dr. Curioso 🧪:</b> ¡Eureka! ¿En qué locura científica puedo ayudarte hoy? ✨</div>`;
+        container.innerHTML = `
+            <div class="msg-bot flex items-start gap-3">
+                <img src="images/dr_curioso_avatar.png" class="w-10 h-10 rounded-full border border-cyan-400" alt="Dr. Curioso">
+                <div class="flex-1">
+                    <b>Dr. Curioso 🧪:</b> ¡Eureka! ¡Soy el Dr. Curioso! Prepárate para descubrir lo increíble. ¿De qué quieres hablar hoy? ✨
+                </div>
+            </div>`;
     }
 };
 
@@ -345,15 +351,143 @@ document.addEventListener('DOMContentLoaded', () => {
     }));
 
     // Initial Load
+    // Initial Load
     API.getCuriosities().then(data => {
         curiosities = data;
         window.allCuriosities = data;
         renderGrid(data);
         initMarquee(data);
+        initSearch(data); // New search function
     });
     initWeather();
+    initParticles(); // New particles
+    initBackToTop(); // New back to top
     window.checkAuth();
 });
+
+// --- NEW FUNCTIONALITIES ---
+
+function initSearch(items) {
+    const searchInput = document.getElementById('main-search');
+    const suggestionsBox = document.getElementById('search-suggestions');
+
+    if (!searchInput || !suggestionsBox) return;
+
+    searchInput.addEventListener('input', (e) => {
+        const query = e.target.value.toLowerCase();
+        if (query.length < 2) {
+            suggestionsBox.classList.add('hidden');
+            return;
+        }
+
+        const matches = items.filter(item =>
+            item.title.toLowerCase().includes(query) ||
+            item.category.toLowerCase().includes(query)
+        ).slice(0, 5);
+
+        if (matches.length > 0) {
+            suggestionsBox.innerHTML = matches.map(item => `
+                <div class="px-4 py-3 hover:bg-white/10 cursor-pointer flex items-center gap-3 transition-colors border-b border-white/5 last:border-0" onclick="window.openDetail(${item.id}); document.getElementById('search-suggestions').classList.add('hidden');">
+                    <img src="${(item.images && item.images.length > 0) ? item.images[0] : item.image}" class="w-8 h-8 rounded-full object-cover">
+                    <div>
+                        <div class="text-sm font-bold text-white">${item.title}</div>
+                        <div class="text-[10px] text-cyan-400 uppercase">${item.category}</div>
+                    </div>
+                </div>
+            `).join('');
+            suggestionsBox.classList.remove('hidden');
+        } else {
+            suggestionsBox.innerHTML = '<div class="px-4 py-3 text-gray-500 text-xs italic">Sin resultados cósmicos...</div>';
+            suggestionsBox.classList.remove('hidden');
+        }
+    });
+
+    // Close when clicking outside
+    document.addEventListener('click', (e) => {
+        if (!searchInput.contains(e.target) && !suggestionsBox.contains(e.target)) {
+            suggestionsBox.classList.add('hidden');
+        }
+    });
+}
+
+function initBackToTop() {
+    const btn = document.createElement('button');
+    btn.innerHTML = '↑';
+    btn.className = 'fixed bottom-8 right-8 bg-cyan-400 text-black w-12 h-12 rounded-full font-bold text-xl shadow-[0_0_20px_rgba(0,242,255,0.6)] z-40 hover:scale-110 transition-all hidden flex items-center justify-center';
+    btn.onclick = () => window.scrollTo({ top: 0, behavior: 'smooth' });
+    document.body.appendChild(btn);
+
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 500) btn.classList.remove('hidden');
+        else btn.classList.add('hidden');
+    });
+}
+
+function initParticles() {
+    const canvas = document.createElement('canvas');
+    canvas.id = 'particle-bg';
+    canvas.style.position = 'fixed';
+    canvas.style.top = '0';
+    canvas.style.left = '0';
+    canvas.style.width = '100%';
+    canvas.style.height = '100%';
+    canvas.style.zIndex = '-1';
+    canvas.style.pointerEvents = 'none';
+    document.body.prepend(canvas);
+
+    const ctx = canvas.getContext('2d');
+    let width, height;
+    let particles = [];
+
+    const resize = () => {
+        width = canvas.width = window.innerWidth;
+        height = canvas.height = window.innerHeight;
+    };
+    window.addEventListener('resize', resize);
+    resize();
+
+    class Particle {
+        constructor() {
+            this.x = Math.random() * width;
+            this.y = Math.random() * height;
+            this.vx = (Math.random() - 0.5) * 0.5;
+            this.vy = (Math.random() - 0.5) * 0.5;
+            this.size = Math.random() * 2;
+            this.color = Math.random() > 0.5 ? 'rgba(0, 242, 255, ' : 'rgba(112, 0, 255, ';
+            this.alpha = Math.random() * 0.5 + 0.1;
+        }
+
+        update() {
+            this.x += this.vx;
+            this.y += this.vy;
+
+            if (this.x < 0) this.x = width;
+            if (this.x > width) this.x = 0;
+            if (this.y < 0) this.y = height;
+            if (this.y > height) this.y = 0;
+        }
+
+        draw() {
+            ctx.fillStyle = this.color + this.alpha + ')';
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+            ctx.fill();
+        }
+    }
+
+    // Create particles
+    for (let i = 0; i < 100; i++) particles.push(new Particle());
+
+    function animate() {
+        ctx.clearRect(0, 0, width, height);
+        particles.forEach(p => {
+            p.update();
+            p.draw();
+        });
+        requestAnimationFrame(animate);
+    }
+    animate();
+}
 
 // --- UTILS & GAMES ---
 window.voteEmoji = (id, emoji) => {
