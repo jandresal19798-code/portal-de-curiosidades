@@ -153,20 +153,72 @@ document.addEventListener('DOMContentLoaded', () => {
     window.openDetail = async (id) => {
         const item = window.allCuriosities.find(c => c.id === id);
         if (!item) return;
+
+        // Calculate Reading Time (avg 200 words per minute)
+        const wordCount = item.fact.split(/\s+/).length;
+        const readingTime = Math.max(1, Math.ceil(wordCount / 200));
+
         modalBody.innerHTML = `
             <div class="animate-in">
-                <div class="h-[450px] w-[calc(100%+6rem)] -ml-12 -mt-12 mb-10 overflow-hidden relative"><img src="${item.image || ''}" class="w-full h-full object-cover"><div class="absolute inset-0 bg-gradient-to-t from-[#05070a] to-transparent"></div></div>
-                <h2 class="text-4xl md:text-6xl mb-8 font-bold">${item.title}</h2>
-                <p class="text-xl text-gray-300 leading-relaxed mb-12">${item.fact}</p>
-                <div class="flex gap-4 mb-12 justify-center">${['😲', '🤯', '🤔', '💖'].map(e => `<button onclick="voteEmoji(${id}, '${e}')" class="text-3xl hover:scale-125 transition-transform">${e}</button>`).join('')}</div>
+                <div class="h-[450px] w-[calc(100%+6rem)] -ml-12 -mt-12 mb-10 overflow-hidden relative group/hero">
+                    <img src="${item.image || ''}" class="w-full h-full object-cover group-hover/hero:scale-110 transition-transform duration-700">
+                    <div class="absolute inset-0 bg-gradient-to-t from-[#05070a] via-[#05070a]/20 to-transparent"></div>
+                    <div class="absolute bottom-8 left-0 px-12">
+                         <span class="bg-cyan-400 text-black text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-tighter">Lectura: ${readingTime} min</span>
+                    </div>
+                </div>
+                
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8 mt-4">
+                    <h2 class="text-4xl md:text-6xl font-bold leading-tight m-0">${item.title}</h2>
+                    <div class="flex gap-3">
+                        <button onclick="window.shareWhatsApp('${item.title}')" class="share-btn">
+                            <span>📱</span> WhatsApp
+                        </button>
+                        <button onclick="window.copyToClipboard('${id}')" class="share-btn">
+                            <span>🔗</span> Copiar
+                        </button>
+                    </div>
+                </div>
+
+                <p class="text-xl text-gray-300 leading-relaxed mb-12 font-light">${item.fact}</p>
+                
+                <div class="flex flex-col items-center gap-6 mb-16 p-8 glass-card no-hover bg-white/5 border-white/10">
+                    <p class="text-xs uppercase tracking-[0.3em] text-gray-500 font-bold">¿Qué te pareció?</p>
+                    <div class="flex gap-6">
+                        ${['😲', '🤯', '🤔', '💖'].map(e => `<button onclick="voteEmoji(${id}, '${e}')" class="text-4xl hover:scale-125 transition-transform active:scale-95 duration-200">${e}</button>`).join('')}
+                    </div>
+                </div>
+
+                <div id="newsletter-segment" class="mb-16 p-8 rounded-3xl bg-gradient-to-br from-cyan-400/10 to-purple-400/10 border border-white/5 text-center">
+                    <h4 class="text-xl font-bold mb-2">¿Quieres más curiosidades? 🚀</h4>
+                    <p class="text-gray-400 text-sm mb-6">Suscríbete a nuestra "Curiosidad del Viernes". No spam, solo asombro.</p>
+                    <div class="flex max-w-md mx-auto gap-2">
+                        <input type="email" placeholder="tu@email.com" class="bg-white/5 border border-white/10 rounded-xl px-4 py-2 flex-grow outline-none focus:border-cyan-400">
+                        <button onclick="alert('¡Gracias! Pronto recibirás grandes secretos.')" class="btn-glow px-6 py-2 rounded-xl font-bold text-sm">Unirse</button>
+                    </div>
+                </div>
+
                 <div class="comments-section border-t border-white/10 pt-12">
-                    <h3 class="text-2xl font-bold mb-8">Comentarios</h3>
+                    <h3 class="text-2xl font-bold mb-8 flex items-center gap-3">
+                        <span class="w-2 h-8 bg-cyan-400 rounded-full"></span> Comentarios
+                    </h3>
                     <div id="comment-list" class="space-y-4">Cargando...</div>
                 </div>
             </div>`;
         modal.classList.remove('hidden');
         document.body.style.overflow = 'hidden';
         loadComments(id);
+    };
+
+    window.shareWhatsApp = (title) => {
+        const url = window.location.href;
+        window.open(`https://api.whatsapp.com/send?text=🧪 ¡Mira lo que descubrí en CurioSphere!: ${title} - ${url}`, '_blank');
+    };
+
+    window.copyToClipboard = (id) => {
+        navigator.clipboard.writeText(window.location.href).then(() => {
+            alert("¡Enlace copiado al portapapeles! 🔗");
+        });
     };
 
     async function loadComments(id) {
