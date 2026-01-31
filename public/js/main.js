@@ -363,7 +363,99 @@ document.addEventListener('DOMContentLoaded', () => {
     initParticles(); // New particles
     initBackToTop(); // New back to top
     window.checkAuth();
+    initAuth();
 });
+
+// --- AUTHENTICATION LOGIC ---
+
+function initAuth() {
+    const loginForm = document.getElementById('login-form');
+    const registerForm = document.getElementById('register-form');
+
+    if (loginForm) {
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const inputs = loginForm.querySelectorAll('input');
+            const email = inputs[0].value;
+            const password = inputs[1].value;
+
+            try {
+                const res = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                const data = await res.json();
+
+                if (res.ok) {
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                    localStorage.setItem('token', data.token);
+                    window.location.reload();
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            } catch (err) {
+                alert('Error de conexión');
+            }
+        });
+    }
+
+    if (registerForm) {
+        registerForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const inputs = registerForm.querySelectorAll('input');
+            const name = inputs[0].value;
+            const email = inputs[1].value;
+            const password = inputs[2].value;
+
+            try {
+                const res = await fetch('/api/auth/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, email, password })
+                });
+                const data = await res.json();
+
+                if (res.ok) {
+                    window.toggleModal('register-modal');
+                    window.toggleModal('verify-modal');
+                    // Store email for verification
+                    localStorage.setItem('pending_email', email);
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            } catch (err) {
+                alert('Error al registrarse');
+            }
+        });
+    }
+}
+
+window.verifyEmail = async () => {
+    const token = document.getElementById('verify-token').value;
+    const email = localStorage.getItem('pending_email');
+
+    if (!token || !email) return alert('Datos incompletos');
+
+    try {
+        const res = await fetch('/api/auth/verify', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, token })
+        });
+        const data = await res.json();
+
+        if (res.ok) {
+            alert(data.message);
+            window.toggleModal('verify-modal');
+            window.toggleModal('login-modal');
+        } else {
+            alert(data.error);
+        }
+    } catch (err) {
+        alert('Error en verificación');
+    }
+};
 
 // --- NEW FUNCTIONALITIES ---
 
