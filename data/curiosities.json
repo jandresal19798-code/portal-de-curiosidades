@@ -7,7 +7,11 @@
         "links": [
             "https://solarsystem.nasa.gov/planets/venus/in-depth/"
         ],
-        "image": "https://images.unsplash.com/photo-1614732414444-af963b81f392?auto=format&fit=crop&q=80&w=800"
+        "image": "https://images.unsplash.com/photo-1614732414444-af963b81f392?auto=format&fit=crop&q=80&w=800",
+        "images": [
+            "https://images.unsplash.com/photo-1614732414444-af963b81f392?auto=format&fit=crop&q=80&w=800",
+            "https://images.unsplash.com/photo-1614728423169-3f65fd722b7e?auto=format&fit=crop&q=80&w=800"
+        ]
     },
     {
         "id": 2,
@@ -17,7 +21,11 @@
         "links": [
             "https://science.nasa.gov/mars/lunar-and-solar-eclipses-on-mars/"
         ],
-        "image": "https://images.unsplash.com/photo-1614728894747-a83421e2b9c9?auto=format&fit=crop&q=80&w=800"
+        "image": "https://images.unsplash.com/photo-1614728894747-a83421e2b9c9?auto=format&fit=crop&q=80&w=800",
+        "images": [
+            "https://images.unsplash.com/photo-1614728894747-a83421e2b9c9?auto=format&fit=crop&q=80&w=800",
+            "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80&w=800"
+        ]
     },
     {
         "id": 3,
@@ -27,7 +35,11 @@
         "links": [
             "https://www.nature.com/articles/s41467-017-00836-1"
         ],
-        "image": "https://images.unsplash.com/photo-1551376347-075b0121a65b?auto=format&fit=crop&q=80&w=800"
+        "image": "https://images.unsplash.com/photo-1551376347-075b0121a65b?auto=format&fit=crop&q=80&w=800",
+        "images": [
+            "https://images.unsplash.com/photo-1551376347-075b0121a65b?auto=format&fit=crop&q=80&w=800",
+            "https://images.unsplash.com/photo-1551376347-075b0121a65b?auto=format&fit=crop&q=80&w=800&sig=2"
+        ]
     },
     {
         "id": 4,

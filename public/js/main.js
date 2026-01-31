@@ -124,17 +124,22 @@ document.addEventListener('DOMContentLoaded', () => {
             const bgColor = bgColors[item.category] || '#0891b2';
 
             // Generar placeholder SVG seguro
-            const placeholderSVG = getPlaceholderSVG(item.category, bgColor, 800, 600, 24);
-            const img = item.image || placeholderSVG;
+            const placeholderSVG = getPlaceholderSVG(item.category, bgColor, 600, 400, 24);
+            // Support multiple images
+            const mainImage = (item.images && item.images.length > 0) ? item.images[0] : (item.image || placeholderSVG);
 
             return `
                 <div class="glass-card overflow-hidden flex flex-col animate-in">
-                    <div class="h-56 overflow-hidden relative" style="background: linear-gradient(135deg, ${bgColor}15, ${bgColor}30);">
-                        <img src="${img}" 
+                    <div class="h-56 overflow-hidden relative group" style="background: linear-gradient(135deg, ${bgColor}15, ${bgColor}30);">
+                        <img src="${mainImage}" 
                              alt="${item.title}"
-                             class="w-full h-full object-cover hover:scale-110 transition-transform"
+                             class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                              onerror="this.onerror=null; this.src='${placeholderSVG}';"
                              loading="lazy">
+                        ${(item.images && item.images.length > 1) ?
+                    `<div class="absolute bottom-2 right-2 bg-black/60 backdrop-blur text-white text-[10px] px-2 py-1 rounded-full flex items-center gap-1">
+                                <span>📷</span> ${item.images.length}
+                             </div>` : ''}
                     </div>
                     <div class="p-6 flex-grow">
                         <span class="${accent} text-[10px] font-bold uppercase tracking-widest mb-2 block">${item.category}</span>
@@ -152,19 +157,14 @@ document.addEventListener('DOMContentLoaded', () => {
         updateLoadMore(items.length);
     }
 
-    function updateLoadMore(total) {
-        let btn = document.getElementById('load-more');
-        if (currentPage * itemsPerPage < total) {
-            if (!btn) {
-                btn = document.createElement('button');
-                btn.id = 'load-more';
-                btn.className = 'col-span-full mt-12 py-4 px-10 rounded-full border border-white/10 hover:bg-white/5 font-bold transition-all';
-                btn.innerText = 'Cargar más';
-                btn.onclick = () => { currentPage++; renderGrid(curiosities.filter(c => document.querySelector('.filter-btn.active').dataset.category === 'all' || c.category === document.querySelector('.filter-btn.active').dataset.category), true); };
-                grid.after(btn);
-            }
-        } else if (btn) btn.remove();
-    }
+    // Modal Gallery State
+    let currentSlide = 0;
+
+    window.changeSlide = (step, total) => {
+        currentSlide = (currentSlide + step + total) % total;
+        document.getElementById('gallery-track').style.transform = `translateX(-${currentSlide * 100}%)`;
+        document.getElementById('slide-counter').innerText = `${currentSlide + 1} / ${total}`;
+    };
 
     window.openDetail = async (id) => {
         const item = window.allCuriosities.find(c => c.id === id);
@@ -176,14 +176,45 @@ document.addEventListener('DOMContentLoaded', () => {
         const bgColors = { 'Ciencia': '#0891b2', 'Espacio': '#a855f7', 'Animales': '#22c55e', 'Naturaleza': '#f97316', 'Cuerpo Humano': '#ef4444' };
         const bgColor = bgColors[item.category] || '#0891b2';
 
-        // Generar placeholder SVG seguro
-        const placeholderSVG = getPlaceholderSVG(item.category, bgColor, 1200, 800, 48);
-        const img = item.image || placeholderSVG;
+        const placeholderSVG = getPlaceholderSVG(item.category, bgColor, 800, 600, 48);
 
-        modalBody.innerHTML = `
-            <div class="animate-in">
+        // Prepare Images
+        const images = (item.images && item.images.length > 0) ? item.images : [item.image || placeholderSVG];
+        currentSlide = 0;
+
+        // Generate Gallery HTML
+        let galleryHTML = '';
+        if (images.length > 1) {
+            galleryHTML = `
+                <div class="h-[450px] w-[calc(100%+6rem)] -ml-12 -mt-12 mb-10 relative group/hero overflow-hidden">
+                    <div id="gallery-track" class="flex w-full h-full transition-transform duration-500 ease-out">
+                        ${images.map(img => `
+                            <div class="w-full h-full flex-shrink-0 relative bg-black/50">
+                                <img src="${img}" 
+                                     alt="${item.title}" 
+                                     class="w-full h-full object-cover"
+                                     onerror="this.onerror=null; this.src='${placeholderSVG}';">
+                                <div class="absolute inset-0 bg-gradient-to-t from-[#05070a] via-transparent to-transparent"></div>
+                            </div>
+                        `).join('')}
+                    </div>
+                    
+                    <!-- Controls -->
+                    <button onclick="changeSlide(-1, ${images.length})" class="absolute left-4 top-1/2 -translate-y-1/2 bg-black/30 hover:bg-black/60 text-white p-3 rounded-full backdrop-blur transition-all">←</button>
+                    <button onclick="changeSlide(1, ${images.length})" class="absolute right-4 top-1/2 -translate-y-1/2 bg-black/30 hover:bg-black/60 text-white p-3 rounded-full backdrop-blur transition-all">→</button>
+                    
+                    <div class="absolute bottom-8 right-12 bg-black/50 backdrop-blur px-3 py-1 rounded-full text-xs font-bold border border-white/10">
+                        <span id="slide-counter">1 / ${images.length}</span>
+                    </div>
+
+                    <div class="absolute bottom-8 left-0 px-12 z-10">
+                         <span class="bg-cyan-400 text-black text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-tighter">Lectura: ${readingTime} min</span>
+                    </div>
+                </div>`;
+        } else {
+            galleryHTML = `
                 <div class="h-[450px] w-[calc(100%+6rem)] -ml-12 -mt-12 mb-10 overflow-hidden relative group/hero" style="background: linear-gradient(135deg, ${bgColor}22, ${bgColor}44);">
-                    <img src="${img}" 
+                    <img src="${images[0]}" 
                          alt="${item.title}"
                          class="w-full h-full object-cover group-hover/hero:scale-110 transition-transform duration-700"
                          onerror="this.onerror=null; this.src='${placeholderSVG}';"
@@ -192,7 +223,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     <div class="absolute bottom-8 left-0 px-12">
                          <span class="bg-cyan-400 text-black text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-tighter">Lectura: ${readingTime} min</span>
                     </div>
-                </div>
+                </div>`;
+        }
+
+        modalBody.innerHTML = `
+            <div class="animate-in">
+                ${galleryHTML}
                 
                 <button onclick="window.closeModal()" class="mb-6 flex items-center gap-2 text-gray-400 hover:text-cyan-400 transition-colors group">
                     <span class="text-xl group-hover:-translate-x-1 transition-transform">←</span>
