@@ -168,8 +168,15 @@
             <div class="mt-32 flex justify-center">
                 <div id="clima-full-widget"
                     class="clima-widget glass-card p-8 w-full max-w-sm text-center relative overflow-hidden no-hover">
-                    <div class="clima-header relative z-10">
-                        <h2 id="ciudad-full" class="text-xl font-bold tracking-widest mb-2">MONTEVIDEO</h2>
+                    <div class="clima-header relative z-10 mb-4">
+                        <div
+                            class="flex items-center justify-between gap-2 bg-white/5 rounded-full px-4 py-2 border border-white/10 focus-within:border-cyan-400 group transition-all">
+                            <input type="text" id="weather-search-input" placeholder="Buscar ciudad..."
+                                class="bg-transparent border-none outline-none text-xs text-white w-full placeholder:text-gray-600">
+                            <button onclick="manualWeatherSearch()"
+                                class="text-gray-500 hover:text-cyan-400">🔍</button>
+                        </div>
+                        <h2 id="ciudad-full" class="text-xl font-bold tracking-widest mt-4">MONTEVIDEO</h2>
                     </div>
                     <img id="icono-full" src="" alt=""
                         class="mx-auto w-24 h-24 relative z-10 transition-transform hover:scale-110">

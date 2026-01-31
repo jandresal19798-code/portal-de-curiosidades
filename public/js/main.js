@@ -357,8 +357,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Geocoding promise (parallel)
         const geoPromise = (lat !== null && lon !== null && !overrideCity)
-            ? fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=10`, {
-                headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) CurioSphere/1.1' }
+            ? fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=12`, {
+                headers: {
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) CurioSphere/1.1',
+                    'Accept-Language': 'es'
+                }
             }).then(r => r.json()).catch(() => null)
             : Promise.resolve(null);
 
@@ -367,9 +370,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (geoData && !geoData.error && geoData.address) {
                 const a = geoData.address;
-                // Prioritize city-level labels over street-level labels
-                cityName = a.city || a.town || a.village || a.municipality || a.suburb || a.county ||
-                    geoData.display_name?.split(',')[0] || cityName;
+                // Intentar obtener el nombre más específico pero relevante
+                const candidates = [a.city, a.town, a.village, a.hamlet, a.suburb, a.neighbourhood, a.municipality, a.county];
+                cityName = candidates.find(c => c) || geoData.display_name?.split(',')[0] || cityName;
             } else if (geoData && geoData.error) {
                 console.warn("Nominatim error:", geoData.error);
             }
@@ -497,6 +500,35 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }, 1800000);
     }
+
+    window.manualWeatherSearch = async () => {
+        const input = document.getElementById('weather-search-input');
+        const query = input.value.trim();
+        if (!query) return;
+
+        try {
+            console.log(`Buscando ciudad: ${query}`);
+            const res = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(query)}&count=1&language=es&format=json`);
+            const data = await res.json();
+
+            if (data.results && data.results.length > 0) {
+                const city = data.results[0];
+                const displayName = city.name + (city.admin1 ? `, ${city.admin1}` : '');
+                fetchWeather(city.latitude, city.longitude, displayName);
+                input.value = '';
+            } else {
+                alert("Ciudad no encontrada... ¡Quizás está en otra dimensión!");
+            }
+        } catch (err) {
+            console.error("Error en búsqueda manual:", err);
+            alert("Error al conectar con el satélite de búsqueda.");
+        }
+    };
+
+    // Add keypress for search
+    document.getElementById('weather-search-input')?.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') window.manualWeatherSearch();
+    });
 
 
 
