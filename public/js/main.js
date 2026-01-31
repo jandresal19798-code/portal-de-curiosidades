@@ -45,51 +45,76 @@ window.toggleMobileMenu = () => {
     alert("Menú móvil en desarrollo - Usa la versión de escritorio para mejor experiencia");
 };
 
+// --- THEME TOGGLE ---
+window.toggleTheme = () => {
+    const body = document.body;
+    const btn = document.getElementById('theme-btn');
+    const isLight = body.classList.toggle('light-mode');
+
+    btn.textContent = isLight ? '☀️' : '🌙';
+    localStorage.setItem('theme', isLight ? 'light' : 'dark');
+};
+
+// --- READING PROGRESS ---
+window.updateProgress = () => {
+    const bar = document.getElementById('progress-bar');
+    if (!bar) return;
+    const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+    const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+    const scrolled = (winScroll / height) * 100;
+    bar.style.width = scrolled + "%";
+};
+
+window.onscroll = () => updateProgress();
+
+// --- RANDOM CURIOSITY ---
+window.randomCuriosity = () => {
+    if (window.allCuriosities && window.allCuriosities.length > 0) {
+        const random = window.allCuriosities[Math.floor(Math.random() * window.allCuriosities.length)];
+        window.openDetail(random.id);
+    }
+};
+
 document.addEventListener('DOMContentLoaded', () => {
     const grid = document.getElementById('curiosity-grid');
     const modal = document.getElementById('modal');
     const modalBody = document.getElementById('modal-body');
-    const closeModal = document.querySelector('.close-modal');
     const filters = document.querySelectorAll('.filter-btn');
 
     let curiosities = [];
+    window.allCuriosities = [];
+
+    // Load saved theme
+    if (localStorage.getItem('theme') === 'light') {
+        window.toggleTheme();
+    }
 
     let currentPage = 1;
     const itemsPerPage = 12;
 
     function renderGrid(items, append = false) {
         if (!append) grid.innerHTML = '';
-
         if (items.length === 0) {
             grid.innerHTML = '<p class="col-span-full text-center text-gray-400 py-10">No se encontraron curiosidades.</p>';
             return;
         }
-
         const start = (currentPage - 1) * itemsPerPage;
         const end = start + itemsPerPage;
         const pageItems = items.slice(start, end);
 
         const html = pageItems.map(item => {
             const colors = {
-                'Ciencia': 'text-cyan-400',
-                'Espacio': 'text-purple-400',
-                'Animales': 'text-green-400',
-                'Naturaleza': 'text-orange-400',
-                'Cuerpo Humano': 'text-red-400',
-                'Matemáticas': 'text-blue-400'
+                'Ciencia': 'text-cyan-400', 'Espacio': 'text-purple-400', 'Animales': 'text-green-400',
+                'Naturaleza': 'text-orange-400', 'Cuerpo Humano': 'text-red-400', 'Matemáticas': 'text-blue-400'
             };
             const accent = colors[item.category] || 'text-cyan-400';
-            // Default high-quality fallback image
             const fallbackImg = `https://images.unsplash.com/photo-1532187875605-1fc6367b913e?auto=format&fit=crop&q=80&w=800&sig=${item.id}`;
             const imgUrl = item.image && item.image.includes('unsplash.com') ? item.image : fallbackImg;
 
             return `
                 <div class="glass-card overflow-hidden flex flex-col animate-in">
                     <div class="h-56 overflow-hidden bg-gray-900">
-                        <img src="${imgUrl}" 
-                             alt="${item.title}" 
-                             class="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
-                             onerror="this.onerror=null; this.src='${fallbackImg}';">
+                        <img src="${imgUrl}" alt="${item.title}" class="w-full h-full object-cover transition-transform duration-500 hover:scale-110" onerror="this.onerror=null; this.src='${fallbackImg}';">
                     </div>
                     <div class="p-6 flex-grow">
                         <span class="${accent} text-[10px] font-bold uppercase tracking-[0.2em] mb-2 block">${item.category}</span>
@@ -97,7 +122,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <p class="text-gray-400 text-sm leading-relaxed line-clamp-3">${item.fact}</p>
                     </div>
                     <div class="p-6 pt-0 mt-auto">
-                        <button onclick="openDetail(${item.id})" class="text-white text-sm font-bold flex items-center gap-2 hover:gap-4 transition-all group">
+                        <button onclick="window.openDetail(${item.id})" class="text-white text-sm font-bold flex items-center gap-2 hover:gap-4 transition-all group">
                             Leer más <span class="text-cyan-400 group-hover:translate-x-1 transition-transform">→</span>
                         </button>
                     </div>
@@ -105,13 +130,8 @@ document.addEventListener('DOMContentLoaded', () => {
             `;
         }).join('');
 
-        if (append) {
-            grid.insertAdjacentHTML('beforeend', html);
-        } else {
-            grid.innerHTML = html;
-        }
-
-        // Add "Load More" button if there are more items
+        if (append) grid.insertAdjacentHTML('beforeend', html);
+        else grid.innerHTML = html;
         updateLoadMoreButton(items.length);
     }
 
@@ -131,26 +151,47 @@ document.addEventListener('DOMContentLoaded', () => {
                 };
                 grid.after(btn);
             }
-        } else {
-            if (btn) btn.remove();
-        }
+        } else if (btn) btn.remove();
     }
 
-    // Load Curiosities with artificial delay for skeleton demo
     async function loadCuriosities() {
         try {
-            // Skeleton will show while this waits
             const data = await API.getCuriosities();
-            setTimeout(() => {
-                curiosities = data;
-                renderGrid(curiosities);
-            }, 600); // Small delay to appreciate skeletons
+            curiosities = data;
+            window.allCuriosities = data;
+            renderGrid(curiosities);
+            initMainSearch(data);
+            initMarquee(data);
         } catch (error) {
-            grid.innerHTML = '<p class="error">Error loading chronicles.</p>';
+            console.error("Fallo carga:", error);
+            grid.innerHTML = '<p class="error text-center text-red-400">Error al conectar con la base de datos galáctica.</p>';
         }
     }
 
-    // Filter Logic
+    function initMainSearch(data) {
+        const input = document.getElementById('main-search');
+        const suggestionsCont = document.getElementById('search-suggestions');
+        if (!input || !suggestionsCont) return;
+
+        input.addEventListener('input', (e) => {
+            const val = e.target.value.toLowerCase().trim();
+            if (val.length < 2) { suggestionsCont.classList.add('hidden'); return; }
+            const matches = data.filter(c => c.title.toLowerCase().includes(val) || c.category.toLowerCase().includes(val)).slice(0, 5);
+            if (matches.length > 0) {
+                suggestionsCont.innerHTML = matches.map(m => `
+                    <div onclick="window.openDetail(${m.id})" class="px-4 py-3 hover:bg-white/5 cursor-pointer border-b border-white/5 last:border-0 flex items-center gap-3 group">
+                        <div class="w-8 h-8 rounded-lg overflow-hidden flex-shrink-0"><img src="${m.image || ''}" class="w-full h-full object-cover" onerror="this.src='https://fav.farm/🔍'"></div>
+                        <div>
+                            <div class="text-[10px] font-bold text-cyan-400 uppercase tracking-tighter">${m.category}</div>
+                            <div class="text-xs font-bold text-white group-hover:text-cyan-400 transition-colors">${m.title}</div>
+                        </div>
+                    </div>`).join('');
+                suggestionsCont.classList.remove('hidden');
+            } else suggestionsCont.classList.add('hidden');
+        });
+        document.addEventListener('click', (e) => { if (!input.contains(e.target) && !suggestionsCont.contains(e.target)) suggestionsCont.classList.add('hidden'); });
+    }
+
     filters.forEach(btn => {
         btn.addEventListener('click', () => {
             filters.forEach(b => {
@@ -159,37 +200,24 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             btn.classList.add('active', 'bg-cyan-400', 'text-black');
             btn.classList.remove('bg-white/5', 'text-gray-400');
-
-            currentPage = 1; // Reset to page 1
+            currentPage = 1;
             const cat = btn.dataset.category;
             const filtered = cat === 'all' ? curiosities : curiosities.filter(c => c.category === cat);
             renderGrid(filtered);
         });
     });
 
-    // Open Modal
     window.openDetail = async (id) => {
-        const item = curiosities.find(c => c.id === id);
+        const item = window.allCuriosities.find(c => c.id === id);
         if (!item) return;
-
-        const colors = {
-            'Ciencia': 'text-cyan-400',
-            'Espacio': 'text-purple-400',
-            'Animales': 'text-green-400',
-            'Naturaleza': 'text-orange-400',
-            'Cuerpo Humano': 'text-red-400'
-        };
+        const colors = { 'Ciencia': 'text-cyan-400', 'Espacio': 'text-purple-400', 'Animales': 'text-green-400', 'Naturaleza': 'text-orange-400', 'Cuerpo Humano': 'text-red-400' };
         const accent = colors[item.category] || 'text-cyan-400';
-
         const fallbackImg = `https://images.unsplash.com/photo-1532187875605-1fc6367b913e?auto=format&fit=crop&q=80&w=800&sig=${item.id}`;
-        const imgUrl = item.image && item.image.includes('unsplash.com') ? item.image : fallbackImg;
 
         modalBody.innerHTML = `
             <div class="animate-in">
                 <div class="h-80 md:h-[450px] w-[calc(100%+6rem)] -ml-12 -mt-12 mb-10 overflow-hidden relative bg-gray-900">
-                    <img src="${imgUrl}" 
-                         class="w-full h-full object-cover" 
-                         onerror="this.onerror=null; this.src='${fallbackImg}';">
+                    <img src="${item.image || fallbackImg}" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='${fallbackImg}';">
                     <div class="absolute inset-0 bg-gradient-to-t from-[#05070a] via-transparent to-transparent"></div>
                 </div>
                 <span class="${accent} text-xs font-bold uppercase tracking-[0.3em] mb-4 block">${item.category}</span>
@@ -197,486 +225,544 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="prose prose-invert max-w-none mb-12">
                     <p class="text-xl text-gray-300 leading-relaxed font-light">${item.fact}</p>
                 </div>
-                
-                ${item.links ? `
-                    <div class="links-section">
-                        <h4 class="text-xs font-extrabold text-cyan-400 uppercase tracking-widest mb-4">Bibliografía y Fuentes</h4>
-                        <ul class="space-y-3">
-                            ${item.links.map(link => `
-                                <li>
-                                    <a href="${link}" target="_blank" rel="noopener" class="text-sm text-gray-400 hover:text-white flex items-center gap-2 transition-colors">
-                                        <span class="text-cyan-400">⚡</span> ${new URL(link).hostname}
-                                    </a>
-                                </li>
-                            `).join('')}
-                        </ul>
+
+                <div class="flex items-center gap-6 mb-12 p-6 glass-card no-hover justify-center bg-white/5 border-white/10">
+                    <div class="text-center">
+                        <p class="text-[10px] uppercase tracking-widest text-gray-500 mb-3 font-bold">¿Qué te pareció?</p>
+                        <div class="flex gap-4">
+                            <button onclick="voteEmoji(${id}, '😲')" class="text-2xl hover:scale-125 transition-transform">😲</button>
+                            <button onclick="voteEmoji(${id}, '🤯')" class="text-2xl hover:scale-125 transition-transform">🤯</button>
+                            <button onclick="voteEmoji(${id}, '🤔')" class="text-2xl hover:scale-125 transition-transform">🤔</button>
+                            <button onclick="voteEmoji(${id}, '💖')" class="text-2xl hover:scale-125 transition-transform">💖</button>
+                        </div>
                     </div>
-                ` : ''}
-            
-            <div class="comments-section mt-12 pt-12 border-t border-white/10">
-                <h3 class="text-2xl font-bold mb-8">Comentarios</h3>
-                <div id="comment-auth-msg" class="bg-cyan-400/10 text-cyan-400 p-6 rounded-2xl mb-8 hidden">
-                    Necesitas <button onclick="toggleModal('login-modal')" class="font-bold underline">Iniciar Sesión</button> para compartir tus pensamientos.
                 </div>
-                <form id="comment-form" class="space-y-4 mb-12">
-                    <textarea id="text" placeholder="Escribe tu pensamiento..." class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-4 h-32 outline-none focus:border-cyan-400" required></textarea>
-                    <button type="submit" class="btn-glow px-8 py-3 rounded-full font-bold w-full md:w-auto">Publicar Pensamiento</button>
-                </form>
-                <div id="comment-list" class="space-y-6">
-                    Cargando comentarios...
+                
+                ${item.links ? `<div class="links-section"><h4 class="text-xs font-extrabold text-cyan-400 uppercase tracking-widest mb-4">Bibliografía</h4><ul class="space-y-3">${item.links.map(l => `<li><a href="${l.url}" target="_blank" class="flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors"><span>🔗</span> ${l.label}</a></li>`).join('')}</ul></div>` : ''}
+                
+                <div class="comments-section mt-12 pt-12 border-t border-white/10">
+                    <h3 class="text-2xl font-bold mb-8">Comentarios</h3>
+                    <div id="comment-auth-msg" class="bg-cyan-400/10 text-cyan-400 p-6 rounded-2xl mb-8 hidden">Necesitas <button onclick="toggleModal('login-modal')" class="font-bold underline">Iniciar Sesión</button> para comentar.</div>
+                    <form id="comment-form" class="space-y-4 mb-12">
+                        <textarea id="comment-text" placeholder="Escribe tu pensamiento..." class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-4 h-32 outline-none focus:border-cyan-400 text-white" required></textarea>
+                        <button type="submit" class="btn-glow px-8 py-3 rounded-full font-bold w-full md:w-auto">Publicar</button>
+                    </form>
+                    <div id="comment-list" class="space-y-6">Cargando comentarios...</div>
                 </div>
-            </div>
-        `;
+
+                <div class="mt-16 border-t border-white/10 pt-10">
+                    <h4 class="text-sm font-bold uppercase tracking-widest text-gray-400 mb-8 flex items-center gap-3"><span class="w-10 h-[1px] bg-cyan-400"></span> También te podría interesar</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        ${window.allCuriosities.filter(c => c.category === item.category && c.id !== id).sort(() => 0.5 - Math.random()).slice(0, 3).map(r => `
+                            <div onclick="window.openDetail(${r.id})" class="glass-card p-4 group cursor-pointer hover:border-cyan-400 transition-all">
+                                <div class="h-32 mb-4 rounded-xl overflow-hidden"><img src="${r.image || fallbackImg}" class="w-full h-full object-cover group-hover:scale-110 transition-transform"></div>
+                                <h5 class="text-xs font-bold leading-tight group-hover:text-cyan-400 transition-colors">${r.title}</h5>
+                            </div>`).join('')}
+                    </div>
+                </div>
+            </div>`;
 
         modal.classList.remove('hidden');
         document.body.style.overflow = 'hidden';
+        history.pushState({ modalId: 'modal', itemId: id }, "");
 
-        // Back button support for curiosity detail
-        history.pushState({ modalId: 'detail-modal' }, "");
-
-        // Check Auth for Comments
         const user = localStorage.getItem('user');
         const authMsg = document.getElementById('comment-auth-msg');
         const commentForm = document.getElementById('comment-form');
-
-        if (!user) {
-            authMsg.classList.remove('hidden');
-            commentForm.classList.add('hidden');
+        if (authMsg && commentForm) {
+            if (!user) { authMsg.classList.remove('hidden'); commentForm.classList.add('hidden'); }
+            commentForm.onsubmit = async (e) => {
+                e.preventDefault();
+                const textEl = document.getElementById('comment-text');
+                const token = localStorage.getItem('token');
+                try {
+                    const res = await fetch(`/api/comments/${id}`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify({ text: textEl.value }) });
+                    if (res.ok) { textEl.value = ''; loadComments(id); }
+                    else { const data = await res.json(); alert(data.error || 'Error'); }
+                } catch (err) { alert('Error de conexión'); }
+            };
         }
-
-        // Load existing comments
         loadComments(id);
-
-        // Handle Comment Submission
-        commentForm.onsubmit = async (e) => {
-            e.preventDefault();
-            const text = document.getElementById('text').value;
-            const token = localStorage.getItem('token');
-
-            try {
-                const res = await fetch(`/api/comments/${id}`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify({ text })
-                });
-
-                if (res.ok) {
-                    commentForm.reset();
-                    loadComments(id);
-                } else {
-                    const data = await res.json();
-                    alert(data.error || 'Error al publicar');
-                }
-            } catch (error) {
-                alert('Error de conexión');
-            }
-        };
     };
 
     async function loadComments(id) {
-        const commentList = document.getElementById('comment-list');
+        const list = document.getElementById('comment-list');
+        if (!list) return;
         try {
             const comments = await API.getComments(id);
-            if (comments.length === 0) {
-                commentList.innerHTML = '<p style="color: var(--text-dim)">No hay comentarios todavía. ¡Sé el primero!</p>';
-                return;
-            }
-            commentList.innerHTML = comments.map(c => `
-                <div class="comment">
-                    <div>
-                        <span class="comment-author">${c.author}</span>
-                        <span class="comment-date">${new Date(c.date).toLocaleDateString()}</span>
-                    </div>
-                    <p>${c.text}</p>
-                </div>
-            `).reverse().join('');
-        } catch (error) {
-            commentList.innerHTML = 'Error al cargar comentarios.';
-        }
+            if (comments.length === 0) { list.innerHTML = '<p class="text-gray-500 text-xs text-center border border-dashed border-white/10 p-8 rounded-2xl">Aún no hay comentarios. ¡Sé el primero!</p>'; return; }
+            list.innerHTML = comments.map(c => `
+                <div class="bg-white/5 p-6 rounded-2xl border border-white/5">
+                    <div class="flex justify-between items-center mb-2"><span class="text-cyan-400 font-bold text-xs">${c.author}</span><span class="text-[10px] text-gray-500">${new Date(c.date).toLocaleDateString()}</span></div>
+                    <p class="text-sm text-gray-300">${c.text}</p>
+                </div>`).reverse().join('');
+        } catch (err) { list.innerHTML = '<p class="text-red-400">Error.</p>'; }
     }
 
-    window.closeModal = () => {
-        if (!modal.classList.contains('hidden')) {
-            modal.classList.add('hidden');
-            document.body.style.overflow = 'auto';
-            if (history.state && (history.state.modalId === 'modal' || history.state.modalId === 'detail-modal')) {
-                history.back();
-            }
-        }
-    };
-
-    window.onpopstate = (event) => {
-        document.querySelectorAll('.modal').forEach(m => m.classList.add('hidden'));
-        if (modal) modal.classList.add('hidden');
-        document.body.style.overflow = 'auto';
-    };
-
-    window.onclick = (e) => {
-        if (e.target.classList.contains('modal')) {
-            window.closeSpecificModal(e.target.id);
-            if (history.state) history.back();
-        }
-        if (e.target === modal) {
-            window.closeModal();
-        }
-    };
-
-
-    // Marquee Logic
-    function initMarquee(items) {
-        const content = document.getElementById('marquee-content');
-        if (!content) return;
-
-        // Take a random sample of 20 items to keep it readable and performant
-        const sample = [...items].sort(() => 0.5 - Math.random()).slice(0, 20);
-
-        const facts = sample.map(i => `<div class="marquee-item"><span>💡 SABÍAS QUE:</span> ${i.fact}</div>`).join('');
-        // Double the content for smooth infinite loop
-        content.innerHTML = facts + facts;
-    }
-
-    // Weather Logic (Open-Meteo + Reverse Geocoding)
-    const DEFAULT_CITY = 'Montevideo';
-    const DEFAULT_LAT = -34.9011;
-    const DEFAULT_LON = -56.1645;
-
-    async function fetchWeather(lat, lon, overrideCity = null) {
-        const finalLat = (lat !== null && lat !== undefined) ? lat : DEFAULT_LAT;
-        const finalLon = (lon !== null && lon !== undefined) ? lon : DEFAULT_LON;
-        const apiUrl = `https://api.open-meteo.com/v1/forecast?latitude=${finalLat}&longitude=${finalLon}&current_weather=true&hourly=relativehumidity_2m,windspeed_10m`;
-
-        console.log(`Buscando clima en coord: ${finalLat}, ${finalLon}`);
-
-        // Try to get city name in parallel or use default
-        let cityName = overrideCity || DEFAULT_CITY;
-
-        const weatherPromise = fetch(apiUrl).then(r => r.json());
-
-        // Geocoding promise (parallel)
-        const geoPromise = (lat !== null && lon !== null && !overrideCity)
-            ? fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=12`, {
-                headers: {
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) CurioSphere/1.1',
-                    'Accept-Language': 'es'
-                }
-            }).then(r => r.json()).catch(() => null)
-            : Promise.resolve(null);
-
-        try {
-            const [weatherData, geoData] = await Promise.all([weatherPromise, geoPromise]);
-
-            if (geoData && !geoData.error && geoData.address) {
-                const a = geoData.address;
-                // Intentar obtener el nombre más específico pero relevante
-                const candidates = [a.city, a.town, a.village, a.hamlet, a.suburb, a.neighbourhood, a.municipality, a.county];
-                cityName = candidates.find(c => c) || geoData.display_name?.split(',')[0] || cityName;
-            } else if (geoData && geoData.error) {
-                console.warn("Nominatim error:", geoData.error);
-            }
-
-            if (weatherData && (weatherData.current_weather || weatherData.weather_code !== undefined)) {
-                updateWeatherUI(weatherData, cityName);
-                console.log(`Clima cargado en ${cityName}`);
-
-                // Cache coords for refresh
-                localStorage.setItem('last_lat', finalLat);
-                localStorage.setItem('last_lon', finalLon);
-            }
-        } catch (error) {
-            console.error("Error en servicio meteorológico:", error);
-            const tempEl = document.getElementById('nav-weather-temp');
-            if (tempEl && tempEl.textContent === '--°C') {
-                tempEl.textContent = 'Error';
-            }
-        }
-    }
-
-    function updateWeatherUI(data, cityName) {
-        const weather = data.current_weather || data;
-        if (!weather || (weather.temperature === undefined && data.temperature === undefined)) return;
-
-        const temp = weather.temperature !== undefined ? weather.temperature : data.temperature;
-        const t = Math.round(temp);
-        const wCode = (weather.weathercode !== undefined) ? weather.weathercode : weather.weather_code;
-
-        // Mapping Open-Meteo codes to icons
-        const iconMap = {
-            0: '01d', 1: '02d', 2: '03d', 3: '04d',
-            45: '50d', 48: '50d',
-            51: '09d', 53: '09d', 55: '09d',
-            61: '10d', 63: '10d', 65: '10d',
-            71: '13d', 73: '13d', 75: '13d',
-            80: '09d', 81: '09d', 82: '09d',
-            95: '11d'
-        };
-        const iconCode = iconMap[wCode] || '03d';
-        const iconUrl = `https://openweathermap.org/img/wn/${iconCode}@2x.png`;
-
-        // Nav Widget
-        const navIcon = document.getElementById('nav-weather-icon');
-        if (navIcon) {
-            navIcon.src = iconUrl;
-            navIcon.classList.remove('hidden');
-        }
-        document.getElementById('nav-weather-city').textContent = cityName;
-        document.getElementById('nav-weather-temp').textContent = `${t}°C`;
-
-        // Full Widget
-        const fullIcon = document.getElementById('icono-full');
-        if (fullIcon) {
-            fullIcon.src = iconUrl;
-            document.getElementById('ciudad-full').textContent = cityName.toUpperCase();
-            document.getElementById('temp-full').textContent = `${t}°C`;
-
-            const descMap = { 0: 'Despejado', 1: 'Casi despejado', 2: 'Algo nublado', 3: 'Nublado', 45: 'Niebla', 61: 'Lluvia leve', 95: 'Tormenta' };
-            document.getElementById('desc-full').textContent = descMap[wCode] || 'Condiciones variables';
-
-            // Getting humidity from hourly (approx)
-            const humidity = data.hourly ? data.hourly.relativehumidity_2m[0] : '--';
-            document.getElementById('humedad-full').textContent = `${humidity}%`;
-            document.getElementById('viento-full').textContent = `${weather.windspeed} km/h`;
-
-            // Dynamic Background based on temp
-            const glow = document.getElementById('widget-glow');
-            if (t <= 13) glow.style.background = 'linear-gradient(180deg, #1e3c72 0%, #2a5298 100%)';
-            else if (t <= 22) glow.style.background = 'linear-gradient(180deg, #4facfe 0%, #00f2fe 100%)';
-            else if (t <= 29) glow.style.background = 'linear-gradient(180deg, #f6d365 0%, #fda085 100%)';
-            else glow.style.background = 'linear-gradient(180deg, #ff0844 0%, #ffb199 100%)';
-            glow.style.opacity = '0.3';
-        }
-    }
-
-    async function initWeather() {
-        console.log("Iniciando servicio de clima...");
-
-        const setWeatherByIP = async () => {
-            try {
-                // IP Geolocation fallback (much more reliable for web)
-                const res = await fetch('https://ipapi.co/json/');
-                const data = await res.json();
-                if (data.latitude && data.longitude) {
-                    console.log(`Ubicación por IP detectada: ${data.city}`);
-                    fetchWeather(data.latitude, data.longitude, data.city);
-                } else {
-                    fetchWeather(null, null, DEFAULT_CITY);
-                }
-            } catch (err) {
-                console.warn("Fallo geolocalización por IP:", err);
-                fetchWeather(null, null, DEFAULT_CITY);
-            }
-        };
-
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(
-                (pos) => {
-                    console.log(`Coords obtenidas por GPS: ${pos.coords.latitude}, ${pos.coords.longitude}`);
-                    fetchWeather(pos.coords.latitude, pos.coords.longitude);
-                },
-                (err) => {
-                    console.warn("Geolocalización navegador rechazada o fallida:", err.message);
-                    setWeatherByIP();
-                },
-                { timeout: 7000 }
-            );
-        } else {
-            console.warn("Navegador no soporta geolocalización");
-            setWeatherByIP();
-        }
-
-        // Refresh every 30 mins
-        setInterval(() => {
-            const currentItem = document.getElementById('nav-weather-city').textContent;
-            if (currentItem === DEFAULT_CITY || currentItem === 'Zona Local') {
-                initWeather();
-            } else {
-                // Just refresh weather, don't re-geolocate if we have a city
-                const lat = localStorage.getItem('last_lat');
-                const lon = localStorage.getItem('last_lon');
-                if (lat && lon) fetchWeather(lat, lon, currentItem);
-                else initWeather();
-            }
-        }, 1800000);
-    }
-
-    window.manualWeatherSearch = async () => {
-        const input = document.getElementById('weather-search-input');
-        const query = input.value.trim();
-        if (!query) return;
-
-        try {
-            console.log(`Buscando ciudad: ${query}`);
-            const res = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(query)}&count=1&language=es&format=json`);
-            const data = await res.json();
-
-            if (data.results && data.results.length > 0) {
-                const city = data.results[0];
-                const displayName = city.name + (city.admin1 ? `, ${city.admin1}` : '');
-                fetchWeather(city.latitude, city.longitude, displayName);
-                input.value = '';
-            } else {
-                alert("Ciudad no encontrada... ¡Quizás está en otra dimensión!");
-            }
-        } catch (err) {
-            console.error("Error en búsqueda manual:", err);
-            alert("Error al conectar con el satélite de búsqueda.");
-        }
-    };
-
-    // Add keypress for search
-    document.getElementById('weather-search-input')?.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') window.manualWeatherSearch();
-    });
-
-
-
-    window.botMessage = (e) => {
-        if (e.key === 'Enter') {
-            const input = e.target;
-            const msg = input.value.toLowerCase();
-            const container = document.getElementById('bot-messages');
-
-            // Mad Scientist logic
-            const introductions = [
-                "¡MWAHAHA! ¡Mis experimentos dicen que... ",
-                "¡Eureka! ¡Has activado mi comunicador cuántico! ",
-                "¡Cuidado con las pociones! Pero mira esto: ",
-                "¡Por los pelos de Einstein! Escucha bien: "
-            ];
-
-            let response = "¡No me interrumpas, estoy mezclando plutonio! Pero si insistes... pregunta sobre átomos, viajes en el tiempo o bichejos raros.";
-
-            if (msg.includes('ciencia') || msg.includes('atomo'))
-                response = "¡Átomos! ¿Sabías que somos un 99% espacio vacío? Si quitáramos el espacio, ¡toda la humanidad cabría en una manzana! 🍎⚡";
-
-            if (msg.includes('animal') || msg.includes('bicho') || msg.includes('mar'))
-                response = "¡Bestias fascinantes! ¿Sabías que los pulpos tienen 3 corazones y sangre azul? ¡Y la medusa inmortal puede resetear su vida! ¡He intentado inyectarme su ADN pero solo me dio hambre de plancton! 🐙💧";
-
-            if (msg.includes('espacio') || msg.includes('marte') || msg.includes('luna'))
-                response = "¡El cosmos es aterrador! En Marte los atardeceres son azules y en la Luna tus huellas durarán millones de años porque no hay viento. ¡MWAHAHA! 🌌🌚";
-
-            if (msg.includes('cuerpo') || msg.includes('bio'))
-                response = "¡Máquinas biológicas! Generas electricidad suficiente para una bombilla y tus ácidos estomacales podrían disolver metal. ¡Impresionante! 🧠⚡";
-
-            if (msg.includes('historia') || msg.includes('tiempo'))
-                response = "¡El tiempo es relativo! ¿Sabías que los vikingos nunca usaron cascos con cuernos? ¡Fue un invento de la ópera del siglo XIX! 🎭🕰️";
-
-            if (msg.includes('hola') || msg.includes('quien'))
-                response = "¡Soy el Dr. Curioso! El científico más brillante (y algo despeinado) de este servidor. ¡Pregúntame sobre el espacio, animales o el cuerpo humano! 🧪💥";
-
-            const randomIntro = introductions[Math.floor(Math.random() * introductions.length)];
-
-            container.innerHTML += `<div class="msg-user"><b>Tú:</b> ${input.value}</div>`;
-            container.innerHTML += `<div class="msg-bot"><b>Dr. Curioso 🧪:</b> ${randomIntro}${response}</div>`;
-            input.value = '';
-            container.scrollTop = container.scrollHeight;
-        }
-    }
-
-    // --- AUTH FRONTEND ---
-    const checkAuth = () => {
+    // Auth
+    window.checkAuth = () => {
         const user = JSON.parse(localStorage.getItem('user'));
         const btns = document.getElementById('auth-buttons');
         const info = document.getElementById('user-info');
         const nameText = document.getElementById('user-name');
         const adminBtn = document.getElementById('admin-btn');
-
         if (user) {
-            btns.classList.add('hidden');
-            info.classList.remove('hidden');
+            btns.classList.add('hidden'); info.classList.remove('hidden');
             nameText.innerText = user.name;
             if (user.role === 'admin') adminBtn.classList.remove('hidden');
         } else {
-            btns.classList.remove('hidden');
-            info.classList.add('hidden');
-            adminBtn.classList.add('hidden');
+            btns.classList.remove('hidden'); info.classList.add('hidden'); adminBtn.classList.add('hidden');
         }
     };
 
-    window.logout = () => {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        window.location.reload();
-    };
+    window.logout = () => { localStorage.removeItem('token'); localStorage.removeItem('user'); window.location.reload(); };
 
-    // Forms
     document.getElementById('register-form').onsubmit = async (e) => {
         e.preventDefault();
         const [name, email, password] = e.target.querySelectorAll('input');
         try {
-            const res = await fetch('/api/auth/register', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name: name.value, email: email.value, password: password.value })
-            });
+            const res = await fetch('/api/auth/register', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: name.value, email: email.value, password: password.value }) });
             const data = await res.json();
-            if (res.ok) {
-                alert(data.message);
-                localStorage.setItem('temp_email', email.value);
-                toggleModal('register-modal');
-                toggleModal('verify-modal');
-            } else alert(data.error);
-        } catch (err) { alert('Error al registrar'); }
+            if (res.ok) { alert(data.message); localStorage.setItem('temp_email', email.value); toggleModal('register-modal'); toggleModal('verify-modal'); }
+            else alert(data.error);
+        } catch (err) { alert('Error'); }
     };
 
     document.getElementById('login-form').onsubmit = async (e) => {
         e.preventDefault();
         const [email, password] = e.target.querySelectorAll('input');
         try {
-            const res = await fetch('/api/auth/login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email: email.value, password: password.value })
-            });
+            const res = await fetch('/api/auth/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: email.value, password: password.value }) });
             const data = await res.json();
-            if (res.ok) {
-                localStorage.setItem('token', data.token);
-                localStorage.setItem('user', JSON.stringify(data.user));
-                window.location.reload();
-            } else alert(data.error);
-        } catch (err) { alert('Error al entrar'); }
+            if (res.ok) { localStorage.setItem('token', data.token); localStorage.setItem('user', JSON.stringify(data.user)); window.location.reload(); }
+            else alert(data.error);
+        } catch (err) { alert('Error'); }
     };
 
     window.verifyEmail = async () => {
         const email = localStorage.getItem('temp_email');
         const token = document.getElementById('verify-token').value;
         try {
-            const res = await fetch('/api/auth/verify', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, token })
-            });
+            const res = await fetch('/api/auth/verify', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, token }) });
             const data = await res.json();
-            if (res.ok) {
-                alert(data.message);
-                toggleModal('verify-modal');
-                toggleModal('login-modal');
-            } else alert(data.error);
-        } catch (err) { alert('Error al verificar'); }
+            if (res.ok) { alert(data.message); toggleModal('verify-modal'); toggleModal('login-modal'); }
+            else alert(data.error);
+        } catch (err) { alert('Error'); }
     };
 
-    // Admin
     window.openAdmin = async () => {
         const token = localStorage.getItem('token');
         try {
-            const res = await fetch('/api/admin/dashboard', {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
+            const res = await fetch('/api/admin/dashboard', { headers: { 'Authorization': `Bearer ${token}` } });
             const data = await res.json();
-            if (res.ok) {
-                renderAdmin(data);
-                toggleModal('admin-modal');
-            } else alert(data.error);
-        } catch (err) { alert('Error al cargar dashboard'); }
+            if (res.ok) { renderAdmin(data); toggleModal('admin-modal'); }
+            else alert(data.error);
+        } catch (err) { alert('Error'); }
     };
 
     const renderAdmin = (data) => {
         const uList = document.getElementById('admin-users-list');
         const aList = document.getElementById('admin-actions-list');
+        uList.innerHTML = data.users.map(u => `<div class="bg-white/5 p-4 rounded-xl border border-white/10 flex justify-between items-center"><div><p class="font-bold">${u.name}</p><p class="text-[10px] text-gray-500">${u.email}</p></div><div class="flex gap-2"><span class="text-[8px] px-2 py-1 rounded ${u.verified ? 'bg-green-500/20 text-green-400' : 'bg-yellow-500/20 text-yellow-400'}">${u.verified ? 'VERIFICADO' : 'PENDIENTE'}</span><span class="text-[8px] px-2 py-1 rounded bg-red-400 text-black font-bold">${u.role}</span></div></div>`).join('');
+        aList.innerHTML = data.actions.map(a => `<div class="border-l border-white/10 pl-3 py-1 mb-2"><span class="text-gray-500">${new Date(a.timestamp).toLocaleTimeString()}</span><span class="text-cyan-400 mx-2">${a.email}:</span><span class="text-gray-300">${a.action}</span></div>`).join('');
+    };
 
-        uList.innerHTML = data.users.map(u => `
+    // Initial Execution
+    loadCuriosities();
+    initWeather();
+    window.checkAuth();
+});
+
+// --- GLOBAL UTILS (Outside DOMContentLoaded) ---
+
+window.voteEmoji = (id, emoji) => {
+    // Mock voting system using localStorage
+    const votes = JSON.parse(localStorage.getItem(`votes_${id}`) || '[]');
+    votes.push({ emoji, date: new Date().toISOString() });
+    localStorage.setItem(`votes_${id}`, JSON.stringify(votes));
+
+    const target = event.target;
+    target.classList.add('animate-bounce');
+    setTimeout(() => target.classList.remove('animate-bounce'), 1000);
+    console.log(`Votado ${emoji} para item ${id}`);
+};
+
+window.closeModal = () => {
+    const modal = document.getElementById('modal');
+    if (modal && !modal.classList.contains('hidden')) {
+        modal.classList.add('hidden');
+        document.body.style.overflow = 'auto';
+        if (history.state && (history.state.modalId === 'modal')) {
+            history.back();
+        }
+    }
+};
+
+window.onpopstate = (event) => {
+    document.querySelectorAll('.modal').forEach(m => m.classList.add('hidden'));
+    const detailModal = document.getElementById('modal');
+    if (detailModal) detailModal.classList.add('hidden');
+    document.body.style.overflow = 'auto';
+};
+
+window.onclick = (e) => {
+    const detailModal = document.getElementById('modal');
+    if (e.target.classList.contains('modal')) {
+        window.closeSpecificModal(e.target.id);
+        if (history.state) history.back();
+    }
+    if (e.target === detailModal) {
+        window.closeModal();
+    }
+};
+
+function initMarquee(items) {
+    const content = document.getElementById('marquee-content');
+    if (!content) return;
+    const sample = [...items].sort(() => 0.5 - Math.random()).slice(0, 20);
+    const facts = sample.map(i => `<div class="marquee-item"><span>💡 SABÍAS QUE:</span> ${i.fact}</div>`).join('');
+    content.innerHTML = facts + facts;
+}
+
+// Weather Logic (Open-Meteo + Reverse Geocoding)
+const DEFAULT_CITY = 'Montevideo';
+const DEFAULT_LAT = -34.9011;
+const DEFAULT_LON = -56.1645;
+
+async function fetchWeather(lat, lon, overrideCity = null) {
+    const finalLat = (lat !== null && lat !== undefined) ? lat : DEFAULT_LAT;
+    const finalLon = (lon !== null && lon !== undefined) ? lon : DEFAULT_LON;
+    const apiUrl = `https://api.open-meteo.com/v1/forecast?latitude=${finalLat}&longitude=${finalLon}&current_weather=true&hourly=relativehumidity_2m,windspeed_10m`;
+
+    console.log(`Buscando clima en coord: ${finalLat}, ${finalLon}`);
+
+    // Try to get city name in parallel or use default
+    let cityName = overrideCity || DEFAULT_CITY;
+
+    const weatherPromise = fetch(apiUrl).then(r => r.json());
+
+    // Geocoding promise (parallel)
+    const geoPromise = (lat !== null && lon !== null && !overrideCity)
+        ? fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=12`, {
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) CurioSphere/1.1',
+                'Accept-Language': 'es'
+            }
+        }).then(r => r.json()).catch(() => null)
+        : Promise.resolve(null);
+
+    try {
+        const [weatherData, geoData] = await Promise.all([weatherPromise, geoPromise]);
+
+        if (geoData && !geoData.error && geoData.address) {
+            const a = geoData.address;
+            // Intentar obtener el nombre más específico pero relevante
+            const candidates = [a.city, a.town, a.village, a.hamlet, a.suburb, a.neighbourhood, a.municipality, a.county];
+            cityName = candidates.find(c => c) || geoData.display_name?.split(',')[0] || cityName;
+        } else if (geoData && geoData.error) {
+            console.warn("Nominatim error:", geoData.error);
+        }
+
+        if (weatherData && (weatherData.current_weather || weatherData.weather_code !== undefined)) {
+            updateWeatherUI(weatherData, cityName);
+            console.log(`Clima cargado en ${cityName}`);
+
+            // Cache coords for refresh
+            localStorage.setItem('last_lat', finalLat);
+            localStorage.setItem('last_lon', finalLon);
+        }
+    } catch (error) {
+        console.error("Error en servicio meteorológico:", error);
+        const tempEl = document.getElementById('nav-weather-temp');
+        if (tempEl && tempEl.textContent === '--°C') {
+            tempEl.textContent = 'Error';
+        }
+    }
+}
+
+function updateWeatherUI(data, cityName) {
+    const weather = data.current_weather || data;
+    if (!weather || (weather.temperature === undefined && data.temperature === undefined)) return;
+
+    const temp = weather.temperature !== undefined ? weather.temperature : data.temperature;
+    const t = Math.round(temp);
+    const wCode = (weather.weathercode !== undefined) ? weather.weathercode : weather.weather_code;
+
+    // Mapping Open-Meteo codes to icons
+    const iconMap = {
+        0: '01d', 1: '02d', 2: '03d', 3: '04d',
+        45: '50d', 48: '50d',
+        51: '09d', 53: '09d', 55: '09d',
+        61: '10d', 63: '10d', 65: '10d',
+        71: '13d', 73: '13d', 75: '13d',
+        80: '09d', 81: '09d', 82: '09d',
+        95: '11d'
+    };
+    const iconCode = iconMap[wCode] || '03d';
+    const iconUrl = `https://openweathermap.org/img/wn/${iconCode}@2x.png`;
+
+    // Nav Widget
+    const navIcon = document.getElementById('nav-weather-icon');
+    if (navIcon) {
+        navIcon.src = iconUrl;
+        navIcon.classList.remove('hidden');
+    }
+    document.getElementById('nav-weather-city').textContent = cityName;
+    document.getElementById('nav-weather-temp').textContent = `${t}°C`;
+
+    // Full Widget
+    const fullIcon = document.getElementById('icono-full');
+    if (fullIcon) {
+        fullIcon.src = iconUrl;
+        document.getElementById('ciudad-full').textContent = cityName.toUpperCase();
+        document.getElementById('temp-full').textContent = `${t}°C`;
+
+        const descMap = { 0: 'Despejado', 1: 'Casi despejado', 2: 'Algo nublado', 3: 'Nublado', 45: 'Niebla', 61: 'Lluvia leve', 95: 'Tormenta' };
+        document.getElementById('desc-full').textContent = descMap[wCode] || 'Condiciones variables';
+
+        // Getting humidity from hourly (approx)
+        const humidity = data.hourly ? data.hourly.relativehumidity_2m[0] : '--';
+        document.getElementById('humedad-full').textContent = `${humidity}%`;
+        document.getElementById('viento-full').textContent = `${weather.windspeed} km/h`;
+
+        // Dynamic Background based on temp
+        const glow = document.getElementById('widget-glow');
+        if (t <= 13) glow.style.background = 'linear-gradient(180deg, #1e3c72 0%, #2a5298 100%)';
+        else if (t <= 22) glow.style.background = 'linear-gradient(180deg, #4facfe 0%, #00f2fe 100%)';
+        else if (t <= 29) glow.style.background = 'linear-gradient(180deg, #f6d365 0%, #fda085 100%)';
+        else glow.style.background = 'linear-gradient(180deg, #ff0844 0%, #ffb199 100%)';
+        glow.style.opacity = '0.3';
+    }
+}
+
+async function initWeather() {
+    console.log("Iniciando servicio de clima...");
+
+    const setWeatherByIP = async () => {
+        try {
+            // IP Geolocation fallback (much more reliable for web)
+            const res = await fetch('https://ipapi.co/json/');
+            const data = await res.json();
+            if (data.latitude && data.longitude) {
+                console.log(`Ubicación por IP detectada: ${data.city}`);
+                fetchWeather(data.latitude, data.longitude, data.city);
+            } else {
+                fetchWeather(null, null, DEFAULT_CITY);
+            }
+        } catch (err) {
+            console.warn("Fallo geolocalización por IP:", err);
+            fetchWeather(null, null, DEFAULT_CITY);
+        }
+    };
+
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            (pos) => {
+                console.log(`Coords obtenidas por GPS: ${pos.coords.latitude}, ${pos.coords.longitude}`);
+                fetchWeather(pos.coords.latitude, pos.coords.longitude);
+            },
+            (err) => {
+                console.warn("Geolocalización navegador rechazada o fallida:", err.message);
+                setWeatherByIP();
+            },
+            { timeout: 7000 }
+        );
+    } else {
+        console.warn("Navegador no soporta geolocalización");
+        setWeatherByIP();
+    }
+
+    // Refresh every 30 mins
+    setInterval(() => {
+        const currentItem = document.getElementById('nav-weather-city').textContent;
+        if (currentItem === DEFAULT_CITY || currentItem === 'Zona Local') {
+            initWeather();
+        } else {
+            // Just refresh weather, don't re-geolocate if we have a city
+            const lat = localStorage.getItem('last_lat');
+            const lon = localStorage.getItem('last_lon');
+            if (lat && lon) fetchWeather(lat, lon, currentItem);
+            else initWeather();
+        }
+    }, 1800000);
+}
+
+window.manualWeatherSearch = async () => {
+    const input = document.getElementById('weather-search-input');
+    const query = input.value.trim();
+    if (!query) return;
+
+    try {
+        console.log(`Buscando ciudad: ${query}`);
+        const res = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(query)}&count=1&language=es&format=json`);
+        const data = await res.json();
+
+        if (data.results && data.results.length > 0) {
+            const city = data.results[0];
+            const displayName = city.name + (city.admin1 ? `, ${city.admin1}` : '');
+            fetchWeather(city.latitude, city.longitude, displayName);
+            input.value = '';
+        } else {
+            alert("Ciudad no encontrada... ¡Quizás está en otra dimensión!");
+        }
+    } catch (err) {
+        console.error("Error en búsqueda manual:", err);
+        alert("Error al conectar con el satélite de búsqueda.");
+    }
+};
+
+// Add keypress for search
+document.getElementById('weather-search-input')?.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') window.manualWeatherSearch();
+});
+
+
+
+window.botMessage = (e) => {
+    if (e.key === 'Enter') {
+        const input = e.target;
+        const msg = input.value.toLowerCase();
+        const container = document.getElementById('bot-messages');
+
+        // Mad Scientist logic
+        const introductions = [
+            "¡MWAHAHA! ¡Mis experimentos dicen que... ",
+            "¡Eureka! ¡Has activado mi comunicador cuántico! ",
+            "¡Cuidado con las pociones! Pero mira esto: ",
+            "¡Por los pelos de Einstein! Escucha bien: "
+        ];
+
+        let response = "¡No me interrumpas, estoy mezclando plutonio! Pero si insistes... pregunta sobre átomos, viajes en el tiempo o bichejos raros.";
+
+        if (msg.includes('ciencia') || msg.includes('atomo'))
+            response = "¡Átomos! ¿Sabías que somos un 99% espacio vacío? Si quitáramos el espacio, ¡toda la humanidad cabría en una manzana! 🍎⚡";
+
+        if (msg.includes('animal') || msg.includes('bicho') || msg.includes('mar'))
+            response = "¡Bestias fascinantes! ¿Sabías que los pulpos tienen 3 corazones y sangre azul? ¡Y la medusa inmortal puede resetear su vida! ¡He intentado inyectarme su ADN pero solo me dio hambre de plancton! 🐙💧";
+
+        if (msg.includes('espacio') || msg.includes('marte') || msg.includes('luna'))
+            response = "¡El cosmos es aterrador! En Marte los atardeceres son azules y en la Luna tus huellas durarán millones de años porque no hay viento. ¡MWAHAHA! 🌌🌚";
+
+        if (msg.includes('cuerpo') || msg.includes('bio'))
+            response = "¡Máquinas biológicas! Generas electricidad suficiente para una bombilla y tus ácidos estomacales podrían disolver metal. ¡Impresionante! 🧠⚡";
+
+        if (msg.includes('historia') || msg.includes('tiempo'))
+            response = "¡El tiempo es relativo! ¿Sabías que los vikingos nunca usaron cascos con cuernos? ¡Fue un invento de la ópera del siglo XIX! 🎭🕰️";
+
+        if (msg.includes('hola') || msg.includes('quien'))
+            response = "¡Soy el Dr. Curioso! El científico más brillante (y algo despeinado) de este servidor. ¡Pregúntame sobre el espacio, animales o el cuerpo humano! 🧪💥";
+
+        const randomIntro = introductions[Math.floor(Math.random() * introductions.length)];
+
+        container.innerHTML += `<div class="msg-user"><b>Tú:</b> ${input.value}</div>`;
+        container.innerHTML += `<div class="msg-bot"><b>Dr. Curioso 🧪:</b> ${randomIntro}${response}</div>`;
+        input.value = '';
+        container.scrollTop = container.scrollHeight;
+    }
+}
+
+// --- AUTH FRONTEND ---
+const checkAuth = () => {
+    const user = JSON.parse(localStorage.getItem('user'));
+    const btns = document.getElementById('auth-buttons');
+    const info = document.getElementById('user-info');
+    const nameText = document.getElementById('user-name');
+    const adminBtn = document.getElementById('admin-btn');
+
+    if (user) {
+        btns.classList.add('hidden');
+        info.classList.remove('hidden');
+        nameText.innerText = user.name;
+        if (user.role === 'admin') adminBtn.classList.remove('hidden');
+    } else {
+        btns.classList.remove('hidden');
+        info.classList.add('hidden');
+        adminBtn.classList.add('hidden');
+    }
+};
+
+window.logout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    window.location.reload();
+};
+
+// Forms
+document.getElementById('register-form').onsubmit = async (e) => {
+    e.preventDefault();
+    const [name, email, password] = e.target.querySelectorAll('input');
+    try {
+        const res = await fetch('/api/auth/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name: name.value, email: email.value, password: password.value })
+        });
+        const data = await res.json();
+        if (res.ok) {
+            alert(data.message);
+            localStorage.setItem('temp_email', email.value);
+            toggleModal('register-modal');
+            toggleModal('verify-modal');
+        } else alert(data.error);
+    } catch (err) { alert('Error al registrar'); }
+};
+
+document.getElementById('login-form').onsubmit = async (e) => {
+    e.preventDefault();
+    const [email, password] = e.target.querySelectorAll('input');
+    try {
+        const res = await fetch('/api/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: email.value, password: password.value })
+        });
+        const data = await res.json();
+        if (res.ok) {
+            localStorage.setItem('token', data.token);
+            localStorage.setItem('user', JSON.stringify(data.user));
+            window.location.reload();
+        } else alert(data.error);
+    } catch (err) { alert('Error al entrar'); }
+};
+
+window.verifyEmail = async () => {
+    const email = localStorage.getItem('temp_email');
+    const token = document.getElementById('verify-token').value;
+    try {
+        const res = await fetch('/api/auth/verify', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, token })
+        });
+        const data = await res.json();
+        if (res.ok) {
+            alert(data.message);
+            toggleModal('verify-modal');
+            toggleModal('login-modal');
+        } else alert(data.error);
+    } catch (err) { alert('Error al verificar'); }
+};
+
+// Admin
+window.openAdmin = async () => {
+    const token = localStorage.getItem('token');
+    try {
+        const res = await fetch('/api/admin/dashboard', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await res.json();
+        if (res.ok) {
+            renderAdmin(data);
+            toggleModal('admin-modal');
+        } else alert(data.error);
+    } catch (err) { alert('Error al cargar dashboard'); }
+};
+
+const renderAdmin = (data) => {
+    const uList = document.getElementById('admin-users-list');
+    const aList = document.getElementById('admin-actions-list');
+
+    uList.innerHTML = data.users.map(u => `
             <div class="bg-white/5 p-4 rounded-xl border border-white/10 flex justify-between items-center">
                 <div>
                     <p class="font-bold">${u.name}</p>
@@ -689,21 +775,21 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
         `).join('');
 
-        aList.innerHTML = data.actions.map(a => `
+    aList.innerHTML = data.actions.map(a => `
             <div class="border-l border-white/10 pl-3 py-1 mb-2">
                 <span class="text-gray-500">${new Date(a.timestamp).toLocaleTimeString()}</span>
                 <span class="text-cyan-400 mx-2">${a.email}:</span>
                 <span class="text-gray-300">${a.action}</span>
             </div>
         `).join('');
-    };
+};
 
-    checkAuth();
-    initWeather();
-    loadCuriosities();
+checkAuth();
+initWeather();
+loadCuriosities();
 
-    // Auto-update Marquee every few items
-    API.getCuriosities().then(data => initMarquee(data));
+// Auto-update Marquee every few items
+API.getCuriosities().then(data => initMarquee(data));
 });
 
 // --- GAMES LOGIC ---
