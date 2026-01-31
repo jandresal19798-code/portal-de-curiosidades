@@ -1,3 +1,50 @@
+// Global Helpers (defined outside to be available immediately)
+window.toggleModal = (id) => {
+    const m = document.getElementById(id);
+    if (m) {
+        const isHidden = m.classList.contains('hidden');
+        if (isHidden) {
+            m.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            history.pushState({ modalId: id }, "");
+        } else {
+            window.closeSpecificModal(id);
+        }
+    }
+};
+
+window.closeSpecificModal = (id) => {
+    const m = document.getElementById(id);
+    if (m) {
+        m.classList.add('hidden');
+        document.body.style.overflow = 'auto';
+        // If we closed it manually, we might want to pop state, but back button handles it
+    }
+};
+
+window.toggleBot = () => {
+    const chat = document.getElementById('bot-chat');
+    const container = document.getElementById('bot-messages');
+    chat.classList.toggle('hidden');
+
+    if (!chat.classList.contains('hidden') && container.innerHTML === "") {
+        const intros = [
+            "¡MWAHAHA! ¿Quién osa interrumpir mi fusión nuclear?",
+            "¡Eureka! ¡Has llegado justo a tiempo para mi experimento número 402!",
+            "¡Por los pelos de Einstein! ¡Un humano ha entrado en mi laboratorio!",
+            "¡Cuidado donde pisas! ¡Esa mancha verde es... bueno, mejor no preguntes!",
+            "¡Rápido! ¡Pásame la llave de 12 dimensiones! Ah, eres tú..."
+        ];
+        const welcome = intros[Math.floor(Math.random() * intros.length)];
+        container.innerHTML = `<div class="msg-bot"><b>Dr. Curioso 🧪:</b> ${welcome} ¿En qué locura científica puedo ayudarte hoy?</div>`;
+    }
+};
+
+window.toggleMobileMenu = () => {
+    // Basic mobile menu toggle logic
+    alert("Menú móvil en desarrollo - Usa la versión de escritorio para mejor experiencia");
+};
+
 document.addEventListener('DOMContentLoaded', () => {
     const grid = document.getElementById('curiosity-grid');
     const modal = document.getElementById('modal');
@@ -171,6 +218,9 @@ document.addEventListener('DOMContentLoaded', () => {
         modal.classList.remove('hidden');
         document.body.style.overflow = 'hidden';
 
+        // Back button support for curiosity detail
+        history.pushState({ modalId: 'detail-modal' }, "");
+
         // Check Auth for Comments
         const user = localStorage.getItem('user');
         const authMsg = document.getElementById('comment-auth-msg');
@@ -235,23 +285,30 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Modal Helpers
-    window.toggleModal = (id) => {
-        const m = document.getElementById(id);
-        if (m) m.classList.toggle('hidden');
+    window.closeModal = () => {
+        if (!modal.classList.contains('hidden')) {
+            modal.classList.add('hidden');
+            document.body.style.overflow = 'auto';
+            if (history.state && (history.state.modalId === 'modal' || history.state.modalId === 'detail-modal')) {
+                history.back();
+            }
+        }
     };
 
-    window.closeModal = () => {
-        modal.classList.add('hidden');
+    window.onpopstate = (event) => {
+        document.querySelectorAll('.modal').forEach(m => m.classList.add('hidden'));
+        if (modal) modal.classList.add('hidden');
         document.body.style.overflow = 'auto';
     };
 
     window.onclick = (e) => {
         if (e.target.classList.contains('modal')) {
-            e.target.classList.add('hidden');
-            document.body.style.overflow = 'auto';
+            window.closeSpecificModal(e.target.id);
+            if (history.state) history.back();
         }
-        if (e.target === modal) window.closeModal();
+        if (e.target === modal) {
+            window.closeModal();
+        }
     };
 
 
@@ -377,24 +434,18 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 900000);
     }
 
-    // Bot Logic
-    window.toggleBot = () => {
-        const chat = document.getElementById('bot-chat');
-        const container = document.getElementById('bot-messages');
-        chat.classList.toggle('hidden');
-
-        if (!chat.classList.contains('hidden') && container.innerHTML === "") {
-            const intros = [
-                "¡MWAHAHA! ¿Quién osa interrumpir mi fusión nuclear?",
-                "¡Eureka! ¡Has llegado justo a tiempo para mi experimento número 402!",
-                "¡Por los pelos de Einstein! ¡Un humano ha entrado en mi laboratorio!",
-                "¡Cuidado donde pisas! ¡Esa mancha verde es... bueno, mejor no preguntes!",
-                "¡Rápido! ¡Pásame la llave de 12 dimensiones! Ah, eres tú..."
-            ];
-            const welcome = intros[Math.floor(Math.random() * intros.length)];
-            container.innerHTML = `<div class="msg-bot"><b>Dr. Curioso 🧪:</b> ${welcome} ¿En qué locura científica puedo ayudarte hoy?</div>`;
-        }
-    };
+    // Bot Logic (Consolidated)
+    if (container.innerHTML === "") {
+        const intros = [
+            "¡MWAHAHA! ¿Quién osa interrumpir mi fusión nuclear?",
+            "¡Eureka! ¡Has llegado justo a tiempo para mi experimento número 402!",
+            "¡Por los pelos de Einstein! ¡Un humano ha entrado en mi laboratorio!",
+            "¡Cuidado donde pisas! ¡Esa mancha verde es... bueno, mejor no preguntes!",
+            "¡Rápido! ¡Pásame la llave de 12 dimensiones! Ah, eres tú..."
+        ];
+        const welcome = intros[Math.floor(Math.random() * intros.length)];
+        container.innerHTML = `<div class="msg-bot"><b>Dr. Curioso 🧪:</b> ${welcome} ¿En qué locura científica puedo ayudarte hoy?</div>`;
+    }
 
     window.botMessage = (e) => {
         if (e.key === 'Enter') {
