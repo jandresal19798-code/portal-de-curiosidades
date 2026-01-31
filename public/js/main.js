@@ -86,6 +86,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const modalBody = document.getElementById('modal-body');
     const filters = document.querySelectorAll('.filter-btn');
 
+    // Update Date
+    const updateDate = () => {
+        const el = document.getElementById('nav-date');
+        if (!el) return;
+        const now = new Date();
+        const options = { weekday: 'long', day: 'numeric', month: 'long' };
+        let dateStr = now.toLocaleDateString('es-ES', options);
+        el.textContent = dateStr.charAt(0).toUpperCase() + dateStr.slice(1);
+    };
+    updateDate();
+
     let curiosities = [];
     window.allCuriosities = [];
     let currentPage = 1;
