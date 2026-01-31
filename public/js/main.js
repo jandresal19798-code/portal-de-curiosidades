@@ -157,6 +157,20 @@ document.addEventListener('DOMContentLoaded', () => {
         updateLoadMore(items.length);
     }
 
+    function updateLoadMore(total) {
+        let btn = document.getElementById('load-more');
+        if (currentPage * itemsPerPage < total) {
+            if (!btn) {
+                btn = document.createElement('button');
+                btn.id = 'load-more';
+                btn.className = 'col-span-full mt-12 py-4 px-10 rounded-full border border-white/10 hover:bg-white/5 font-bold transition-all';
+                btn.innerText = 'Cargar más';
+                btn.onclick = () => { currentPage++; renderGrid(curiosities.filter(c => document.querySelector('.filter-btn.active').dataset.category === 'all' || c.category === document.querySelector('.filter-btn.active').dataset.category), true); };
+                grid.after(btn);
+            }
+        } else if (btn) btn.remove();
+    }
+
     // Modal Gallery State
     let currentSlide = 0;
 
