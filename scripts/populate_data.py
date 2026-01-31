@@ -130,8 +130,8 @@ start_id = len(all_items) + 1
 # Process extra data with Pollinations for high quality images for the first batch
 for i, data in enumerate(extra_data):
     current_id = start_id + i
-    # Use Pollinations for the manually curated list as well for better quality
-    img_url = get_image_url(data[0], data[1], 0) # Use 0 index to force Pollinations 
+    # Process extra data - switch to Picsum to avoid Pollinations rate limit
+    img_url = get_image_url(data[0], data[1], current_id + 100) 
     all_items.append({
         "id": current_id,
         "title": data[0],
