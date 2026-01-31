@@ -19,10 +19,17 @@
 <body>
     <header class="main-header">
         <div class="top-bar">
-            <div class="date-user">
-                <span id="header-date">VIERNES, 30 DE ENERO, 2026</span>
-                <img src="https://ui-avatars.com/api/?name=Dr+Curioso&background=2dd4bf&color=fff" alt="User"
-                    class="user-pill">
+            <div class="header-info">
+                <div id="weather-widget" class="weather-mini">
+                    <span id="weather-city">Buscando clima...</span>
+                    <span id="weather-temp"></span>
+                    <span id="weather-desc"></span>
+                </div>
+                <div class="date-user">
+                    <span id="header-date">VIERNES, 30 DE ENERO, 2026</span>
+                    <img src="https://ui-avatars.com/api/?name=Dr+Curioso&background=2dd4bf&color=fff" alt="User"
+                        class="user-pill">
+                </div>
             </div>
         </div>
         <nav class="nav-container">
@@ -66,6 +73,17 @@
                         <span>𝕏</span> <span>𝑓</span> <span>📷</span> <span>📹</span>
                     </div>
                     <button class="btn-cyan outline">SUBSCRIBE</button>
+                </div>
+            </section>
+
+            <section id="games" class="games-mini-section">
+                <div class="section-badge">LABORATORIO DE PRUEBAS</div>
+                <div id="game-selection" class="game-choices">
+                    <button onclick="startQuiz()" class="btn-cyan outline">MENTAL QUIZ 🧠</button>
+                    <button onclick="startMemory()" class="btn-cyan outline">BIO MEMORIA 🧬</button>
+                </div>
+                <div id="game-board" class="hidden glass">
+                    <!-- Event results -->
                 </div>
             </section>
 

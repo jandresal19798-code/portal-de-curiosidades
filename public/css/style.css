@@ -52,9 +52,25 @@ h3,
     padding: 0.5rem 8%;
     display: flex;
     justify-content: flex-end;
+}
+
+.header-info {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+}
+
+.weather-mini {
+    display: flex;
+    gap: 1rem;
     font-size: 0.7rem;
-    color: var(--text-muted);
-    letter-spacing: 1px;
+    font-weight: 700;
+    color: var(--primary);
+    letter-spacing: 0.5px;
+}
+
+#weather-temp {
+    color: var(--text-main);
 }
 
 .date-user {
@@ -221,6 +237,69 @@ h3,
 .btn-cyan.solid:hover {
     transform: translateY(-3px);
     box-shadow: 0 10px 20px var(--primary-glow);
+}
+
+/* Games Section */
+.games-mini-section {
+    padding: 0 8% 2rem;
+    text-align: center;
+}
+
+.section-badge {
+    font-size: 0.65rem;
+    font-weight: 800;
+    letter-spacing: 3px;
+    color: var(--text-muted);
+    margin-bottom: 1.5rem;
+    position: relative;
+    display: inline-block;
+}
+
+.section-badge::before,
+.section-badge::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: 50px;
+    height: 1px;
+    background: var(--card-border);
+}
+
+.section-badge::before {
+    left: -60px;
+}
+
+.section-badge::after {
+    right: -60px;
+}
+
+.game-choices {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+}
+
+#game-board {
+    margin: 2rem auto 0;
+    max-width: 600px;
+    padding: 3rem;
+    animation: fadeIn 0.5s ease;
+}
+
+#game-board.hidden {
+    display: none;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .social-icons {
