@@ -1,0 +1,262 @@
+/* UIVERSE INSPIRED ELEMENTS */
+
+/* 1. Galaxy Button (Inspired by Uiverse) */
+.btn-galaxy {
+    position: relative;
+    padding: 12px 35px;
+    background: #05070a;
+    color: white;
+    font-weight: bold;
+    font-size: 1rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    border: none;
+    border-radius: 100px;
+    cursor: pointer;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    z-index: 1;
+    box-shadow: 0 0 20px rgba(0, 242, 255, 0.2);
+}
+
+.btn-galaxy::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 200%;
+    height: 100%;
+    background: linear-gradient(90deg,
+            #00f2ff,
+            #7000ff,
+            #ff00ff,
+            #00f2ff);
+    background-size: 200% auto;
+    animation: galaxy-flow 3s linear infinite;
+    z-index: -2;
+    transition: all 0.3s ease;
+}
+
+.btn-galaxy::after {
+    content: "";
+    position: absolute;
+    inset: 2px;
+    background: #05070a;
+    border-radius: 98px;
+    z-index: -1;
+    transition: opacity 0.3s ease;
+}
+
+.btn-galaxy:hover {
+    transform: scale(1.05);
+    box-shadow:
+        0 0 30px rgba(0, 242, 255, 0.6),
+        0 0 50px rgba(112, 0, 255, 0.4);
+    color: #fff;
+}
+
+.btn-galaxy:hover::after {
+    opacity: 0;
+    /* Makes background full gradient on hover */
+}
+
+@keyframes galaxy-flow {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    100% {
+        background-position: 200% 50%;
+    }
+}
+
+/* 2. Neon Input (Pulse Effect) */
+.input-neon {
+    width: 100%;
+    padding: 15px 20px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    color: white;
+    outline: none;
+    font-family: inherit;
+    transition: all 0.3s ease;
+}
+
+.input-neon:focus {
+    border-color: #00f2ff;
+    box-shadow:
+        0 0 5px rgba(0, 242, 255, 0.5),
+        0 0 15px rgba(0, 242, 255, 0.3),
+        inset 0 0 10px rgba(0, 242, 255, 0.05);
+    background: rgba(0, 242, 255, 0.02);
+}
+
+/* 3. Holographic Card Border */
+.card-holo {
+    position: relative;
+    background: rgba(18, 18, 18, 0.6);
+    border-radius: 20px;
+    overflow: hidden;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    transition: all 0.4s ease;
+}
+
+.card-holo::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg,
+            transparent,
+            rgba(255, 255, 255, 0.05),
+            transparent);
+    transition: 0.5s;
+    pointer-events: none;
+}
+
+.card-holo:hover::before {
+    left: 100%;
+}
+
+.card-holo:hover {
+    border-color: rgba(255, 255, 255, 0.3);
+    box-shadow: 0 10px 40px -10px rgba(0, 242, 255, 0.15);
+    transform: translateY(-5px);
+}
+
+/* 4. Atomic Loader (For AI Chat) */
+.loader-atomic {
+    position: relative;
+    width: 60px;
+    height: 60px;
+    /* Reduced to fit better */
+    border-radius: 50%;
+    perspective: 800px;
+    margin: 20px auto;
+}
+
+.inner {
+    position: absolute;
+    box-sizing: border-box;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+}
+
+.inner.one {
+    left: 0%;
+    top: 0%;
+    animation: rotate-one 1s linear infinite;
+    border-bottom: 3px solid #00f2ff;
+}
+
+.inner.two {
+    right: 0%;
+    top: 0%;
+    animation: rotate-two 1s linear infinite;
+    border-right: 3px solid #7000ff;
+}
+
+.inner.three {
+    right: 0%;
+    bottom: 0%;
+    animation: rotate-three 1s linear infinite;
+    border-top: 3px solid #ff00ff;
+}
+
+@keyframes rotate-one {
+    0% {
+        transform: rotateX(35deg) rotateY(-45deg) rotateZ(0deg);
+    }
+
+    100% {
+        transform: rotateX(35deg) rotateY(-45deg) rotateZ(360deg);
+    }
+}
+
+@keyframes rotate-two {
+    0% {
+        transform: rotateX(50deg) rotateY(10deg) rotateZ(0deg);
+    }
+
+    100% {
+        transform: rotateX(50deg) rotateY(10deg) rotateZ(360deg);
+    }
+}
+
+@keyframes rotate-three {
+    0% {
+        transform: rotateX(35deg) rotateY(55deg) rotateZ(0deg);
+    }
+
+    100% {
+        transform: rotateX(35deg) rotateY(55deg) rotateZ(360deg);
+    }
+}
+
+/* 5. Modern Toggle Switch (Uiverse style) */
+.theme-switch {
+    --width_of_switch: 3.5em;
+    --height_of_switch: 2em;
+    --size_of_icon: 1.4em;
+    --slider_offset: 0.3em;
+    border: none;
+    cursor: pointer;
+    background-color: transparent;
+    padding: 0;
+}
+
+.switch {
+    position: relative;
+    width: var(--width_of_switch);
+    height: var(--height_of_switch);
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(255, 255, 255, 0.1);
+    transition: .4s;
+    border-radius: 30px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: var(--height_of_switch);
+    width: var(--height_of_switch);
+    left: 0;
+    bottom: 0;
+    background-color: white;
+    /* Sun/Moon color */
+    transition: .4s;
+    border-radius: 20px;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+    transform: scale(0.7);
+}
+
+input:checked+.slider {
+    background-color: #05070a;
+    border-color: #00f2ff;
+}
+
+input:checked+.slider:before {
+    transform: translateX(calc(var(--width_of_switch) - var(--height_of_switch))) scale(0.7);
+    background: #00f2ff;
+    box-shadow: 0 0 15px #00f2ff;
+}

@@ -30,9 +30,9 @@ window.closeModal = () => {
 
 window.toggleTheme = () => {
     const body = document.body;
-    const btn = document.getElementById('theme-btn');
+    const checkbox = document.getElementById('theme-checkbox');
     const isLight = body.classList.toggle('light-mode');
-    if (btn) btn.textContent = isLight ? '☀️' : '🌙';
+    if (checkbox) checkbox.checked = !isLight; // Checked means dark in our CSS logic usually, let's ensure consistency
     localStorage.setItem('theme', isLight ? 'light' : 'dark');
 };
 
@@ -156,8 +156,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const mainImage = (item.images && item.images.length > 0) ? item.images[0] : (item.image || placeholderSVG);
 
             return `
-                <div class="glass-card overflow-hidden flex flex-col animate-in">
-                    <div class="h-56 overflow-hidden relative group" style="background: linear-gradient(135deg, ${bgColor}15, ${bgColor}30);">
+                <div class="card-holo h-full flex flex-col animate-in group">
+                    <div class="h-56 overflow-hidden relative" style="background: linear-gradient(135deg, ${bgColor}15, ${bgColor}30);">
                         <img src="${mainImage}" 
                              alt="${item.title}"
                              class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
