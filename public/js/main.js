@@ -1421,33 +1421,6 @@ window.renderUserRankings = () => {
             </div>`;
     }
 };
-};
-
-// 6. NEW GAME: Crono-Explorador
-window.startChronoExplorer = () => {
-    showBoard();
-    const events = [
-        { y: -13800000000, t: "Big Bang" },
-        { y: -4500000000, t: "Formación Tierra" },
-        { y: -65000000, t: "Extinción Dinosaurios" },
-        { y: 1969, t: "Hombre en la Luna" }
-    ];
-    // Simple verification simulation for visual mockup
-    gameBoard.innerHTML = `
-        <div class="max-w-xl mx-auto text-center animate-in">
-            <h3 class="text-2xl font-bold mb-2 text-yellow-400">Crono-Explorador</h3>
-            <p class="mb-8 text-sm text-gray-400">Ordena los eventos del más antiguo al más reciente.</p>
-            <div class="space-y-3 mb-8">
-                ${events.sort(() => Math.random() - 0.5).map(e => `
-                    <div class="p-4 card-holo text-left flex justify-between items-center group cursor-move">
-                        <span class="font-bold">${e.t}</span>
-                        <span class="text-xs text-gray-500 group-hover:text-cyan-400">↕</span>
-                    </div>
-                `).join('')}
-            </div>
-            <button onclick="endGame(4,4)" class="btn-galaxy w-full">Verificar Línea Temporal</button>
-        </div>`;
-};
 
 // Add ranking to initialization
 window.addEventListener('load', renderUserRankings);
