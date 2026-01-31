@@ -2,9 +2,13 @@ const express = require('express');
 const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
+const nodemailer = require('nodemailer');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const JWT_SECRET = 'cosmic-chronicles-secret-888';
 
 // Middleware
 app.use(cors());
@@ -14,15 +18,45 @@ app.use(express.static(path.join(__dirname, 'public')));
 // Archivos de datos
 const CURIOSITIES_FILE = path.join(__dirname, 'data', 'curiosities.json');
 const COMMENTS_FILE = path.join(__dirname, 'data', 'comments.json');
+const USERS_FILE = path.join(__dirname, 'data', 'users.json');
+const ACTIONS_FILE = path.join(__dirname, 'data', 'actions.json');
 
-// Inicializar archivo de comentarios si no existe
-if (!fs.existsSync(COMMENTS_FILE)) {
-    fs.writeFileSync(COMMENTS_FILE, JSON.stringify({}));
-}
+// Inicializar archivos si no existen
+[COMMENTS_FILE, USERS_FILE, ACTIONS_FILE].forEach(file => {
+    if (!fs.existsSync(file)) {
+        fs.writeFileSync(file, JSON.stringify(file === COMMENTS_FILE ? {} : []));
+    }
+});
 
 // Helper para leer/escribir datos
 const getData = (file) => JSON.parse(fs.readFileSync(file, 'utf8'));
 const saveData = (file, data) => fs.writeFileSync(file, JSON.stringify(data, null, 2));
+
+// Log Actions
+const logAction = (userId, email, action) => {
+    const actions = getData(ACTIONS_FILE);
+    actions.unshift({
+        id: Date.now(),
+        userId,
+        email,
+        action,
+        timestamp: new Date().toISOString()
+    });
+    saveData(ACTIONS_FILE, actions.slice(0, 100)); // Keep last 100
+};
+
+// Auth Middleware
+const authenticateToken = (req, res, next) => {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
+    if (!token) return res.sendStatus(401);
+
+    jwt.verify(token, JWT_SECRET, (err, user) => {
+        if (err) return res.sendStatus(403);
+        req.user = user;
+        next();
+    });
+};
 
 // Rutas API
 app.get('/api/curiosities', (req, res) => {
@@ -44,29 +78,108 @@ app.get('/api/comments/:id', (req, res) => {
     }
 });
 
-app.post('/api/comments/:id', (req, res) => {
+// --- AUTH ROUTES ---
+
+app.post('/api/auth/register', async (req, res) => {
     try {
-        const { author, text } = req.body;
+        const { email, password, name } = req.body;
+        const users = getData(USERS_FILE);
+
+        if (users.find(u => u.email === email)) {
+            return res.status(400).json({ error: 'El usuario ya existe' });
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const newUser = {
+            id: Date.now(),
+            email,
+            password: hashedPassword,
+            name,
+            role: email === 'admin@cosmic.com' ? 'admin' : 'user',
+            verified: false,
+            createdAt: new Date().toISOString()
+        };
+
+        users.push(newUser);
+        saveData(USERS_FILE, users);
+
+        logAction(newUser.id, email, 'Registro de usuario');
+
+        // Simulación de envío de mail (En producción usar Transporter real)
+        console.log(`[MAIL] Verificación enviada a ${email}: Token ${newUser.id}`);
+
+        res.status(201).json({ message: 'Registrado con éxito. Revisa tu consola para el token de simulación.' });
+    } catch (e) {
+        res.status(500).json({ error: 'Error en el registro' });
+    }
+});
+
+app.post('/api/auth/login', async (req, res) => {
+    try {
+        const { email, password } = req.body;
+        const users = getData(USERS_FILE);
+        const user = users.find(u => u.email === email);
+
+        if (!user || !(await bcrypt.compare(password, user.password))) {
+            return res.status(401).json({ error: 'Credenciales inválidas' });
+        }
+
+        const token = jwt.sign({ id: user.id, email: user.email, role: user.role }, JWT_SECRET, { expiresIn: '24h' });
+        logAction(user.id, email, 'Inicio de sesión');
+
+        res.json({ token, user: { name: user.name, email: user.email, role: user.role } });
+    } catch (e) {
+        res.status(500).json({ error: 'Error en el login' });
+    }
+});
+
+app.post('/api/auth/verify', (req, res) => {
+    const { email, token } = req.body;
+    const users = getData(USERS_FILE);
+    const user = users.find(u => u.email === email && u.id.toString() === token);
+
+    if (user) {
+        user.verified = true;
+        saveData(USERS_FILE, users);
+        logAction(user.id, email, 'Email verificado');
+        res.json({ message: 'Email verificado correctamente' });
+    } else {
+        res.status(400).json({ error: 'Token inválido' });
+    }
+});
+
+// --- ADMIN ROUTES ---
+
+app.get('/api/admin/dashboard', authenticateToken, (req, res) => {
+    if (req.user.role !== 'admin') return res.status(403).json({ error: 'Acceso denegado' });
+
+    const users = getData(USERS_FILE).map(({ password, ...u }) => u);
+    const actions = getData(ACTIONS_FILE);
+
+    res.json({ users, actions });
+});
+
+// Rutas API originales protegidas
+app.post('/api/comments/:id', authenticateToken, (req, res) => {
+    try {
+        const { text } = req.body;
         const curiosityId = req.params.id;
 
-        if (!author || !text) {
-            return res.status(400).json({ error: 'Autor y comentario son requeridos' });
-        }
+        if (!text) return res.status(400).json({ error: 'El comentario es requerido' });
 
         const comments = getData(COMMENTS_FILE);
-        if (!comments[curiosityId]) {
-            comments[curiosityId] = [];
-        }
+        if (!comments[curiosityId]) comments[curiosityId] = [];
 
         const newComment = {
             id: Date.now(),
-            author,
+            author: req.user.email,
             text,
             date: new Date().toISOString()
         };
 
         comments[curiosityId].push(newComment);
         saveData(COMMENTS_FILE, comments);
+        logAction(req.user.id, req.user.email, `Comentó en curiosidad ${curiosityId}`);
 
         res.status(201).json(newComment);
     } catch (error) {

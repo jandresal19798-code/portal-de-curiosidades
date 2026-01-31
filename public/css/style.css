@@ -218,3 +218,20 @@ body {
 ::-webkit-scrollbar-thumb:hover {
     background: var(--accent);
 }
+
+/* Admin Console Extra Styles */
+#admin-actions-list {
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 12px;
+    padding: 15px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.action-item {
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.action-item:last-child {
+    border: none;
+}

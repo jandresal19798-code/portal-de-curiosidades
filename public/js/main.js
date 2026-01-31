@@ -155,8 +155,10 @@ document.addEventListener('DOMContentLoaded', () => {
             
             <div class="comments-section mt-12 pt-12 border-t border-white/10">
                 <h3 class="text-2xl font-bold mb-8">Comentarios</h3>
+                <div id="comment-auth-msg" class="bg-cyan-400/10 text-cyan-400 p-6 rounded-2xl mb-8 hidden">
+                    Necesitas <button onclick="toggleModal('login-modal')" class="font-bold underline">Iniciar Sesión</button> para compartir tus pensamientos.
+                </div>
                 <form id="comment-form" class="space-y-4 mb-12">
-                    <input type="text" id="author" placeholder="Tu nombre" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 outline-none focus:border-cyan-400" required>
                     <textarea id="text" placeholder="Escribe tu pensamiento..." class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-4 h-32 outline-none focus:border-cyan-400" required></textarea>
                     <button type="submit" class="btn-glow px-8 py-3 rounded-full font-bold w-full md:w-auto">Publicar Pensamiento</button>
                 </form>
@@ -169,22 +171,44 @@ document.addEventListener('DOMContentLoaded', () => {
         modal.classList.remove('hidden');
         document.body.style.overflow = 'hidden';
 
-        // Load Comments
+        // Check Auth for Comments
+        const user = localStorage.getItem('user');
+        const authMsg = document.getElementById('comment-auth-msg');
+        const commentForm = document.getElementById('comment-form');
+
+        if (!user) {
+            authMsg.classList.remove('hidden');
+            commentForm.classList.add('hidden');
+        }
+
+        // Load existing comments
         loadComments(id);
 
         // Handle Comment Submission
-        const form = document.getElementById('comment-form');
-        form.onsubmit = async (e) => {
+        commentForm.onsubmit = async (e) => {
             e.preventDefault();
-            const author = document.getElementById('author').value;
             const text = document.getElementById('text').value;
+            const token = localStorage.getItem('token');
 
             try {
-                await API.postComment(id, author, text);
-                form.reset();
-                loadComments(id);
+                const res = await fetch(`/api/comments/${id}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ text })
+                });
+
+                if (res.ok) {
+                    commentForm.reset();
+                    loadComments(id);
+                } else {
+                    const data = await res.json();
+                    alert(data.error || 'Error al publicar');
+                }
             } catch (error) {
-                alert('Error al publicar comentario');
+                alert('Error de conexión');
             }
         };
     };
@@ -212,12 +236,21 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Modal Helpers
+    window.toggleModal = (id) => {
+        const m = document.getElementById(id);
+        if (m) m.classList.toggle('hidden');
+    };
+
     window.closeModal = () => {
         modal.classList.add('hidden');
         document.body.style.overflow = 'auto';
     };
 
     window.onclick = (e) => {
+        if (e.target.classList.contains('modal')) {
+            e.target.classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
         if (e.target === modal) window.closeModal();
     };
 
@@ -406,6 +439,130 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // --- AUTH FRONTEND ---
+    const checkAuth = () => {
+        const user = JSON.parse(localStorage.getItem('user'));
+        const btns = document.getElementById('auth-buttons');
+        const info = document.getElementById('user-info');
+        const nameText = document.getElementById('user-name');
+        const adminBtn = document.getElementById('admin-btn');
+
+        if (user) {
+            btns.classList.add('hidden');
+            info.classList.remove('hidden');
+            nameText.innerText = user.name;
+            if (user.role === 'admin') adminBtn.classList.remove('hidden');
+        } else {
+            btns.classList.remove('hidden');
+            info.classList.add('hidden');
+            adminBtn.classList.add('hidden');
+        }
+    };
+
+    window.logout = () => {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        window.location.reload();
+    };
+
+    // Forms
+    document.getElementById('register-form').onsubmit = async (e) => {
+        e.preventDefault();
+        const [name, email, password] = e.target.querySelectorAll('input');
+        try {
+            const res = await fetch('/api/auth/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name: name.value, email: email.value, password: password.value })
+            });
+            const data = await res.json();
+            if (res.ok) {
+                alert(data.message);
+                localStorage.setItem('temp_email', email.value);
+                toggleModal('register-modal');
+                toggleModal('verify-modal');
+            } else alert(data.error);
+        } catch (err) { alert('Error al registrar'); }
+    };
+
+    document.getElementById('login-form').onsubmit = async (e) => {
+        e.preventDefault();
+        const [email, password] = e.target.querySelectorAll('input');
+        try {
+            const res = await fetch('/api/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: email.value, password: password.value })
+            });
+            const data = await res.json();
+            if (res.ok) {
+                localStorage.setItem('token', data.token);
+                localStorage.setItem('user', JSON.stringify(data.user));
+                window.location.reload();
+            } else alert(data.error);
+        } catch (err) { alert('Error al entrar'); }
+    };
+
+    window.verifyEmail = async () => {
+        const email = localStorage.getItem('temp_email');
+        const token = document.getElementById('verify-token').value;
+        try {
+            const res = await fetch('/api/auth/verify', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, token })
+            });
+            const data = await res.json();
+            if (res.ok) {
+                alert(data.message);
+                toggleModal('verify-modal');
+                toggleModal('login-modal');
+            } else alert(data.error);
+        } catch (err) { alert('Error al verificar'); }
+    };
+
+    // Admin
+    window.openAdmin = async () => {
+        const token = localStorage.getItem('token');
+        try {
+            const res = await fetch('/api/admin/dashboard', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const data = await res.json();
+            if (res.ok) {
+                renderAdmin(data);
+                toggleModal('admin-modal');
+            } else alert(data.error);
+        } catch (err) { alert('Error al cargar dashboard'); }
+    };
+
+    const renderAdmin = (data) => {
+        const uList = document.getElementById('admin-users-list');
+        const aList = document.getElementById('admin-actions-list');
+
+        uList.innerHTML = data.users.map(u => `
+            <div class="bg-white/5 p-4 rounded-xl border border-white/10 flex justify-between items-center">
+                <div>
+                    <p class="font-bold">${u.name}</p>
+                    <p class="text-[10px] text-gray-500">${u.email}</p>
+                </div>
+                <div class="flex gap-2">
+                    <span class="text-[8px] px-2 py-1 rounded ${u.verified ? 'bg-green-500/20 text-green-400' : 'bg-yellow-500/20 text-yellow-400'}">${u.verified ? 'VERIFICADO' : 'PENDIENTE'}</span>
+                    <span class="text-[8px] px-2 py-1 rounded bg-red-400 text-black font-bold">${u.role}</span>
+                </div>
+            </div>
+        `).join('');
+
+        aList.innerHTML = data.actions.map(a => `
+            <div class="border-l border-white/10 pl-3 py-1 mb-2">
+                <span class="text-gray-500">${new Date(a.timestamp).toLocaleTimeString()}</span>
+                <span class="text-cyan-400 mx-2">${a.email}:</span>
+                <span class="text-gray-300">${a.action}</span>
+            </div>
+        `).join('');
+    };
+
+    checkAuth();
     initWeather();
     loadCuriosities();
 
