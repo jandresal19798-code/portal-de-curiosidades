@@ -125,34 +125,141 @@ nav {
     box-shadow: 0 15px 35px rgba(99, 102, 241, 0.5);
 }
 
+/* Hero Enhanced */
+.highlight {
+    color: #22c55e;
+    text-shadow: 0 0 20px rgba(34, 197, 94, 0.5);
+}
+
+.hero-btns {
+    display: flex;
+    gap: 1.5rem;
+}
+
+.btn-secondary {
+    display: inline-block;
+    padding: 1rem 2.5rem;
+    border: 2px solid var(--primary);
+    color: white;
+    text-decoration: none;
+    font-weight: 600;
+    border-radius: 3rem;
+    transition: var(--transition);
+}
+
+.btn-secondary:hover {
+    background: var(--primary);
+    transform: translateY(-5px);
+}
+
 .hero-visual {
+    position: relative;
+    width: 400px;
+    height: 400px;
+}
+
+.orb {
+    width: 250px;
+    height: 250px;
+    background: radial-gradient(circle, #6366f1, #22c55e);
+    border-radius: 50%;
+    filter: blur(40px);
+    animation: pulse 4s infinite alternate;
+}
+
+.orb-ring {
     position: absolute;
-    right: -5%;
     top: 50%;
-    transform: translateY(-50%);
-    width: 600px;
-    height: 600px;
-    z-index: 1;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 320px;
+    height: 320px;
+    border: 2px dashed rgba(34, 197, 94, 0.3);
+    border-radius: 50%;
+    animation: rotate 20s linear infinite;
 }
 
-.blob-gradient {
+@keyframes pulse {
+    from {
+        transform: scale(1);
+        opacity: 0.5;
+    }
+
+    to {
+        transform: scale(1.3);
+        opacity: 0.8;
+    }
+}
+
+@keyframes rotate {
+    from {
+        transform: translate(-50%, -50%) rotate(0deg);
+    }
+
+    to {
+        transform: translate(-50%, -50%) rotate(360deg);
+    }
+}
+
+/* Games Section */
+.games-section {
+    padding: 100px 10%;
+    text-align: center;
+}
+
+.games-section p {
+    color: var(--text-dim);
+    margin-bottom: 3rem;
+}
+
+.game-container {
+    padding: 4rem;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.btn-game {
+    background: #0f172a;
+    border: 2px solid #22c55e;
+    color: #22c55e;
+    padding: 1.5rem 3rem;
+    margin: 1rem;
+    font-size: 1.2rem;
+    font-weight: 800;
+    cursor: pointer;
+    border-radius: 1rem;
+    transition: 0.3s;
+}
+
+.btn-game:hover {
+    background: #22c55e;
+    color: black;
+}
+
+#game-board {
+    margin-top: 2rem;
+}
+
+.quiz-option {
+    display: block;
     width: 100%;
-    height: 100%;
-    background: linear-gradient(45deg, #6366f1, #ec4899, #8b5cf6);
-    filter: blur(80px);
-    border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
-    animation: blobify 10s infinite alternate linear;
-    opacity: 0.6;
+    padding: 1rem;
+    margin: 0.5rem 0;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--glass-border);
+    border-radius: 0.5rem;
+    cursor: pointer;
+    color: white;
 }
 
-@keyframes blobify {
-    0% {
-        border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
-    }
+.quiz-option:hover {
+    background: var(--primary);
+}
 
-    100% {
-        border-radius: 50% 50% 50% 50% / 50% 50% 50% 50%;
-    }
+/* Weather Widget Improved */
+.weather-glass {
+    min-width: 250px;
+    justify-content: center;
 }
 
 /* Grid Section */

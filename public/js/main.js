@@ -241,3 +241,117 @@ document.addEventListener('DOMContentLoaded', () => {
     initWeather();
     loadCuriosities();
 });
+
+// --- GAMES LOGIC ---
+function startQuiz() {
+    const board = document.getElementById('game-board');
+    const selection = document.getElementById('game-selection');
+    selection.classList.add('hidden');
+    board.classList.remove('hidden');
+
+    const questions = [
+        { q: "¿Cuántos corazones tiene un pulpo?", a: ["1", "2", "3", "4"], correct: 2 },
+        { q: "¿Qué planeta tiene un día más largo que su año?", a: ["Marte", "Venus", "Júpiter", "Saturno"], correct: 1 },
+        { q: "¿De qué color es el atardecer en Marte?", a: ["Rojo", "Verde", "Azul", "Amarillo"], correct: 2 }
+    ];
+
+    let current = 0;
+
+    const showQuestion = () => {
+        if (current >= questions.length) {
+            const secretFacts = [
+                "¡DATO SECRETO! ¿Sabías que los astronautas crecen hasta 5 cm en el espacio? 👨‍🚀",
+                "¡DATO SECRETO! Existe una nube de alcohol en el espacio que mide 463 mil millones de km. 🍺🌌",
+                "¡DATO SECRETO! Las ovejas pueden reconocer caras humanas. 🐑📸"
+            ];
+            const reward = secretFacts[Math.floor(Math.random() * secretFacts.length)];
+            board.innerHTML = `
+                <h3 style="color:#22c55e">¡EUREKA! HAS GANADO</h3>
+                <div class="links-section" style="margin-top:1rem">
+                    <p><b>Recompensa del Dr. Curioso:</b></p>
+                    <p>${reward}</p>
+                </div>
+                <button onclick="location.reload()" class="btn-game" style="margin-top:1rem">Volver al Inicio</button>
+            `;
+            return;
+        }
+        const q = questions[current];
+        board.innerHTML = `
+            <h3>${q.q}</h3>
+            ${q.a.map((opt, i) => `<button class="quiz-option" onclick="checkAnswer(${i}, ${q.correct})">${opt}</button>`).join('')}
+        `;
+    };
+
+    window.checkAnswer = (idx, correct) => {
+        if (idx === correct) {
+            alert("¡EUREKA! Correcto.");
+            current++;
+            showQuestion();
+        } else {
+            alert("¡BOOM! Error. Inténtalo de nuevo, humano.");
+        }
+    };
+
+    showQuestion();
+}
+
+function startMemory() {
+    const board = document.getElementById('game-board');
+    const selection = document.getElementById('game-selection');
+    selection.classList.add('hidden');
+    board.classList.remove('hidden');
+
+    const icons = ['🧬', '🧬', '🧪', '🧪', '🧠', '🧠', '🌌', '🌌', '🐙', '🐙', '🦖', '🦖'];
+    const shuffled = icons.sort(() => Math.random() - 0.5);
+
+    board.innerHTML = `
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;">
+            ${shuffled.map((icon, i) => `
+                <div class="card glass memory-card" style="height: 100px; display: flex; align-items: center; justify-content: center; font-size: 2rem; cursor: pointer;" onclick="flipCard(this, '${icon}')">
+                    ❓
+                </div>
+            `).join('')}
+        </div>
+        <button onclick="location.reload()" class="btn-game" style="margin-top:20px">Reiniciar</button>
+    `;
+
+    let flipped = [];
+    window.flipCard = (el, icon) => {
+        if (flipped.length < 2 && !el.classList.contains('matched')) {
+            el.innerText = icon;
+            flipped.push({ el, icon });
+            if (flipped.length === 2) {
+                if (flipped[0].icon === flipped[1].icon) {
+                    flipped.forEach(f => f.el.classList.add('matched'));
+                    flipped = [];
+                    checkWin();
+                } else {
+                    setTimeout(() => {
+                        flipped.forEach(f => f.el.innerText = '❓');
+                        flipped = [];
+                    }, 1000);
+                }
+            }
+        }
+    };
+
+    const checkWin = () => {
+        const remaining = document.querySelectorAll('.memory-card:not(.matched)');
+        if (remaining.length === 0) {
+            const biologoySecrets = [
+                "¡DATO SECRETO! Las vacas tienen mejores amigas y se estresan si las separan. 🐄❤️",
+                "¡DATO SECRETO! Los lobos aúllan con tonos diferentes para que otros lobos sepan quiénes son. 🐺🎶",
+                "¡DATO SECRETO! Las ratas se ríen cuando les haces cosquillas. 🐀😂"
+            ];
+            const reward = biologoySecrets[Math.floor(Math.random() * biologoySecrets.length)];
+            board.innerHTML = `
+                <h3 style="color:#22c55e">¡MEMORIA DE ELEFANTE!</h3>
+                <div class="links-section" style="margin-top:1rem">
+                    <p><b>Recompensa biológica:</b></p>
+                    <p>${reward}</p>
+                </div>
+                <button onclick="location.reload()" class="btn-game" style="margin-top:1rem">Volver al Inicio</button>
+            `;
+        }
+    };
+}
