@@ -7,21 +7,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let curiosities = [];
 
-    // Load Curiosities
-    async function loadCuriosities() {
-        try {
-            curiosities = await API.getCuriosities();
-            renderGrid(curiosities);
-            initMarquee(curiosities);
-        } catch (error) {
-            grid.innerHTML = '<p class="error">Error al cargar curiosidades. Inténtalo de nuevo más tarde.</p>';
-        }
-    }
-
     function renderGrid(items) {
+        // Clear skeleton
+        grid.innerHTML = '';
+
         grid.innerHTML = items.slice(0, 8).map(item => `
             <div class="daily-card" onclick="openDetail(${item.id})">
-                <img src="${item.image}" alt="${item.title}">
+                <div class="img-wrapper">
+                    <img src="${item.image}" alt="${item.title}" loading="lazy">
+                </div>
                 <h4>${item.title}</h4>
             </div>
         `).join('');
@@ -29,12 +23,26 @@ document.addEventListener('DOMContentLoaded', () => {
         // Render Trending Sidebar
         const sidebar = document.getElementById('trending-list');
         if (sidebar) {
-            sidebar.innerHTML = items.slice(8, 13).map(item => `
-                <div class="trending-item">
+            sidebar.innerHTML = items.slice(8, 14).map(item => `
+                <div class="trending-item" onclick="openDetail(${item.id})">
                     <img src="${item.image}" alt="thumb" class="trending-thumb">
                     <p>${item.title}</p>
                 </div>
             `).join('');
+        }
+    }
+
+    // Load Curiosities with artificial delay for skeleton demo
+    async function loadCuriosities() {
+        try {
+            // Skeleton will show while this waits
+            const data = await API.getCuriosities();
+            setTimeout(() => {
+                curiosities = data;
+                renderGrid(curiosities);
+            }, 600); // Small delay to appreciate skeletons
+        } catch (error) {
+            grid.innerHTML = '<p class="error">Error loading chronicles.</p>';
         }
     }
 
