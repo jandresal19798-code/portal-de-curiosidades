@@ -190,6 +190,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                 </div>
                 
+                <!-- Botón Volver al Inicio -->
+                <button onclick="window.closeModal()" class="mb-6 flex items-center gap-2 text-gray-400 hover:text-cyan-400 transition-colors group">
+                    <span class="text-xl group-hover:-translate-x-1 transition-transform">←</span>
+                    <span class="text-sm font-bold uppercase tracking-wider">Volver al Inicio</span>
+                </button>
+
                 <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8 mt-4">
                     <h2 class="text-4xl md:text-6xl font-bold leading-tight m-0">${item.title}</h2>
                     <div class="flex gap-3">
