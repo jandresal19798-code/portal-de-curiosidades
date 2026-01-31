@@ -1,16 +1,19 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CurioSphere | Descubre el Mundo</title>
-    <meta name="description" content="Explora curiosidades asombrosas sobre ciencia, naturaleza, historia y el espacio. Únete a la comunidad y comparte tus pensamientos.">
+    <meta name="description"
+        content="Explora curiosidades asombrosas sobre ciencia, naturaleza, historia y el espacio. Únete a la comunidad y comparte tus pensamientos.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
     <link rel="icon" href="https://fav.farm/✨" />
 </head>
+
 <body>
     <div id="app">
         <header>
@@ -30,7 +33,8 @@
             <section id="home" class="hero">
                 <div class="hero-content">
                     <h2 class="reveal">¿Sabías que...?</h2>
-                    <p class="reveal-delay">Sumérgete en un océano de datos fascinantes y descubre lo increíble que es nuestro mundo.</p>
+                    <p class="reveal-delay">Sumérgete en un océano de datos fascinantes y descubre lo increíble que es
+                        nuestro mundo.</p>
                     <a href="#explore" class="btn-primary">Explorar Curiosidades</a>
                 </div>
                 <div class="hero-visual">
@@ -41,6 +45,11 @@
             <section id="explore">
                 <div class="section-header">
                     <h2>Descubrimientos Recientes</h2>
+                    <div id="weather-widget" class="weather-glass">
+                        <span id="weather-city">Cargando clima...</span>
+                        <span id="weather-temp"></span>
+                        <span id="weather-desc"></span>
+                    </div>
                     <div class="filters">
                         <button class="filter-btn active" data-category="all">Todos</button>
                         <button class="filter-btn" data-category="Ciencia">Ciencia</button>
@@ -55,6 +64,13 @@
                 </div>
             </section>
         </main>
+
+        <!-- Marquee Banner -->
+        <div class="marquee-banner">
+            <div class="marquee-content" id="marquee-content">
+                <!-- Injected by JS -->
+            </div>
+        </div>
 
         <!-- Dynamic Modal for Details and Comments -->
         <div id="modal" class="modal hidden">
@@ -74,4 +90,5 @@
     <script src="js/api.js"></script>
     <script src="js/main.js"></script>
 </body>
+
 </html>

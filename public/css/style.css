@@ -368,9 +368,63 @@ nav {
     }
 }
 
+/* Weather Widget */
+.weather-glass {
+    background: var(--glass-bg);
+    backdrop-filter: blur(5px);
+    border: 1px solid var(--glass-border);
+    padding: 0.5rem 1.5rem;
+    border-radius: 2rem;
+    display: flex;
+    gap: 1rem;
+    font-size: 0.9rem;
+    align-items: center;
+}
+
+/* Marquee Banner */
+.marquee-banner {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    background: rgba(15, 23, 42, 0.9);
+    backdrop-filter: blur(10px);
+    border-top: 1px solid var(--glass-border);
+    padding: 0.75rem 0;
+    overflow: hidden;
+    z-index: 1000;
+}
+
+.marquee-content {
+    display: flex;
+    white-space: nowrap;
+    animation: marquee 40s linear infinite;
+}
+
+.marquee-item {
+    padding: 0 2rem;
+    color: var(--text-light);
+    font-weight: 500;
+}
+
+.marquee-item span {
+    color: var(--primary);
+    margin-right: 0.5rem;
+}
+
+@keyframes marquee {
+    0% {
+        transform: translateX(0);
+    }
+
+    100% {
+        transform: translateX(-50%);
+    }
+}
+
 footer {
     text-align: center;
-    padding: 4rem;
+    padding: 6rem 4rem 8rem;
+    /* Added extra bottom padding for marquee */
     color: var(--text-dim);
     border-top: 1px solid var(--glass-border);
 }

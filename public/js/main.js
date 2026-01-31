@@ -12,6 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             curiosities = await API.getCuriosities();
             renderGrid(curiosities);
+            initMarquee(curiosities);
         } catch (error) {
             grid.innerHTML = '<p class="error">Error al cargar curiosidades. Inténtalo de nuevo más tarde.</p>';
         }
@@ -52,6 +53,14 @@ document.addEventListener('DOMContentLoaded', () => {
             <span class="card-category">${item.category}</span>
             <h2>${item.title}</h2>
             <p class="full-fact">${item.fact}</p>
+            ${item.links ? `
+                <div class="links-section">
+                    <h4>Fuentes y Más Información:</h4>
+                    <ul>
+                        ${item.links.map(link => `<li><a href="${link}" target="_blank" rel="noopener">${link}</a></li>`).join('')}
+                    </ul>
+                </div>
+            ` : ''}
             
             <div class="comments-section">
                 <h3>Comentarios</h3>
@@ -121,5 +130,36 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.target === modal) closeModal.onclick();
     };
 
+
+    // Marquee Logic
+    function initMarquee(items) {
+        const content = document.getElementById('marquee-content');
+        const facts = items.map(i => `<div class="marquee-item"><span>💡 SABÍAS QUE:</span> ${i.fact}</div>`).join('');
+        // Double the content for smooth infinite loop
+        content.innerHTML = facts + facts;
+    }
+
+    // Weather Logic
+    function initWeather() {
+        if ("geolocation" in navigator) {
+            navigator.geolocation.getCurrentPosition(async (position) => {
+                try {
+                    const { latitude, longitude } = position.coords;
+                    const data = await API.getWeather(latitude, longitude);
+                    const weather = data.current_weather;
+
+                    document.getElementById('weather-city').innerText = "Tu ubicación";
+                    document.getElementById('weather-temp').innerText = `${weather.temperature}°C`;
+                    document.getElementById('weather-desc').innerText = `Viento: ${weather.windspeed}km/h`;
+                } catch (e) {
+                    document.getElementById('weather-city').innerText = "Clima no disponible";
+                }
+            }, () => {
+                document.getElementById('weather-city').innerText = "Permiso denegado";
+            });
+        }
+    }
+
+    initWeather();
     loadCuriosities();
 });

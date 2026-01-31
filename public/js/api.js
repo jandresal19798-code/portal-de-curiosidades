@@ -16,5 +16,11 @@ const API = {
             body: JSON.stringify({ author, text })
         });
         return res.json();
+    },
+
+    async getWeather(lat, lon) {
+        // Using a public API like Open-Meteo which doesn't require a key for simple use
+        const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`);
+        return res.json();
     }
 };
