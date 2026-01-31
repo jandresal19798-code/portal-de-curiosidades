@@ -4,146 +4,196 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cosmic Chronicles | Explora lo Increíble</title>
-    <meta name="description"
-        content="Descubre los secretos del universo en Cosmic Chronicles. Curiosidades sobre ciencia, historia y tecnología con el toque del Dr. Curioso.">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <title>CurioSphere | Explora lo Increíble</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <link
-        href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Plus+Jakarta+Sans:wght@300;400;500;700&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&family=Playfair+Display:wght@700&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
     <link rel="icon" href="https://fav.farm/🚀" />
 </head>
 
-<body>
-    <header class="main-header">
-        <div class="top-bar">
-            <div class="header-info">
-                <div id="weather-widget" class="weather-mini">
-                    <span id="weather-city">Buscando clima...</span>
-                    <span id="weather-temp"></span>
-                    <span id="weather-desc"></span>
+<body class="min-h-screen pb-16">
+
+    <!-- Navigation -->
+    <nav class="fixed w-full z-50 top-0 px-6 py-4 border-b border-white/5 bg-black/50 backdrop-blur-lg">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-6">
+                <div class="text-2xl font-extrabold tracking-tighter flex items-center gap-2 cursor-pointer"
+                    onclick="window.scrollTo(0,0)">
+                    <span class="text-cyan-400">●</span> CURIOSPHERE
                 </div>
-                <div class="date-user">
-                    <span id="header-date">VIERNES, 30 DE ENERO, 2026</span>
-                    <img src="https://ui-avatars.com/api/?name=Dr+Curioso&background=2dd4bf&color=fff" alt="User"
-                        class="user-pill">
+                <!-- Weather Widget Integrated in Nav -->
+                <div id="weather-widget"
+                    class="hidden md:flex items-center gap-4 text-xs font-bold bg-white/5 px-4 py-2 rounded-full border border-white/10">
+                    <span id="weather-city" class="text-cyan-400">Madrid</span>
+                    <span id="weather-temp">--°C</span>
+                    <span id="weather-desc" class="text-gray-400">--</span>
                 </div>
             </div>
+            <div class="hidden md:flex gap-8 font-medium text-sm text-gray-400">
+                <a href="#home" class="nav-link text-white">Inicio</a>
+                <a href="#games" class="nav-link">Juegos</a>
+                <a href="#explore" class="nav-link">Explorar</a>
+            </div>
+            <button
+                class="bg-white text-black px-5 py-2 rounded-full font-bold text-sm hover:bg-cyan-400 transition-colors">
+                Unirse
+            </button>
         </div>
-        <nav class="nav-container">
-            <div class="logo-area">
-                <span class="logo-icon">🪐</span>
-                <h1>COSMIC CHRONICLES</h1>
-            </div>
-            <div class="nav-links">
-                <a href="#home" class="active">HOME</a>
-                <a href="#news">NEWS</a>
-                <a href="#oddities">ODDITIES</a>
-                <a href="#history">HISTORY</a>
-                <a href="#technology">TECHNOLOGY</a>
-                <a href="#contact">CONTACT</a>
-            </div>
-            <div class="nav-search">
-                <span>🔍</span>
-            </div>
-        </nav>
-    </header>
+    </nav>
 
-    <div id="app">
-        <main>
-            <section class="featured-section">
-                <div class="featured-main glass">
-                    <div class="featured-text">
-                        <h2>EXPLORE THE UNKNOWN</h2>
-                        <p>Uncovering Wonders, One Story At Time</p>
-                    </div>
-                </div>
-                <div class="featured-side glass">
-                    <p>Lost Treasures Unearthed</p>
-                </div>
-                <div class="featured-side glass artifact">
-                    <img src="https://images.unsplash.com/photo-1543157145-f78c636d023c?auto=format&fit=crop&w=300"
-                        alt="Artifact">
-                </div>
-                <div class="featured-actions">
-                    <button class="btn-cyan">WRITE US</button>
-                    <div class="social-icons">
-                        <span>𝕏</span> <span>𝑓</span> <span>📷</span> <span>📹</span>
-                    </div>
-                    <button class="btn-cyan outline">SUBSCRIBE</button>
-                </div>
-            </section>
-
-            <section id="games" class="games-mini-section">
-                <div class="section-badge">LABORATORIO DE PRUEBAS</div>
-                <div id="game-selection" class="game-choices">
-                    <button onclick="startQuiz()" class="btn-cyan outline">MENTAL QUIZ 🧠</button>
-                    <button onclick="startMemory()" class="btn-cyan outline">BIO MEMORIA 🧬</button>
-                </div>
-                <div id="game-board" class="hidden glass">
-                    <!-- Event results -->
-                </div>
-            </section>
-
-            <div class="content-layout">
-                <section class="stories-column">
-                    <div class="column-header">
-                        <h3>TOP STORIES</h3>
-                        <h3>CURIOUSER & CURIOUSER</h3>
-                    </div>
-                    <div id="curiosity-grid" class="daily-grid">
-                        <!-- Skeleton placeholders -->
-                        <div class="skeleton-card"></div>
-                        <div class="skeleton-card"></div>
-                        <div class="skeleton-card"></div>
-                        <div class="skeleton-card"></div>
-                    </div>
-                </section>
-
-                <aside class="trending-sidebar">
-                    <h3>TRENDING NOW</h3>
-                    <div id="trending-list" class="trending-list">
-                        <div class="skeleton-trend"></div>
-                        <div class="skeleton-trend"></div>
-                        <div class="skeleton-trend"></div>
-                    </div>
-                </aside>
+    <main class="pt-32 pb-20 px-6">
+        <!-- Hero Section -->
+        <section id="home" class="max-w-7xl mx-auto text-center mb-32">
+            <span class="text-cyan-400 font-bold tracking-widest text-xs uppercase mb-4 block">Laboratorio Digital del
+                Dr. Curioso</span>
+            <h1 class="playfair text-6xl md:text-8xl mb-8 leading-tight">
+                Explora lo <span
+                    class="italic text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-500">Increíble</span>
+            </h1>
+            <p class="text-gray-400 max-w-2xl mx-auto text-lg mb-10 leading-relaxed">
+                Descubre los secretos mejor guardados de la ciencia, el espacio y la naturaleza en un estallido de
+                conocimiento visual.
+            </p>
+            <div class="flex flex-wrap justify-center gap-4">
+                <a href="#explore" class="btn-glow px-8 py-4 rounded-full font-bold">Descubrir Ahora</a>
+                <a href="#games" class="px-8 py-4 rounded-full font-bold border border-white/10 hover:bg-white/5">Zona
+                    de Juegos 🎮</a>
             </div>
-        </main>
+        </section>
 
-        <!-- Bot de Curiosidades -->
-        <div id="bot-container">
-            <button id="bot-toggle" onclick="toggleBot()">💬 Bot Curioso</button>
-            <div id="bot-chat" class="glass hidden">
-                <div class="chat-header">Asistente de Curiosidades 📗</div>
-                <div id="bot-messages"></div>
-                <input type="text" id="bot-input" placeholder="Pregunta algo..." onkeypress="botMessage(event)">
+        <!-- Games Section -->
+        <section id="games" class="max-w-3xl mx-auto mb-32">
+            <div class="flex justify-between items-end mb-12">
+                <div>
+                    <h2 class="text-3xl font-bold mb-2">Zona de Juegos 🧪</h2>
+                    <p class="text-gray-500 text-sm">Desafía tu mente con experimentos digitales</p>
+                </div>
             </div>
+
+            <div id="game-selection" class="grid md:grid-cols-2 gap-8">
+                <div class="glass-card p-10 flex items-center justify-between group cursor-pointer"
+                    onclick="startQuiz()">
+                    <div>
+                        <h3 class="text-xl font-bold mb-2 group-hover:text-cyan-400 transition-colors">Mental-Quiz 🧠
+                        </h3>
+                        <p class="text-gray-500 text-sm">¿Qué tanto sabes realmente del mundo?</p>
+                    </div>
+                    <div class="text-3xl opacity-50 group-hover:opacity-100 transition-opacity">→</div>
+                </div>
+                <div class="glass-card p-10 flex items-center justify-between group cursor-pointer"
+                    onclick="startMemory()">
+                    <div>
+                        <h3 class="text-xl font-bold mb-2 group-hover:text-purple-400 transition-colors">Bio-Memoria 🧬
+                        </h3>
+                        <p class="text-gray-500 text-sm">Entrena tu cerebro con patrones biológicos</p>
+                    </div>
+                    <div class="text-3xl opacity-50 group-hover:opacity-100 transition-opacity">→</div>
+                </div>
+            </div>
+
+            <!-- Game Board Container -->
+            <div id="game-board" class="hidden glass-card p-10 text-center mt-8">
+                <!-- Content injected by JS -->
+            </div>
+        </section>
+
+        <!-- Explore Section -->
+        <section id="explore" class="max-w-7xl mx-auto">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
+                <h2 class="text-3xl font-bold font-serif">Descubrimientos Recientes</h2>
+                <div class="flex gap-2 overflow-x-auto pb-2 no-scrollbar text-xs">
+                    <button class="filter-btn active bg-cyan-400 text-black px-4 py-2 rounded-full font-bold"
+                        data-category="all">Todos</button>
+                    <button
+                        class="filter-btn bg-white/5 hover:bg-white/10 px-4 py-2 rounded-full border border-white/5 transition-colors"
+                        data-category="Ciencia">Ciencia</button>
+                    <button
+                        class="filter-btn bg-white/5 hover:bg-white/10 px-4 py-2 rounded-full border border-white/5 transition-colors"
+                        data-category="Espacio">Espacio</button>
+                    <button
+                        class="filter-btn bg-white/5 hover:bg-white/10 px-4 py-2 rounded-full border border-white/5 transition-colors"
+                        data-category="Animales">Animales</button>
+                    <button
+                        class="filter-btn bg-white/5 hover:bg-white/10 px-4 py-2 rounded-full border border-white/5 transition-colors"
+                        data-category="Naturaleza">Naturaleza</button>
+                </div>
+            </div>
+
+            <div id="curiosity-grid" class="grid md:grid-cols-3 gap-8">
+                <!-- Skeleton placeholders -->
+                <div class="glass-card overflow-hidden h-[450px] skeleton"></div>
+                <div class="glass-card overflow-hidden h-[450px] skeleton"></div>
+                <div class="glass-card overflow-hidden h-[450px] skeleton"></div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Marquee Banner -->
+    <div
+        class="fixed bottom-0 w-full h-12 bg-black/80 backdrop-blur-xl border-t border-white/5 flex items-center overflow-hidden z-40">
+        <div id="marquee-content" class="flex whitespace-nowrap gap-12 font-bold text-xs">
+            <!-- Injected by JS -->
         </div>
-
-        <!-- Marquee Banner -->
-        <div class="marquee-banner">
-            <div class="marquee-content" id="marquee-content">
-                <!-- Injected by JS -->
-            </div>
-        </div>
-
-        <!-- Dynamic Modal for Details and Comments -->
-        <div id="modal" class="modal hidden">
-            <div class="modal-content glass">
-                <button class="close-modal">&times;</button>
-                <div id="modal-body">
-                    <!-- Content injected by JS -->
-                </div>
-            </div>
-        </div>
-
-        <footer>
-            <p>&copy; 2024 CurioSphere. Creado con ❤️ para mentes curiosas.</p>
-        </footer>
     </div>
+
+    <!-- Bot Floating Button -->
+    <div class="fixed bottom-20 right-8 z-50">
+        <button onclick="toggleBot()"
+            class="btn-glow w-16 h-16 rounded-2xl flex items-center justify-center text-3xl shadow-2xl relative">
+            💬
+            <span class="absolute -top-1 -right-1 flex h-3 w-3">
+                <span
+                    class="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-3 w-3 bg-cyan-500"></span>
+            </span>
+        </button>
+
+        <!-- Bot Chat Window -->
+        <div id="bot-chat"
+            class="hidden absolute bottom-20 right-0 w-[350px] overflow-hidden glass-card flex flex-col shadow-2xl">
+            <div
+                class="chat-header p-4 border-b border-white/10 bg-black/40 font-bold text-cyan-400 flex justify-between items-center">
+                <span>LABORATORIO DEL DR. CURIOSO 🧪</span>
+                <button onclick="toggleBot()" class="text-white/50 hover:text-white">✕</button>
+            </div>
+            <div id="bot-messages" class="h-[350px] overflow-y-auto p-4 space-y-4 text-sm font-mono bg-black/20">
+                <!-- Messages -->
+            </div>
+            <div class="p-4 bg-black/40">
+                <input type="text" id="bot-input" onkeypress="botMessage(event)" placeholder="Pregunta algo..."
+                    class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-2 text-cyan-400 font-mono text-xs focus:ring-1 focus:ring-cyan-400 outline-none">
+            </div>
+        </div>
+    </div>
+
+    <!-- Detail Modal -->
+    <div id="modal" class="hidden fixed inset-0 z-[60] flex items-center justify-center p-6">
+        <div class="absolute inset-0 bg-black/90 backdrop-blur-md" onclick="closeModal()"></div>
+        <div class="relative glass-card w-full max-w-4xl max-h-[90vh] overflow-y-auto p-8 md:p-12 overflow-x-hidden">
+            <button onclick="closeModal()"
+                class="absolute top-6 right-6 text-2xl text-gray-400 hover:text-white transition-colors">✕</button>
+            <div id="modal-body">
+                <!-- Content -->
+            </div>
+        </div>
+    </div>
+
+    <footer class="border-t border-white/5 py-12 px-6">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
+            <div class="flex items-center gap-2 font-bold text-sm">
+                <span class="text-cyan-400">●</span> CURIOSPHERE 2026
+            </div>
+            <p class="text-gray-500 text-xs text-center md:text-left">Explorando las fronteras del conocimiento digital.
+            </p>
+            <div class="flex gap-8 text-gray-500 text-xs font-semibold">
+                <a href="#" class="hover:text-cyan-400 transition-colors">PRIVACIDAD</a>
+                <a href="#" class="hover:text-cyan-400 transition-colors">TÉRMINOS</a>
+                <a href="#" class="hover:text-cyan-400 transition-colors">CONTACTO</a>
+            </div>
+        </div>
+    </footer>
 
     <script src="js/api.js"></script>
     <script src="js/main.js"></script>

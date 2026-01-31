@@ -8,28 +8,38 @@ document.addEventListener('DOMContentLoaded', () => {
     let curiosities = [];
 
     function renderGrid(items) {
-        // Clear skeleton
         grid.innerHTML = '';
-
-        grid.innerHTML = items.slice(0, 8).map(item => `
-            <div class="daily-card" onclick="openDetail(${item.id})">
-                <div class="img-wrapper">
-                    <img src="${item.image}" alt="${item.title}" loading="lazy">
-                </div>
-                <h4>${item.title}</h4>
-            </div>
-        `).join('');
-
-        // Render Trending Sidebar
-        const sidebar = document.getElementById('trending-list');
-        if (sidebar) {
-            sidebar.innerHTML = items.slice(8, 14).map(item => `
-                <div class="trending-item" onclick="openDetail(${item.id})">
-                    <img src="${item.image}" alt="thumb" class="trending-thumb">
-                    <p>${item.title}</p>
-                </div>
-            `).join('');
+        if (items.length === 0) {
+            grid.innerHTML = '<p class="col-span-full text-center text-gray-400 py-10">No se encontraron curiosidades en esta categoría.</p>';
+            return;
         }
+
+        grid.innerHTML = items.map(item => {
+            const colors = {
+                'Ciencia': 'text-cyan-400',
+                'Espacio': 'text-purple-400',
+                'Animales': 'text-green-400',
+                'Naturaleza': 'text-orange-400',
+                'Cuerpo Humano': 'text-red-400'
+            };
+            const accent = colors[item.category] || 'text-cyan-400';
+
+            return `
+                <div class="glass-card overflow-hidden flex flex-col animate-in">
+                    <div class="h-56 bg-cover bg-center" style="background-image: url('${item.image}')"></div>
+                    <div class="p-6 flex-grow">
+                        <span class="${accent} text-[10px] font-bold uppercase tracking-[0.2em] mb-2 block">${item.category}</span>
+                        <h3 class="text-xl font-bold mb-3 leading-snug">${item.title}</h3>
+                        <p class="text-gray-400 text-sm leading-relaxed line-clamp-3">${item.fact}</p>
+                    </div>
+                    <div class="p-6 pt-0 mt-auto">
+                        <button onclick="openDetail(${item.id})" class="text-white text-sm font-bold flex items-center gap-2 hover:gap-4 transition-all group">
+                            Leer más <span class="text-cyan-400 group-hover:translate-x-1 transition-transform">→</span>
+                        </button>
+                    </div>
+                </div>
+            `;
+        }).join('');
     }
 
     // Load Curiosities with artificial delay for skeleton demo
@@ -49,8 +59,13 @@ document.addEventListener('DOMContentLoaded', () => {
     // Filter Logic
     filters.forEach(btn => {
         btn.addEventListener('click', () => {
-            filters.forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
+            filters.forEach(b => {
+                b.classList.remove('active', 'bg-cyan-400', 'text-black');
+                b.classList.add('bg-white/5', 'text-gray-400');
+            });
+            btn.classList.add('active', 'bg-cyan-400', 'text-black');
+            btn.classList.remove('bg-white/5', 'text-gray-400');
+
             const cat = btn.dataset.category;
             const filtered = cat === 'all' ? curiosities : curiosities.filter(c => c.category === cat);
             renderGrid(filtered);
@@ -62,28 +77,49 @@ document.addEventListener('DOMContentLoaded', () => {
         const item = curiosities.find(c => c.id === id);
         if (!item) return;
 
+        const colors = {
+            'Ciencia': 'text-cyan-400',
+            'Espacio': 'text-purple-400',
+            'Animales': 'text-green-400',
+            'Naturaleza': 'text-orange-400',
+            'Cuerpo Humano': 'text-red-400'
+        };
+        const accent = colors[item.category] || 'text-cyan-400';
+
         modalBody.innerHTML = `
-            <img src="${item.image}" alt="${item.title}" style="width:100%; border-radius:1rem; margin-bottom:2rem; height:300px; object-fit:cover;">
-            <span class="card-category">${item.category}</span>
-            <h2>${item.title}</h2>
-            <p class="full-fact">${item.fact}</p>
-            ${item.links ? `
-                <div class="links-section">
-                    <h4>Fuentes y Más Información:</h4>
-                    <ul>
-                        ${item.links.map(link => `<li><a href="${link}" target="_blank" rel="noopener">${link}</a></li>`).join('')}
-                    </ul>
+            <div class="animate-in">
+                <div class="h-80 md:h-[450px] w-[calc(100%+6rem)] -ml-12 -mt-12 mb-10 bg-cover bg-center relative" style="background-image: url('${item.image}')">
+                    <div class="absolute inset-0 bg-gradient-to-t from-[#05070a] via-transparent to-transparent"></div>
                 </div>
-            ` : ''}
+                <span class="${accent} text-xs font-bold uppercase tracking-[0.3em] mb-4 block">${item.category}</span>
+                <h2 class="playfair text-4xl md:text-6xl mb-8 leading-tight">${item.title}</h2>
+                <div class="prose prose-invert max-w-none mb-12">
+                    <p class="text-xl text-gray-300 leading-relaxed font-light">${item.fact}</p>
+                </div>
+                
+                ${item.links ? `
+                    <div class="links-section">
+                        <h4 class="text-xs font-extrabold text-cyan-400 uppercase tracking-widest mb-4">Bibliografía y Fuentes</h4>
+                        <ul class="space-y-3">
+                            ${item.links.map(link => `
+                                <li>
+                                    <a href="${link}" target="_blank" rel="noopener" class="text-sm text-gray-400 hover:text-white flex items-center gap-2 transition-colors">
+                                        <span class="text-cyan-400">⚡</span> ${new URL(link).hostname}
+                                    </a>
+                                </li>
+                            `).join('')}
+                        </ul>
+                    </div>
+                ` : ''}
             
-            <div class="comments-section">
-                <h3>Comentarios</h3>
-                <form id="comment-form" class="comment-form">
-                    <input type="text" id="author" placeholder="Tu nombre" required>
-                    <textarea id="text" placeholder="Escribe tu pensamiento..." required></textarea>
-                    <button type="submit" class="btn-primary">Publicar Comentario</button>
+            <div class="comments-section mt-12 pt-12 border-t border-white/10">
+                <h3 class="text-2xl font-bold mb-8">Comentarios</h3>
+                <form id="comment-form" class="space-y-4 mb-12">
+                    <input type="text" id="author" placeholder="Tu nombre" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 outline-none focus:border-cyan-400" required>
+                    <textarea id="text" placeholder="Escribe tu pensamiento..." class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-4 h-32 outline-none focus:border-cyan-400" required></textarea>
+                    <button type="submit" class="btn-glow px-8 py-3 rounded-full font-bold w-full md:w-auto">Publicar Pensamiento</button>
                 </form>
-                <div id="comment-list" class="comment-list">
+                <div id="comment-list" class="space-y-6">
                     Cargando comentarios...
                 </div>
             </div>
@@ -134,14 +170,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Close Modal
-    closeModal.onclick = () => {
+    // Modal Helpers
+    window.closeModal = () => {
         modal.classList.add('hidden');
         document.body.style.overflow = 'auto';
     };
 
     window.onclick = (e) => {
-        if (e.target === modal) closeModal.onclick();
+        if (e.target === modal) window.closeModal();
     };
 
 
@@ -194,9 +230,9 @@ document.addEventListener('DOMContentLoaded', () => {
     window.toggleBot = () => {
         const chat = document.getElementById('bot-chat');
         const container = document.getElementById('bot-messages');
-        chat.classList.toggle('active');
+        chat.classList.toggle('hidden');
 
-        if (chat.classList.contains('active') && container.innerHTML === "") {
+        if (!chat.classList.contains('hidden') && container.innerHTML === "") {
             const intros = [
                 "¡MWAHAHA! ¿Quién osa interrumpir mi fusión nuclear?",
                 "¡Eureka! ¡Has llegado justo a tiempo para mi experimento número 402!",
@@ -254,6 +290,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     initWeather();
     loadCuriosities();
+
+    // Auto-update Marquee every few items
+    API.getCuriosities().then(data => initMarquee(data));
 });
 
 // --- GAMES LOGIC ---
