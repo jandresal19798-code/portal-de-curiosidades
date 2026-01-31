@@ -56,6 +56,14 @@ const authenticateToken = (req, res, next) => {
 
     jwt.verify(token, JWT_SECRET, (err, user) => {
         if (err) return res.sendStatus(403);
+        
+        const users = getData(USERS_FILE);
+        const dbUser = users.find(u => u.id === user.id);
+        
+        if (dbUser?.blocked) {
+            return res.status(403).json({ error: 'Tu cuenta ha sido bloqueada. Contacta al administrador.' });
+        }
+        
         req.user = user;
         next();
     });
@@ -305,6 +313,56 @@ app.put('/api/admin/users/:id/role', authenticateToken, (req, res) => {
         res.json({ message: 'Rol actualizado', user: { ...user, password: undefined } });
     } catch (error) {
         res.status(500).json({ error: 'Error al actualizar rol' });
+    }
+});
+
+app.post('/api/admin/users/:id/reset-password', authenticateToken, (req, res) => {
+    if (req.user.role !== 'admin') return res.status(403).json({ error: 'Acceso denegado' });
+
+    try {
+        const users = getData(USERS_FILE);
+        const userId = parseInt(req.params.id);
+        const user = users.find(u => u.id === userId);
+
+        if (!user) return res.status(404).json({ error: 'Usuario no encontrado' });
+
+        const newPassword = Math.random().toString(36).slice(-8);
+        user.password = await bcrypt.hash(newPassword, 10);
+        saveData(USERS_FILE, users);
+        logAction(req.user.id, req.user.email, `Restableció contraseña de: ${user.email}`);
+
+        res.json({
+            message: 'Contraseña restablecida',
+            newPassword,
+            warning: 'Comparte esta contraseña con el usuario de forma segura'
+        });
+    } catch (error) {
+        res.status(500).json({ error: 'Error al restablecer contraseña' });
+    }
+});
+
+app.put('/api/admin/users/:id/block', authenticateToken, (req, res) => {
+    if (req.user.role !== 'admin') return res.status(403).json({ error: 'Acceso denegado' });
+
+    try {
+        const users = getData(USERS_FILE);
+        const userId = parseInt(req.params.id);
+
+        if (userId === req.user.id) {
+            return res.status(400).json({ error: 'No puedes bloquearte a ti mismo' });
+        }
+
+        const user = users.find(u => u.id === userId);
+        if (!user) return res.status(404).json({ error: 'Usuario no encontrado' });
+
+        user.blocked = req.body.blocked;
+        user.blockedAt = user.blocked ? new Date().toISOString() : null;
+        saveData(USERS_FILE, users);
+        logAction(req.user.id, req.user.email, `${user.blocked ? 'Bloqueó' : 'Desbloqueó'} a: ${user.email}`);
+
+        res.json({ message: user.blocked ? 'Usuario bloqueado' : 'Usuario desbloqueado', user: { ...user, password: undefined } });
+    } catch (error) {
+        res.status(500).json({ error: 'Error al bloquear/desbloquear usuario' });
     }
 });
 

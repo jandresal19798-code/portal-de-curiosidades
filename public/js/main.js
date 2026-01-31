@@ -1164,28 +1164,27 @@ function renderAdminDashboard(data) {
 
     const usersList = document.getElementById('admin-users-list');
     usersList.innerHTML = users.length ? users.map(user => `
-        <div class="glass-card p-3 flex justify-between items-center hover:bg-white/5 transition-colors">
+        <div class="glass-card p-3 flex justify-between items-center hover:bg-white/5 transition-colors ${user.blocked ? 'opacity-60 border border-red-500/30' : ''}">
             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-400 to-purple-500 flex items-center justify-center font-bold text-black text-sm">
+                <div class="w-10 h-10 rounded-full bg-gradient-to-br ${user.blocked ? 'from-red-500 to-red-700' : 'from-cyan-400 to-purple-500'} flex items-center justify-center font-bold text-black text-sm relative">
                     ${user.name?.charAt(0).toUpperCase() || '?'}
+                    ${user.blocked ? '<span class="absolute -top-1 -right-1 text-red-500 text-xs">🚫</span>' : ''}
                 </div>
                 <div>
                     <div class="font-bold text-sm flex items-center gap-2">
                         ${user.name || 'Sin nombre'}
                         ${user.role === 'admin' ? '<span class="text-[8px] bg-red-500/20 text-red-400 px-1.5 py-0.5 rounded border border-red-500/30">ADMIN</span>' : ''}
+                        ${user.blocked ? '<span class="text-[8px] bg-red-500/20 text-red-400 px-1.5 py-0.5 rounded border border-red-500/30">BLOQUEADO</span>' : ''}
                     </div>
                     <div class="text-xs text-gray-500">${user.email}</div>
+                    ${user.blocked ? `<div class="text-[10px] text-red-400 mt-0.5">Bloqueado: ${new Date(user.blockedAt).toLocaleDateString()}</div>` : ''}
                 </div>
             </div>
-            <div class="flex items-center gap-3">
-                <div class="text-right">
-                    <div class="text-[10px] text-gray-600">${new Date(user.createdAt).toLocaleDateString()}</div>
-                    <div class="text-[10px] ${user.verified ? 'text-green-400' : 'text-yellow-400'}">
-                        ${user.verified ? '✓ Verificado' : '⏳ Pendiente'}
-                    </div>
-                </div>
+            <div class="flex items-center gap-2">
                 ${user.role !== 'admin' ? `
-                    <button onclick="deleteUser(${user.id})" class="text-red-500 hover:text-red-400 text-xs px-2 py-1 rounded border border-red-500/30 hover:bg-red-500/10 transition-colors">✕</button>
+                    <button onclick="resetUserPassword(${user.id})" title="Resetear contraseña" class="text-yellow-400 hover:text-yellow-300 text-xs px-2 py-1 rounded border border-yellow-500/30 hover:bg-yellow-500/10 transition-colors">🔑</button>
+                    <button onclick="toggleUserBlock(${user.id}, ${!user.blocked})" title="${user.blocked ? 'Desbloquear' : 'Bloquear'}" class="${user.blocked ? 'text-green-400 hover:text-green-300 border-green-500/30 hover:bg-green-500/10' : 'text-orange-400 hover:text-orange-300 border-orange-500/30 hover:bg-orange-500/10'} text-xs px-2 py-1 rounded border transition-colors">${user.blocked ? '✓' : '🚫'}</button>
+                    <button onclick="deleteUser(${user.id})" title="Eliminar usuario" class="text-red-500 hover:text-red-400 text-xs px-2 py-1 rounded border border-red-500/30 hover:bg-red-500/10 transition-colors">✕</button>
                 ` : ''}
             </div>
         </div>
@@ -1256,10 +1255,49 @@ window.deleteCuriosity = async (id) => {
         if (res.error) {
             alert('Error: ' + res.error);
         } else {
+            toggleModal('curiosity-form-modal');
+            window.openAdmin();
+            window.allCuriosities = null;
+            API.getCuriosities().then(data => {
+                window.allCuriosities = data;
+                renderGrid(data);
+            });
+        }
+    } catch (err) {
+        alert('Error al guardar');
+    }
+});
+
+window.resetUserPassword = async (id) => {
+    if (!confirm('¿Restablecer la contraseña de este usuario? Se generará una nueva contraseña.')) return;
+
+    try {
+        const res = await API.resetUserPassword(id);
+        if (res.error) {
+            alert('Error: ' + res.error);
+        } else {
+            alert(`✅ Contraseña restablecida\n\nNueva contraseña: ${res.newPassword}\n\n⚠️ Comparte esta contraseña con el usuario de forma segura.`);
             window.openAdmin();
         }
     } catch (err) {
-        alert('Error al eliminar');
+        alert('Error al restablecer contraseña');
+    }
+};
+
+window.toggleUserBlock = async (id, block) => {
+    const action = block ? 'bloquear' : 'desbloquear';
+    if (!confirm(`¿Estás seguro de ${action} a este usuario?`)) return;
+
+    try {
+        const res = await API.blockUser(id, block);
+        if (res.error) {
+            alert('Error: ' + res.error);
+        } else {
+            alert(block ? '🚫 Usuario bloqueado' : '✅ Usuario desbloqueado');
+            window.openAdmin();
+        }
+    } catch (err) {
+        alert('Error al procesar solicitud');
     }
 };
 

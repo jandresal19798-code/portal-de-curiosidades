@@ -77,5 +77,27 @@ const API = {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         return res.json();
+    },
+
+    async resetUserPassword(id) {
+        const token = localStorage.getItem('token');
+        const res = await fetch(`/api/admin/users/${id}/reset-password`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        return res.json();
+    },
+
+    async blockUser(id, block) {
+        const token = localStorage.getItem('token');
+        const res = await fetch(`/api/admin/users/${id}/block`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ blocked: block })
+        });
+        return res.json();
     }
 };
