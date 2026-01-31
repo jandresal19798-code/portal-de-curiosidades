@@ -434,18 +434,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 900000);
     }
 
-    // Bot Logic (Consolidated)
-    if (container.innerHTML === "") {
-        const intros = [
-            "¡MWAHAHA! ¿Quién osa interrumpir mi fusión nuclear?",
-            "¡Eureka! ¡Has llegado justo a tiempo para mi experimento número 402!",
-            "¡Por los pelos de Einstein! ¡Un humano ha entrado en mi laboratorio!",
-            "¡Cuidado donde pisas! ¡Esa mancha verde es... bueno, mejor no preguntes!",
-            "¡Rápido! ¡Pásame la llave de 12 dimensiones! Ah, eres tú..."
-        ];
-        const welcome = intros[Math.floor(Math.random() * intros.length)];
-        container.innerHTML = `<div class="msg-bot"><b>Dr. Curioso 🧪:</b> ${welcome} ¿En qué locura científica puedo ayudarte hoy?</div>`;
-    }
+
 
     window.botMessage = (e) => {
         if (e.key === 'Enter') {
