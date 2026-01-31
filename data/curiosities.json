@@ -1,0 +1,42 @@
+[
+  {
+    "id": 1,
+    "title": "¿Por qué el cielo es azul?",
+    "category": "Ciencia",
+    "fact": "La luz solar llega a la atmósfera de la Tierra y se dispersa en todas las direcciones al chocar con los gases y las partículas del aire. La luz azul se dispersa más que los otros colores porque viaja en olas más cortas y más pequeñas. Este fenómeno se llama dispersión de Rayleigh.",
+    "image": "https://images.unsplash.com/photo-1501862700950-18382cd41497?auto=format&fit=crop&q=80&w=800",
+    "likes": 124
+  },
+  {
+    "id": 2,
+    "title": "El corazón de una ballena azul",
+    "category": "Naturaleza",
+    "fact": "El corazón de una ballena azul es tan grande que un ser humano podría nadar a través de sus arterias. Pesa alrededor de 180 kg y es del tamaño de un coche de golf.",
+    "image": "https://images.unsplash.com/photo-1568430462989-44163eb1752f?auto=format&fit=crop&q=80&w=800",
+    "likes": 89
+  },
+  {
+    "id": 3,
+    "title": "Miel eterna",
+    "category": "Historia",
+    "fact": "Los arqueólogos han encontrado tarros de miel en tumbas del antiguo Egipto que tienen más de 3,000 años y todavía son perfectamente comestibles. La miel es naturalmente ácida y baja en humedad, lo que la hace un ambiente inhóspito para las bacterias.",
+    "image": "https://images.unsplash.com/photo-1587049352846-4a222e784d38?auto=format&fit=crop&q=80&w=800",
+    "likes": 256
+  },
+  {
+    "id": 4,
+    "title": "Día de Venus",
+    "category": "Espacio",
+    "fact": "Un día en Venus es más largo que un año en Venus. Venus tarda 243 días terrestres en girar sobre su propio eje, pero solo 225 días terrestres en orbitar alrededor del Sol.",
+    "image": "https://images.unsplash.com/photo-1614732414444-af963b81f392?auto=format&fit=crop&q=80&w=800",
+    "likes": 167
+  },
+  {
+    "id": 5,
+    "title": "El pulpo tiene tres corazones",
+    "category": "Naturaleza",
+    "fact": "Dos corazones bombean sangre a las branquias, mientras que el tercero bombea sangre al resto del cuerpo. Además, su sangre es de color azul porque utiliza hemocianina rica en cobre en lugar de hemoglobina rica en hierro.",
+    "image": "https://images.unsplash.com/photo-1545671913-b89ac1b4ac10?auto=format&fit=crop&q=80&w=800",
+    "likes": 142
+  }
+]

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CurioSphere | Descubre el Mundo</title>
+    <meta name="description" content="Explora curiosidades asombrosas sobre ciencia, naturaleza, historia y el espacio. Únete a la comunidad y comparte tus pensamientos.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="icon" href="https://fav.farm/✨" />
+</head>
+<body>
+    <div id="app">
+        <header>
+            <nav class="glass">
+                <div class="logo">
+                    <span class="icon">✨</span>
+                    <h1>CurioSphere</h1>
+                </div>
+                <div class="nav-links">
+                    <a href="#home">Inicio</a>
+                    <a href="#explore">Explorar</a>
+                </div>
+            </nav>
+        </header>
+
+        <main>
+            <section id="home" class="hero">
+                <div class="hero-content">
+                    <h2 class="reveal">¿Sabías que...?</h2>
+                    <p class="reveal-delay">Sumérgete en un océano de datos fascinantes y descubre lo increíble que es nuestro mundo.</p>
+                    <a href="#explore" class="btn-primary">Explorar Curiosidades</a>
+                </div>
+                <div class="hero-visual">
+                    <div class="blob-gradient"></div>
+                </div>
+            </section>
+
+            <section id="explore">
+                <div class="section-header">
+                    <h2>Descubrimientos Recientes</h2>
+                    <div class="filters">
+                        <button class="filter-btn active" data-category="all">Todos</button>
+                        <button class="filter-btn" data-category="Ciencia">Ciencia</button>
+                        <button class="filter-btn" data-category="Naturaleza">Naturaleza</button>
+                        <button class="filter-btn" data-category="Espacio">Espacio</button>
+                    </div>
+                </div>
+
+                <div id="curiosity-grid" class="grid">
+                    <!-- Cards will be injected here -->
+                    <div class="loader">Cargando curiosidades...</div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Dynamic Modal for Details and Comments -->
+        <div id="modal" class="modal hidden">
+            <div class="modal-content glass">
+                <button class="close-modal">&times;</button>
+                <div id="modal-body">
+                    <!-- Content injected by JS -->
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>&copy; 2024 CurioSphere. Creado con ❤️ para mentes curiosas.</p>
+        </footer>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>
