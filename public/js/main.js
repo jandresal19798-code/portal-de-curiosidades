@@ -61,20 +61,46 @@ window.toggleBot = () => {
     }
 };
 
-window.botMessage = (e) => {
+window.botMessage = async (e) => {
     if (e.key === 'Enter') {
         const input = e.target;
-        const msg = input.value.toLowerCase();
+        const msg = input.value.trim();
+        if (!msg) return;
+
         const container = document.getElementById('bot-messages');
-        let response = "¡No me interrumpas! Estoy mezclando plutonio. Pregunta sobre átomos, animales o el espacio.";
 
-        if (msg.includes('ciencia')) response = "¡La ciencia es magia que funciona! 🧪";
-        if (msg.includes('animal')) response = "¡Los pulpos tienen 3 corazones! 🐙";
-        if (msg.includes('espacio')) response = "¡En Marte los atardeceres son azules! 🌌";
-
-        container.innerHTML += `<div class="msg-user"><b>Tú:</b> ${input.value}</div>`;
-        container.innerHTML += `<div class="msg-bot"><b>Dr. Curioso 🧪:</b> ${response}</div>`;
+        // Add user message
+        container.innerHTML += `<div class="msg-user"><b>Tú:</b> ${msg}</div>`;
         input.value = '';
+        container.scrollTop = container.scrollHeight;
+
+        // Add loading indicator
+        const loadingId = 'loading-' + Date.now();
+        container.innerHTML += `<div id="${loadingId}" class="msg-bot text-gray-500 italic">Dr. Curioso está pensando... �</div>`;
+        container.scrollTop = container.scrollHeight;
+
+        try {
+            const res = await fetch('/api/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: msg })
+            });
+
+            const data = await res.json();
+
+            // Remove loading and add response
+            document.getElementById(loadingId).remove();
+
+            if (data.error) {
+                container.innerHTML += `<div class="msg-bot text-red-400"><b>Error:</b> ${data.error}</div>`;
+            } else {
+                container.innerHTML += `<div class="msg-bot"><b>Dr. Curioso 🧪:</b> ${data.response}</div>`;
+            }
+        } catch (error) {
+            document.getElementById(loadingId).remove();
+            container.innerHTML += `<div class="msg-bot text-red-400"><b>Error:</b> No pude conectar con el laboratorio.</div>`;
+        }
+
         container.scrollTop = container.scrollHeight;
     }
 };

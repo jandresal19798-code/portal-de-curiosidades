@@ -5,6 +5,9 @@ const path = require('path');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const nodemailer = require('nodemailer');
+const Groq = require('groq-sdk');
+
+const groq = new Groq({ apiKey: process.env.GROQ_API_KEY || 'dummy_key' });
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -75,6 +78,40 @@ app.get('/api/comments/:id', (req, res) => {
         res.json(comments[curiosityId] || []);
     } catch (error) {
         res.status(500).json({ error: 'Error al obtener comentarios' });
+    }
+});
+
+app.post('/api/chat', async (req, res) => {
+    try {
+        const { message } = req.body;
+        if (!message) return res.status(400).json({ error: 'El mensaje es requerido' });
+
+        if (!process.env.GROQ_API_KEY) {
+            // Mock response if no key is configured, to avoid crashing
+            return res.json({ response: "¡Hola! Para hablar conmigo, necesito que mi creador configure mi cerebro (GROQ_API_KEY) en el sistema. 🧠⚡" });
+        }
+
+        const chatCompletion = await groq.chat.completions.create({
+            messages: [
+                {
+                    role: "system",
+                    content: "Eres el Dr. Curioso, un científico excéntrico, entusiasta y divertido. Tu pasión es la ciencia, el espacio, la naturaleza y los animales. Respondes preguntas con datos fascinantes, metáforas locas pero precisas, y un toque de humor. Usas emojis científicos (🧪, 🔭, 🧬, 🌌) frecuentemente. Si te preguntan algo fuera de tema, intenta relacionarlo con la ciencia de forma absurda pero inteligente. Tu objetivo es inspirar curiosidad."
+                },
+                {
+                    role: "user",
+                    content: message
+                }
+            ],
+            model: "llama3-70b-8192",
+            temperature: 0.7,
+            max_tokens: 300
+        });
+
+        res.json({ response: chatCompletion.choices[0]?.message?.content || "El Dr. Curioso está meditando en una singularidad... intenta de nuevo." });
+
+    } catch (error) {
+        console.error("Error en Groq:", error);
+        res.status(500).json({ error: 'Error al conectar con el Dr. Curioso' });
     }
 });
 
