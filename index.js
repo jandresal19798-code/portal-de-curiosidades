@@ -316,7 +316,7 @@ app.put('/api/admin/users/:id/role', authenticateToken, (req, res) => {
     }
 });
 
-app.post('/api/admin/users/:id/reset-password', authenticateToken, (req, res) => {
+app.post('/api/admin/users/:id/reset-password', authenticateToken, async (req, res) => {
     if (req.user.role !== 'admin') return res.status(403).json({ error: 'Acceso denegado' });
 
     try {
