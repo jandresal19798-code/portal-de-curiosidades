@@ -212,9 +212,10 @@ nav {
 }
 
 .card:hover {
-    transform: translateY(-10px);
-    border-color: var(--primary);
-    background: rgba(255, 255, 255, 0.08);
+    transform: translateY(-10px) scale(1.02);
+    border-color: var(--secondary);
+    background: rgba(255, 255, 255, 0.12);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
 }
 
 .card-image {
@@ -297,7 +298,31 @@ nav {
 #modal-body .full-fact {
     font-size: 1.2rem;
     margin-bottom: 2rem;
+    color: var(--text-light);
+    line-height: 1.8;
+}
+
+.links-section {
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background: rgba(99, 102, 241, 0.1);
+    border-radius: 1rem;
+    border-left: 4px solid var(--primary);
+}
+
+.links-section h4 {
+    margin-bottom: 0.5rem;
     color: var(--text-dim);
+}
+
+.links-section a {
+    color: var(--primary);
+    text-decoration: none;
+    word-break: break-all;
+}
+
+.links-section a:hover {
+    text-decoration: underline;
 }
 
 /* Comments Section */
@@ -409,6 +434,65 @@ nav {
 .marquee-item span {
     color: var(--primary);
     margin-right: 0.5rem;
+}
+
+/* Bot UI */
+#bot-container {
+    position: fixed;
+    right: 2rem;
+    bottom: 5rem;
+    z-index: 2000;
+}
+
+#bot-toggle {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    border: none;
+    color: white;
+    padding: 1rem 1.5rem;
+    border-radius: 3rem;
+    cursor: pointer;
+    font-weight: 600;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+    transition: var(--transition);
+}
+
+#bot-chat {
+    position: absolute;
+    bottom: 4.5rem;
+    right: 0;
+    width: 300px;
+    height: 400px;
+    display: none;
+    flex-direction: column;
+    padding: 1rem;
+}
+
+#bot-chat.active {
+    display: flex;
+}
+
+.chat-header {
+    font-weight: 800;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid var(--glass-border);
+    padding-bottom: 0.5rem;
+}
+
+#bot-messages {
+    flex: 1;
+    overflow-y: auto;
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+    padding-right: 5px;
+}
+
+#bot-input {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--glass-border);
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    color: white;
+    outline: none;
 }
 
 @keyframes marquee {

@@ -20,183 +20,143 @@
         "image": "https://images.unsplash.com/photo-1568430462989-44163eb1752f?auto=format&fit=crop&q=80&w=800"
     },
     {
-        "id": 3,
-        "title": "Miel eterna",
-        "category": "Historia",
-        "fact": "Los arqueólogos han encontrado miel en tumbas egipcias con más de 3,000 años que aún es comestible.",
+        "id": 21,
+        "title": "Metal líquido: Galio",
+        "category": "Química",
+        "fact": "El Galio se funde a 29.76 °C, lo que significa que se hace líquido en la palma de tu mano.",
         "links": [
-            "https://www.muyinteresante.es"
+            "https://www.rsc.org/periodic-table/element/31/gallium"
         ],
-        "image": "https://images.unsplash.com/photo-1587049352846-4a222e784d38?auto=format&fit=crop&q=80&w=800"
+        "image": "https://images.unsplash.com/photo-1554522432-8438096f9479?auto=format&fit=crop&q=80&w=800"
     },
     {
-        "id": 4,
-        "title": "Día de Venus",
-        "category": "Espacio",
-        "fact": "Un día en Venus es más largo que un año en Venus debido a su lentísima rotación.",
+        "id": 22,
+        "title": "El elemento más escaso",
+        "category": "Química",
+        "fact": "El Astato es el elemento más raro de la Tierra; se estima que hay menos de 28 gramos en toda la corteza terrestre.",
         "links": [
-            "https://naukas.com"
+            "https://education.jlab.org/itselemental/ele085.html"
         ],
-        "image": "https://images.unsplash.com/photo-1614732414444-af963b81f392?auto=format&fit=crop&q=80&w=800"
+        "image": "https://images.unsplash.com/photo-1597401493245-c7a8a54238c0?auto=format&fit=crop&q=80&w=800"
     },
     {
-        "id": 5,
-        "title": "Huesos humanos",
-        "category": "Cuerpo Humano",
-        "fact": "El cuerpo humano adulto tiene 206 huesos, y más de una cuarta parte están en los pies.",
-        "links": [
-            "https://www.saberecurioso.com"
-        ],
-        "image": "https://images.unsplash.com/photo-1581093588401-fbb62a02f120?auto=format&fit=crop&q=80&w=800"
-    },
-    {
-        "id": 6,
-        "title": "ADN de plátano",
-        "category": "Biología",
-        "fact": "Compartimos aproximadamente el 50% de nuestro ADN con los plátanos.",
-        "links": [
-            "https://www.agenciasinc.es"
-        ],
-        "image": "https://images.unsplash.com/photo-1528825871115-3581a5387919?auto=format&fit=crop&q=80&w=800"
-    },
-    {
-        "id": 7,
-        "title": "Tiburones ancestrales",
-        "category": "Naturaleza",
-        "fact": "Los tiburones han existido por más de 400 millones de años, son más antiguos que los árboles.",
-        "links": [
-            "https://www.vistaalmar.es"
-        ],
-        "image": "https://images.unsplash.com/photo-1560273074-c93173ec71dd?auto=format&fit=crop&q=80&w=800"
-    },
-    {
-        "id": 8,
-        "title": "Bacterias en el ombligo",
-        "category": "Cuerpo Humano",
-        "fact": "En el ombligo humano viven tantas especies de bacterias que forman un ecosistema del tamaño de una selva.",
-        "links": [
-            "https://www.cienciaxxi.com"
-        ],
-        "image": "https://images.unsplash.com/photo-1576086213369-97a306d36557?auto=format&fit=crop&q=80&w=800"
-    },
-    {
-        "id": 9,
-        "title": "Velocidad de la luz",
+        "id": 23,
+        "title": "Frío absoluto",
         "category": "Física",
-        "fact": "La luz viaja a 299,792,458 metros por segundo.",
+        "fact": "El cero absoluto (-273.15 °C) es la temperatura donde el movimiento atómico se detiene por completo.",
         "links": [
-            "https://www.fisicalab.com"
+            "https://www.sciencedirect.com/topics/engineering/absolute-zero"
         ],
-        "image": "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80&w=800"
+        "image": "https://images.unsplash.com/photo-1473081556163-2a17de81fc97?auto=format&fit=crop&q=80&w=800"
     },
     {
-        "id": 10,
-        "title": "Hormigas insomnes",
+        "id": 24,
+        "title": "Diamantes espaciales",
+        "category": "Física",
+        "fact": "Se cree que existen estrellas formadas casi totalmente por carbono cristalizado (diamante), llamadas enanas blancas pulsantes.",
+        "links": [
+            "https://www.space.com/24731-diamond-star-white-dwarf-pulsar.html"
+        ],
+        "image": "https://images.unsplash.com/photo-1551376347-075b0121a65b?auto=format&fit=crop&q=80&w=800"
+    },
+    {
+        "id": 25,
+        "title": "Guerra de los 335 años",
+        "category": "Historia",
+        "fact": "Fue entre los Países Bajos y las Islas Sorlingas; terminó en 1986 sin que se disparara un solo tiro.",
+        "links": [
+            "https://www.historic-uk.com/HistoryUK/HistoryofBritain/The-Three-Hundred-And-Thirty-Five-Years-War/"
+        ],
+        "image": "https://images.unsplash.com/photo-1464692805480-a69dfaafdb0d?auto=format&fit=crop&q=80&w=800"
+    },
+    {
+        "id": 26,
+        "title": "Ejército de un solo hombre",
+        "category": "Historia",
+        "fact": "Durante la invasión de Noruega en 1940, un solo fuerte detuvo a la flota alemana por horas.",
+        "links": [
+            "https://www.visitnorway.com/listings/oscarsborg-fortress/3364/"
+        ],
+        "image": "https://images.unsplash.com/photo-1548126466-4470dfd32211?auto=format&fit=crop&q=80&w=800"
+    },
+    {
+        "id": 27,
+        "title": "Zanahorias naranjas",
+        "category": "Historia",
+        "fact": "Originalmente eran púrpuras; los holandeses las cultivaron de color naranja en el siglo XVII por honor a la Casa de Orange.",
+        "links": [
+            "https://www.economist.com/the-economist-explains/2018/09/26/why-are-carrots-orange"
+        ],
+        "image": "https://images.unsplash.com/photo-1444312645910-fee9755c3c1e?auto=format&fit=crop&q=80&w=800"
+    },
+    {
+        "id": 28,
+        "title": "Cleopatra y el iPhone",
+        "category": "Historia",
+        "fact": "Cronológicamente, Cleopatra vivió más cerca de la invención del iPhone que de la construcción de la Gran Pirámide.",
+        "links": [
+            "https://www.smithsonianmag.com/history/rehabilitating-cleopatra-70190630/"
+        ],
+        "image": "https://images.unsplash.com/photo-1503177119275-0aa32b3a9368?auto=format&fit=crop&q=80&w=800"
+    },
+    {
+        "id": 29,
+        "title": "Ojos de avestruz",
         "category": "Naturaleza",
-        "fact": "Las hormigas no duermen de forma continua, toman cientos de pequeñas siestas al día.",
+        "fact": "El ojo de un avestruz es más grande que su cerebro.",
         "links": [
-            "https://www.misteriosdomundo.org"
+            "https://www.nationalgeographic.com/animals/birds/facts/ostrich"
         ],
-        "image": "https://images.unsplash.com/photo-1558298495-9799cd7b9736?auto=format&fit=crop&q=80&w=800"
+        "image": "https://images.unsplash.com/photo-1520626330050-dfb9933583ac?auto=format&fit=crop&q=80&w=800"
     },
     {
-        "id": 11,
-        "title": "Agua en la Luna",
-        "category": "Espacio",
-        "fact": "Se ha confirmado la presencia de moléculas de agua en cráteres iluminados por el sol en la Luna.",
+        "id": 30,
+        "title": "Superficie de Plutón vs Rusia",
+        "category": "Geografía",
+        "fact": "Rusia tiene más superficie terrestre (17 millones de km²) que el planeta enano Plutón (16.6 millones de km²).",
         "links": [
-            "https://www.nasa.gov/es"
+            "https://www.nasa.gov/audience/forstudents/k-4/stories/nasa-knows/what-is-pluto-k4.html"
         ],
-        "image": "https://images.unsplash.com/photo-1522030239044-6a87071277c8?auto=format&fit=crop&q=80&w=800"
+        "image": "https://images.unsplash.com/photo-1549413203-9d101a147e8b?auto=format&fit=crop&q=80&w=800"
     },
     {
-        "id": 12,
-        "title": "Lluvia de diamantes",
-        "category": "Espacio",
-        "fact": "En planetas como Neptuno y Urano, las presiones extremas pueden convertir el metano en diamantes que caen como lluvia.",
+        "id": 51,
+        "title": "Primer ratón de madera",
+        "category": "Tecnología",
+        "fact": "Douglas Engelbart inventó el primer ratón de computadora en 1964 y estaba hecho de madera.",
         "links": [
-            "https://www.microsiervos.com"
+            "https://www.computerhistory.org/revolution/input-output/14/350"
         ],
-        "image": "https://images.unsplash.com/photo-1614728894747-a83421e2b9c9?auto=format&fit=crop&q=80&w=800"
+        "image": "https://images.unsplash.com/photo-1527864550417-7da917e6cde9?auto=format&fit=crop&q=80&w=800"
     },
     {
-        "id": 13,
-        "title": "Memoria de los elefantes",
-        "category": "Naturaleza",
-        "fact": "Los elefantes tienen un hipocampo muy desarrollado, lo que les permite recordar rutas y compañeros durante décadas.",
+        "id": 52,
+        "title": "Capacidad del cerebro",
+        "category": "Tecnología",
+        "fact": "El cerebro humano tiene una capacidad de almacenamiento estimada en 2.5 petabytes (2.5 millones de gigabytes).",
         "links": [
-            "https://noticiasdelaciencia.com"
+            "https://www.scientificamerican.com/article/what-is-the-memory-capacity/"
         ],
-        "image": "https://images.unsplash.com/photo-1557008075-7f2c5efa4cfd?auto=format&fit=crop&q=80&w=800"
+        "image": "https://images.unsplash.com/photo-1507413245164-6160d8298b31?auto=format&fit=crop&q=80&w=800"
     },
     {
-        "id": 14,
-        "title": "Cristales gigantes",
-        "category": "Geología",
-        "fact": "En la Cueva de los Cristales en Naica, México, existen cristales de selenita de hasta 12 metros de largo.",
+        "id": 53,
+        "title": "Origen del Bug",
+        "category": "Tecnología",
+        "fact": "El término 'bug' se popularizó cuando Grace Hopper encontró una polilla real bloqueando un relé del ordenador Harvard Mark II.",
         "links": [
-            "https://www.geologia.unam.mx"
+            "https://www.nationalgeographic.org/thisday/sep9/first-computer-bug/"
         ],
-        "image": "https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&q=80&w=800"
+        "image": "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&q=80&w=800"
     },
     {
-        "id": 15,
-        "title": "Ojo del calamar gigante",
-        "category": "Naturaleza",
-        "fact": "El calamar gigante tiene ojos del tamaño de un balón de baloncesto para detectar luz en las profundidades.",
+        "id": 54,
+        "title": "00000000",
+        "category": "Tecnología",
+        "fact": "Durante 20 años, la contraseña de los misiles nucleares de EE. UU. fue simplemente '00000000'.",
         "links": [
-            "https://www.oceanos.es"
+            "https://www.todayifoundout.com/index.php/2013/11/nearly-20-years-nuclear-launch-code-00000000/"
         ],
-        "image": "https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&q=80&w=800"
-    },
-    {
-        "id": 16,
-        "title": "Oxígeno oceánico",
-        "category": "Ciencia",
-        "fact": "Más del 50% del oxígeno de la Tierra es producido por el fitoplancton en los océanos.",
-        "links": [
-            "https://www.cienciadesofa.com"
-        ],
-        "image": "https://images.unsplash.com/photo-1439405326854-0152355e93d3?auto=format&fit=crop&q=80&w=800"
-    },
-    {
-        "id": 17,
-        "title": "Caminar sobre Titán",
-        "category": "Espacio",
-        "fact": "En la luna Titán de Saturno, podrías volar simplemente batiendo los brazos si tuvieras alas, debido a su atmósfera densa y baja gravedad.",
-        "links": [
-            "https://www.astromias.com"
-        ],
-        "image": "https://images.unsplash.com/photo-1614728463871-081446f7c975?auto=format&fit=crop&q=80&w=800"
-    },
-    {
-        "id": 18,
-        "title": "Nieve en Marte",
-        "category": "Espacio",
-        "fact": "En Marte cae nieve, pero está hecha de dióxido de carbono (hielo seco).",
-        "links": [
-            "https://www.esa.int/Space_in_Member_States/Spain"
-        ],
-        "image": "https://images.unsplash.com/photo-1614728894747-a83421e2b9c9?auto=format&fit=crop&q=80&w=800"
-    },
-    {
-        "id": 19,
-        "title": "El animal más ruidoso",
-        "category": "Naturaleza",
-        "fact": "La ballena azul es el animal más ruidoso, sus cantos pueden oírse a 1,600 km de distancia.",
-        "links": [
-            "https://www.biopedia.com"
-        ],
-        "image": "https://images.unsplash.com/photo-1568430462989-44163eb1752f?auto=format&fit=crop&q=80&w=800"
-    },
-    {
-        "id": 20,
-        "title": "Oro en el cuerpo",
-        "category": "Cuerpo Humano",
-        "fact": "El cuerpo humano contiene aproximadamente 0.2 miligramos de oro, la mayor parte en la sangre.",
-        "links": [
-            "https://www.cienciahoy.org.ar"
-        ],
-        "image": "https://images.unsplash.com/photo-1543157145-f78c636d023c?auto=format&fit=crop&q=80&w=800"
+        "image": "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=800"
     }
 ]

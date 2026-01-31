@@ -140,23 +140,64 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Weather Logic
-    function initWeather() {
-        if ("geolocation" in navigator) {
-            navigator.geolocation.getCurrentPosition(async (position) => {
-                try {
-                    const { latitude, longitude } = position.coords;
-                    const data = await API.getWeather(latitude, longitude);
-                    const weather = data.current_weather;
+    async function initWeather() {
+        const weatherCity = document.getElementById('weather-city');
+        const weatherTemp = document.getElementById('weather-temp');
+        const weatherDesc = document.getElementById('weather-desc');
 
-                    document.getElementById('weather-city').innerText = "Tu ubicación";
-                    document.getElementById('weather-temp').innerText = `${weather.temperature}°C`;
-                    document.getElementById('weather-desc').innerText = `Viento: ${weather.windspeed}km/h`;
-                } catch (e) {
-                    document.getElementById('weather-city').innerText = "Clima no disponible";
-                }
-            }, () => {
-                document.getElementById('weather-city').innerText = "Permiso denegado";
-            });
+        // Fallback to a fixed location if geolocation fails or is denied (e.g. Madrid)
+        const defaultLat = 40.4168;
+        const defaultLon = -3.7038;
+
+        const updateWeather = async (lat, lon, label = "Tu ubicación") => {
+            try {
+                const data = await API.getWeather(lat, lon);
+                const weather = data.current_weather;
+                const codes = {
+                    0: '☀️ Despejado', 1: '🌤️ Mayormente despejado', 2: '⛅ Parcialmente nublado', 3: '☁️ Nublado',
+                    45: '🌫️ Niebla', 61: '🌦️ Lluvia ligera', 80: '🌧️ Chubascos'
+                };
+
+                weatherCity.innerText = label;
+                weatherTemp.innerText = `${weather.temperature}°C`;
+                weatherDesc.innerText = codes[weather.weathercode] || '☁️ Nublado';
+            } catch (e) {
+                weatherCity.innerText = "Clima no disponible";
+            }
+        };
+
+        if ("geolocation" in navigator) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => updateWeather(position.coords.latitude, position.coords.longitude),
+                () => updateWeather(defaultLat, defaultLon, "Madrid (Default)")
+            );
+        } else {
+            updateWeather(defaultLat, defaultLon, "Madrid (Default)");
+        }
+    }
+
+    // Bot Logic
+    window.toggleBot = () => {
+        const chat = document.getElementById('bot-chat');
+        chat.classList.toggle('active');
+    };
+
+    window.botMessage = (e) => {
+        if (e.key === 'Enter') {
+            const input = e.target;
+            const msg = input.value.toLowerCase();
+            const container = document.getElementById('bot-messages');
+
+            // Simple bot logic
+            let response = "¡Qué interesante! Pregúntame sobre historia, ciencia o animales.";
+            if (msg.includes('ciencia')) response = "La ciencia nos dice que somos polvo de estrellas. ✨";
+            if (msg.includes('animales')) response = "¡Los pulpos tienen 3 corazones! 🐙";
+            if (msg.includes('historia')) response = "Cleopatra vivió más cerca del iPhone que de las pirámides. 🏛️";
+
+            container.innerHTML += `<div style="margin-bottom:10px"><b>Tú:</b> ${input.value}</div>`;
+            container.innerHTML += `<div style="margin-bottom:10px; color:var(--primary)"><b>Bot Curioso:</b> ${response}</div>`;
+            input.value = '';
+            container.scrollTop = container.scrollHeight;
         }
     }
 

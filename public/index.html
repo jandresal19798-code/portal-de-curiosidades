@@ -53,8 +53,10 @@
                     <div class="filters">
                         <button class="filter-btn active" data-category="all">Todos</button>
                         <button class="filter-btn" data-category="Ciencia">Ciencia</button>
-                        <button class="filter-btn" data-category="Naturaleza">Naturaleza</button>
-                        <button class="filter-btn" data-category="Espacio">Espacio</button>
+                        <button class="filter-btn" data-category="Física">Física</button>
+                        <button class="filter-btn" data-category="Química">Química</button>
+                        <button class="filter-btn" data-category="Historia">Historia</button>
+                        <button class="filter-btn" data-category="Tecnología">Tecnología</button>
                     </div>
                 </div>
 
@@ -64,6 +66,16 @@
                 </div>
             </section>
         </main>
+
+        <!-- Bot de Curiosidades -->
+        <div id="bot-container">
+            <button id="bot-toggle" onclick="toggleBot()">💬 Bot Curioso</button>
+            <div id="bot-chat" class="glass hidden">
+                <div class="chat-header">Asistente de Curiosidades 📗</div>
+                <div id="bot-messages"></div>
+                <input type="text" id="bot-input" placeholder="Pregunta algo..." onkeypress="botMessage(event)">
+            </div>
+        </div>
 
         <!-- Marquee Banner -->
         <div class="marquee-banner">
