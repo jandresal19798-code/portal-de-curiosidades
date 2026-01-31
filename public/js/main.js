@@ -341,6 +341,107 @@ async function initWeather() {
     }
 }
 
+// Búsqueda manual de clima
+window.manualWeatherSearch = async () => {
+    const input = document.getElementById('weather-search-input');
+    const cityQuery = input.value.trim();
+
+    if (!cityQuery) {
+        alert('Por favor ingresa una ciudad');
+        return;
+    }
+
+    try {
+        // Geocodificación usando Open-Meteo
+        const geoUrl = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(cityQuery)}&count=1&language=es&format=json`;
+        const geoResponse = await fetch(geoUrl);
+        const geoData = await geoResponse.json();
+
+        if (!geoData.results || geoData.results.length === 0) {
+            alert('Ciudad no encontrada. Intenta con otra.');
+            return;
+        }
+
+        const location = geoData.results[0];
+        const lat = location.latitude;
+        const lon = location.longitude;
+        const cityName = location.name;
+        const country = location.country || '';
+
+        // Obtener clima
+        const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&hourly=relativehumidity_2m&timezone=auto`;
+        const weatherResponse = await fetch(weatherUrl);
+        const weatherData = await weatherResponse.json();
+
+        const temp = Math.round(weatherData.current_weather.temperature);
+        const weatherCode = weatherData.current_weather.weathercode;
+        const windSpeed = Math.round(weatherData.current_weather.windspeed);
+        const humidity = weatherData.hourly.relativehumidity_2m[0] || 0;
+
+        const getWeatherIcon = (code) => {
+            const icons = {
+                0: '☀️', 1: '🌤️', 2: '⛅', 3: '☁️',
+                45: '🌫️', 48: '🌫️',
+                51: '🌦️', 53: '🌦️', 55: '🌧️',
+                61: '🌧️', 63: '🌧️', 65: '⛈️',
+                71: '🌨️', 73: '🌨️', 75: '❄️',
+                80: '🌦️', 81: '⛈️', 82: '⛈️',
+                95: '⛈️'
+            };
+            return icons[code] || '🌤️';
+        };
+
+        const getWeatherDescription = (code) => {
+            const descriptions = {
+                0: 'Despejado', 1: 'Mayormente despejado', 2: 'Parcialmente nublado', 3: 'Nublado',
+                45: 'Niebla', 48: 'Niebla con escarcha',
+                51: 'Llovizna ligera', 53: 'Llovizna moderada', 55: 'Llovizna intensa',
+                61: 'Lluvia ligera', 63: 'Lluvia moderada', 65: 'Lluvia intensa',
+                71: 'Nevada ligera', 73: 'Nevada moderada', 75: 'Nevada intensa',
+                80: 'Chubascos ligeros', 81: 'Chubascos moderados', 82: 'Chubascos intensos',
+                95: 'Tormenta'
+            };
+            return descriptions[code] || 'Desconocido';
+        };
+
+        const icon = getWeatherIcon(weatherCode);
+        const description = getWeatherDescription(weatherCode);
+
+        // Actualizar modal expandido
+        const ciudadFull = document.getElementById('ciudad-full');
+        const tempFull = document.getElementById('temp-full');
+        const descFull = document.getElementById('desc-full');
+        const iconoFull = document.getElementById('icono-full');
+        const humedadEl = document.getElementById('humedad');
+        const vientoEl = document.getElementById('viento');
+
+        if (ciudadFull) ciudadFull.textContent = `${cityName.toUpperCase()}, ${country}`;
+        if (tempFull) tempFull.textContent = `${temp}°C`;
+        if (descFull) descFull.textContent = description;
+        if (iconoFull) {
+            iconoFull.textContent = icon;
+            iconoFull.alt = description;
+        }
+        if (humedadEl) humedadEl.textContent = `${humidity}%`;
+        if (vientoEl) vientoEl.textContent = `${windSpeed} KM/H`;
+
+        // Actualizar widget de navegación
+        const cityEl = document.getElementById('nav-weather-city');
+        const tempEl = document.getElementById('nav-weather-temp');
+        const iconEl = document.getElementById('nav-weather-icon');
+
+        if (cityEl) cityEl.textContent = cityName;
+        if (tempEl) tempEl.textContent = `${temp}°C`;
+        if (iconEl) iconEl.textContent = icon;
+
+        input.value = '';
+
+    } catch (error) {
+        console.error('Error en búsqueda manual:', error);
+        alert('Error al buscar el clima. Intenta nuevamente.');
+    }
+};
+
 window.checkAuth = () => {
     const user = JSON.parse(localStorage.getItem('user'));
     const btns = document.getElementById('auth-buttons');
