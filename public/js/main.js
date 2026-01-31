@@ -337,11 +337,53 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function loadComments(id) {
         const list = document.getElementById('comment-list');
+        const user = JSON.parse(localStorage.getItem('user'));
+
         try {
             const comments = await API.getComments(id);
-            list.innerHTML = comments.length ? comments.map(c => `<div class="bg-white/5 p-4 rounded-xl border border-white/5"><div class="flex justify-between text-xs mb-2"><span class="text-cyan-400 font-bold">${c.author}</span><span class="text-gray-500">${new Date(c.date).toLocaleDateString()}</span></div><p class="text-sm text-gray-300">${c.text}</p></div>`).reverse().join('') : '<p class="text-gray-500 text-center">Sin comentarios aún.</p>';
-        } catch (e) { list.innerHTML = 'Error al cargar.'; }
+            const commentsHTML = comments.length ? comments.map(c => `
+                <div class="bg-white/5 p-4 rounded-xl border border-white/5">
+                    <div class="flex justify-between text-xs mb-2">
+                        <span class="text-cyan-400 font-bold">${c.author}</span>
+                        <span class="text-gray-500">${new Date(c.date).toLocaleDateString()}</span>
+                    </div>
+                    <p class="text-sm text-gray-300">${c.text}</p>
+                </div>
+            `).reverse().join('') : '<p class="text-gray-500 text-center py-4">Sin comentarios aún. ¡Sé el primero!</p>';
+
+            const formHTML = user ? `
+                <div class="bg-white/5 p-4 rounded-xl border border-white/10 mt-4">
+                    <p class="text-xs text-gray-500 mb-2">Agregar comentario</p>
+                    <div class="flex gap-2">
+                        <input type="text" id="new-comment" placeholder="Escribe tu comentario..." 
+                            class="flex-1 bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-sm outline-none focus:border-cyan-400">
+                        <button onclick="postComment(${id})" class="btn-glow px-4 py-2 rounded-lg text-xs font-bold">Enviar</button>
+                    </div>
+                </div>
+            ` : `<p class="text-center text-sm text-gray-500 py-4 border-t border-white/10 mt-4"><a href="#" onclick="toggleModal('login-modal'); return false;" class="text-cyan-400 hover:underline">Inicia sesión</a> para comentar</p>`;
+
+            list.innerHTML = commentsHTML + formHTML;
+        } catch (e) {
+            list.innerHTML = '<p class="text-red-400 text-center">Error al cargar comentarios.</p>';
+        }
     }
+
+    window.postComment = async (id) => {
+        const input = document.getElementById('new-comment');
+        const text = input.value.trim();
+        if (!text) return;
+
+        try {
+            const res = await API.postComment(id, text);
+            if (res.error) {
+                alert('Error: ' + res.error);
+            } else {
+                loadComments(id);
+            }
+        } catch (e) {
+            alert('Error al enviar comentario');
+        }
+    };
 
     filters.forEach(btn => btn.addEventListener('click', () => {
         filters.forEach(b => b.classList.remove('active', 'bg-cyan-400', 'text-black'));
@@ -898,7 +940,7 @@ function renderAdminDashboard(data) {
     `).join('') || '<p class="text-gray-500 text-sm">No hay acciones registradas.</p>';
 }
 
-// --- GAMES SUITE (ENHANCED) ---
+// --- GAMES SUITE (COMPLETE) ---
 const gameBoard = document.getElementById('game-board');
 const gameSelection = document.getElementById('game-selection');
 
@@ -914,35 +956,90 @@ window.closeGame = () => {
     gameBoard.innerHTML = '';
 };
 
-// 1. Quiz Galáctico
+function saveScore(game, points) {
+    const user = JSON.parse(localStorage.getItem('user'));
+    if (!user) return;
+
+    const rankings = JSON.parse(localStorage.getItem('rankings') || '{}');
+    if (!rankings[user.email]) {
+        rankings[user.email] = { name: user.name, scores: {} };
+    }
+    rankings[user.email].scores[game] = Math.max(rankings[user.email].scores[game] || 0, points);
+
+    const totalXP = Object.values(rankings[user.email].scores).reduce((a, b) => a + b, 0);
+    rankings[user.email].totalXP = totalXP;
+    rankings[user.email].lastUpdate = new Date().toISOString();
+
+    localStorage.setItem('rankings', JSON.stringify(rankings));
+
+    if (window.renderUserRankings) {
+        window.renderUserRankings();
+    }
+}
+
+function endGame(score, total, gameName) {
+    const isWin = score >= total * 0.5;
+    const xpEarned = isWin ? score * 10 : Math.floor(score * 5);
+    saveScore(gameName, xpEarned);
+
+    gameBoard.innerHTML = `
+        <div class="text-center animate-in max-w-md mx-auto">
+            <div class="text-6xl mb-6 animate-bounce">${isWin ? '🏆' : '🌟'}</div>
+            <h2 class="text-3xl font-bold mb-2">${isWin ? '¡Misión Cumplida!' : '¡Sigue Intentando!'}</h2>
+            <p class="text-xl mb-4 text-cyan-400 font-mono">Puntuación: ${score}/${total}</p>
+            <p class="text-2xl font-bold text-yellow-400 mb-6">+${xpEarned} XP</p>
+            <p class="text-gray-400 mb-8">${isWin ? '¡Has demostrado ser un verdadero explorador del conocimiento!' : 'Cada intento te hace más fuerte.'}</p>
+            <div class="flex gap-4 justify-center">
+                <button onclick="closeGame()" class="btn-galaxy px-8">Volver</button>
+                <button onclick="${gameName}()" class="px-8 py-4 rounded-full font-bold border border-white/10 hover:bg-white/5 transition-all">🔄 Reintentar</button>
+            </div>
+        </div>`;
+}
+
+// 1. Quiz Galáctico (COMPLETO)
 window.startQuiz = () => {
     showBoard();
     let score = 0;
     const questions = [
         { q: "¿Qué animal tiene 3 corazones?", ans: "Pulpo", opts: ["Tiburón", "Pulpo", "Ballena", "Calamar"] },
         { q: "¿Cuál es el planeta más grande?", ans: "Júpiter", opts: ["Tierra", "Marte", "Júpiter", "Saturno"] },
-        { q: "¿La velocidad de la luz?", ans: "300,000 km/s", opts: ["150,000 km/s", "300,000 km/s", "1,000 km/s", "Infinita"] }
+        { q: "¿La velocidad de la luz?", ans: "300,000 km/s", opts: ["150,000 km/s", "300,000 km/s", "1,000 km/s", "Infinita"] },
+        { q: "¿Qué gas respiramos?", ans: "Oxígeno", opts: ["Nitrógeno", "Oxígeno", "Helio", "CO2"] },
+        { q: "¿Cuántos huesos tiene el cuerpo adulto?", ans: "206", opts: ["206", "250", "180", "300"] },
+        { q: "¿Qué planeta tiene anillos?", ans: "Saturno", opts: ["Júpiter", "Urano", "Saturno", "Neptuno"] },
+        { q: "¿Cuál es el mamífero más grande?", ans: "Ballena azul", opts: ["Elefante", "Jirafa", "Ballena azul", "Hipopótamo"] },
+        { q: "¿Cuántos colores tiene el arcoíris?", ans: "7", opts: ["6", "7", "8", "5"] }
     ];
+    const shuffled = questions.sort(() => Math.random() - 0.5).slice(0, 5);
     let qIdx = 0;
 
     const renderQ = () => {
-        if (qIdx >= questions.length) return endGame(score, questions.length);
-        const q = questions[qIdx];
+        if (qIdx >= shuffled.length) return endGame(score, shuffled.length, 'startQuiz');
+        const q = shuffled[qIdx];
         gameBoard.innerHTML = `
             <div class="text-center animate-in max-w-2xl mx-auto">
                 <div class="mb-4 flex justify-between text-xs text-cyan-400 font-bold tracking-widest">
-                    <span>PREGUNTA ${qIdx + 1}/${questions.length}</span>
-                    <span>PUNTOS: ${score}</span>
+                    <span>PREGUNTA ${qIdx + 1}/${shuffled.length}</span>
+                    <span>⭐ ${score}</span>
                 </div>
-                <h3 class="text-3xl font-bold mb-8 playfair leading-tight">${q.q}</h3>
+                <div class="w-full bg-white/10 rounded-full h-2 mb-6">
+                    <div class="bg-cyan-400 h-2 rounded-full transition-all" style="width: ${((qIdx) / shuffled.length) * 100}%"></div>
+                </div>
+                <h3 class="text-2xl font-bold mb-8 leading-relaxed">${q.q}</h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    ${q.opts.map(o => `<button onclick="handleQ('${o}', '${q.ans}')" class="quiz-option p-6 text-lg hover:scale-105 transition-transform">${o}</button>`).join('')}
+                    ${q.opts.map((o, i) => `
+                        <button onclick="handleQ('${o}', '${q.ans}')" 
+                            class="quiz-option p-4 text-lg hover:scale-105 transition-all rounded-xl border border-white/10 hover:border-cyan-400 hover:bg-cyan-400/10">
+                            <span class="text-cyan-400 mr-2">${['A', 'B', 'C', 'D'][i]}</span>${o}
+                        </button>
+                    `).join('')}
                 </div>
             </div>`;
     };
 
     window.handleQ = (selected, correct) => {
-        if (selected === correct) score++;
+        const isCorrect = selected === correct;
+        if (isCorrect) score += 20;
         qIdx++;
         renderQ();
     };
@@ -950,21 +1047,27 @@ window.startQuiz = () => {
     renderQ();
 };
 
-// 2. Bio-Memoria
+// 2. Bio-Memoria (COMPLETO)
 window.startMemory = () => {
     showBoard();
-    const emojis = ['🧬', '🦠', '🧪', '🔭', '🪐', '🦕', '🧬', '🦠', '🧪', '🔭', '🪐', '🦕'];
-    let shuffled = emojis.sort(() => Math.random() - 0.5);
+    const emojis = ['🧬', '🦠', '🧪', '🔭', '🪐', '🦕', '🧠', '🦠', '🧬', '🔭', '🪐', '🧠'];
+    let shuffled = [...emojis].sort(() => Math.random() - 0.5);
     let flipped = [];
     let matched = 0;
+    let moves = 0;
 
     gameBoard.innerHTML = `
         <div class="max-w-xl mx-auto text-center animate-in">
-            <h3 class="text-2xl font-bold mb-6 text-purple-400">Bio-Memoria</h3>
-            <div class="grid grid-cols-4 gap-4" id="mem-grid">
+            <div class="flex justify-between mb-4 text-sm font-bold">
+                <span class="text-cyan-400">MOVIMIENTOS: <span id="mem-moves">0</span></span>
+                <span class="text-purple-400">PARES: <span id="mem-pairs">0</span>/6</span>
+            </div>
+            <h3 class="text-2xl font-bold mb-6 text-purple-400">🧬 Bio-Memoria</h3>
+            <div class="grid grid-cols-4 gap-3" id="mem-grid">
                 ${shuffled.map((e, i) => `
-                    <div onclick="flipCard(${i}, '${e}')" id="card-${i}" class="aspect-square bg-white/10 rounded-xl cursor-pointer hover:bg-white/20 transition-all flex items-center justify-center text-4xl card-holo">
-                        <span class="opacity-0 transition-opacity duration-300 select-none">${e}</span>
+                    <div onclick="flipCard(${i}, '${e}')" id="card-${i}" 
+                        class="aspect-square bg-white/10 rounded-xl cursor-pointer hover:bg-white/20 transition-all flex items-center justify-center text-3xl card-holo">
+                        <span class="opacity-0 transition-all duration-300 select-none transform scale-0">${e}</span>
                     </div>
                 `).join('')}
             </div>
@@ -975,42 +1078,56 @@ window.startMemory = () => {
         if (el.classList.contains('flipped') || flipped.length >= 2) return;
 
         el.classList.add('flipped', 'bg-cyan-900/50', 'border-cyan-400');
-        el.querySelector('span').classList.remove('opacity-0');
+        const span = el.querySelector('span');
+        span.classList.remove('opacity-0', 'scale-0');
+        span.classList.add('scale-100');
         flipped.push({ i, e });
 
         if (flipped.length === 2) {
+            moves++;
+            document.getElementById('mem-moves').textContent = moves;
             setTimeout(() => {
                 const [c1, c2] = flipped;
                 if (c1.e === c2.e) {
                     matched++;
-                    if (matched === emojis.length / 2) endGame(100, 100);
+                    document.getElementById('mem-pairs').textContent = matched;
+                    [c1, c2].forEach(c => {
+                        const cell = document.getElementById(`card-${c.i}`);
+                        cell.classList.add('matched', 'bg-green-500/20', 'border-green-400');
+                    });
+                    if (matched === 6) endGame(100, 100, 'startMemory');
                 } else {
                     [c1, c2].forEach(c => {
                         const cell = document.getElementById(`card-${c.i}`);
                         cell.classList.remove('flipped', 'bg-cyan-900/50', 'border-cyan-400');
-                        cell.querySelector('span').classList.add('opacity-0');
+                        const s = cell.querySelector('span');
+                        s.classList.add('opacity-0', 'scale-0');
+                        s.classList.remove('scale-100');
                     });
                 }
                 flipped = [];
-            }, 800);
+            }, 1000);
         }
     };
 };
 
-// 3. Caza-Átomos
+// 3. Caza-Átomos (COMPLETO)
 window.startAtomHunter = () => {
     showBoard();
     let score = 0;
-    let timeLeft = 10;
+    let timeLeft = 30;
+    let atoms = [];
+    let timer;
 
     gameBoard.innerHTML = `
         <div class="max-w-2xl mx-auto text-center animate-in">
-            <h3 class="text-2xl font-bold mb-2 text-cyan-400">Caza-Átomos</h3>
             <div class="flex justify-between mb-4 font-mono text-sm">
-                <span id="atom-time">TIEMPO: ${timeLeft}s</span>
-                <span id="atom-score">ÁTOMOS: 0</span>
+                <span class="text-cyan-400">⏱️ TIEMPO: <span id="atom-time">${timeLeft}s</span></span>
+                <span class="text-yellow-400">⚛️ ÁTOMOS: <span id="atom-score">0</span></span>
             </div>
-            <div id="atom-zone" class="relative h-96 w-full card-holo overflow-hidden cursor-crosshair"></div>
+            <h3 class="text-2xl font-bold mb-2 text-cyan-400">⚛️ Caza-Átomos</h3>
+            <p class="text-xs text-gray-500 mb-4">¡Haz clic en los átomos antes de que desaparezcan!</p>
+            <div id="atom-zone" class="relative h-80 w-full card-holo overflow-hidden cursor-crosshair rounded-xl border border-white/10"></div>
         </div>`;
 
     const zone = document.getElementById('atom-zone');
@@ -1018,43 +1135,292 @@ window.startAtomHunter = () => {
     const spawnAtom = () => {
         if (timeLeft <= 0) return;
         const atom = document.createElement('div');
-        atom.className = 'absolute w-12 h-12 bg-cyan-400 rounded-full shadow-[0_0_30px_#00f2ff] animate-ping cursor-pointer';
-        atom.style.top = Math.random() * (zone.clientHeight - 50) + 'px';
-        atom.style.left = Math.random() * (zone.clientWidth - 50) + 'px';
+        const size = Math.random() * 30 + 20;
+        atom.className = 'absolute rounded-full cursor-pointer animate-pulse';
+        atom.style.width = size + 'px';
+        atom.style.height = size + 'px';
+        atom.style.top = Math.random() * (zone.clientHeight - size) + 'px';
+        atom.style.left = Math.random() * (zone.clientWidth - size) + 'px';
+
+        const colors = ['bg-cyan-400', 'bg-purple-400', 'bg-green-400', 'bg-yellow-400', 'bg-pink-400'];
+        atom.classList.add(colors[Math.floor(Math.random() * colors.length)]);
+
+        const timeout = setTimeout(() => {
+            if (atom.parentNode) {
+                atom.remove();
+                spawnAtom();
+            }
+        }, Math.random() * 1500 + 500);
+
         atom.onclick = (e) => {
             e.stopPropagation();
-            score++;
-            document.getElementById('atom-score').innerText = `ÁTOMOS: ${score}`;
-            atom.remove();
+            clearTimeout(timeout);
+            score += 10;
+            document.getElementById('atom-score').textContent = score;
+            atom.style.transform = 'scale(1.5)';
+            atom.style.opacity = '0';
+            setTimeout(() => atom.remove(), 100);
             spawnAtom();
         };
         zone.appendChild(atom);
+        atoms.push(atom);
+    };
+
+    for (let i = 0; i < 3; i++) spawnAtom();
+
+    timer = setInterval(() => {
+        timeLeft--;
+        document.getElementById('atom-time').textContent = timeLeft + 's';
+        if (timeLeft <= 0) {
+            clearInterval(timer);
+            atoms.forEach(a => a.remove());
+            endGame(score, 100, 'startAtomHunter');
+        }
+    }, 1000);
+};
+
+// 4. Rapidez Matemática (COMPLETO)
+window.startMathChallenge = () => {
+    showBoard();
+    let score = 0;
+    let timeLeft = 60;
+    let currentQ = {};
+
+    const generateQ = () => {
+        const ops = ['+', '-', '*'];
+        const op = ops[Math.floor(Math.random() * ops.length)];
+        let a, b, ans;
+
+        if (op === '+') {
+            a = Math.floor(Math.random() * 50) + 10;
+            b = Math.floor(Math.random() * 50) + 10;
+            ans = a + b;
+        } else if (op === '-') {
+            a = Math.floor(Math.random() * 50) + 20;
+            b = Math.floor(Math.random() * a);
+            ans = a - b;
+        } else {
+            a = Math.floor(Math.random() * 12) + 2;
+            b = Math.floor(Math.random() * 10) + 1;
+            ans = a * b;
+        }
+
+        const wrong = [ans + Math.floor(Math.random() * 10) + 1, ans - Math.floor(Math.random() * 10) - 1].sort(() => Math.random() - 0.5);
+        return { q: `${a} ${op} ${b}`, ans, opts: [ans, ...wrong].sort(() => Math.random() - 0.5).slice(0, 4) };
+    };
+
+    const renderQ = () => {
+        if (timeLeft <= 0) return endGame(score, 50, 'startMathChallenge');
+        currentQ = generateQ();
+        gameBoard.innerHTML = `
+            <div class="max-w-xl mx-auto text-center animate-in">
+                <div class="flex justify-between mb-4 font-mono">
+                    <span class="text-yellow-400">⏱️ ${timeLeft}s</span>
+                    <span class="text-cyan-400">PUNTOS: ${score}</span>
+                </div>
+                <h3 class="text-4xl font-bold mb-8 text-white">${currentQ.q} = ?</h3>
+                <div class="grid grid-cols-2 gap-4">
+                    ${currentQ.opts.map((o, i) => `
+                        <button onclick="handleMath(${o})" 
+                            class="p-6 text-2xl font-bold rounded-xl border border-white/10 hover:border-yellow-400 hover:bg-yellow-400/10 transition-all">
+                            ${o}
+                        </button>
+                    `).join('')}
+                </div>
+            </div>`;
+    };
+
+    window.handleMath = (n) => {
+        if (n === currentQ.ans) {
+            score += 10;
+            renderQ();
+        } else {
+            timeLeft -= 3;
+            document.querySelector('.text-yellow-400').textContent = `⏱️ ${timeLeft}s`;
+            const btn = event.target;
+            btn.classList.add('bg-red-500/50', 'border-red-500');
+            setTimeout(() => btn.classList.remove('bg-red-500/50', 'border-red-500'), 500);
+        }
     };
 
     const timer = setInterval(() => {
         timeLeft--;
-        document.getElementById('atom-time').innerText = `TIEMPO: ${timeLeft}s`;
         if (timeLeft <= 0) {
             clearInterval(timer);
-            endGame(score, 10); // Target score 10
+            endGame(score, 50, 'startMathChallenge');
+        } else if (gameBoard.parentElement && !gameBoard.classList.contains('hidden')) {
+            const t = document.querySelector('.text-yellow-400');
+            if (t) t.textContent = `⏱️ ${timeLeft}s`;
         }
     }, 1000);
 
-    spawnAtom();
+    renderQ();
 };
 
-// 4. Rapidez Matemática
-window.startMathChallenge = () => {
-    showBoard();
-    // Simplified visuals for brevity
-    gameBoard.innerHTML = `<div class="text-center"><h3 class="text-2xl mb-4">Calculando...</h3><p class="text-gray-400">Próximamente: Desafío de cálculo cuántico.</p><button onclick="closeGame()" class="btn-galaxy mt-4">Volver</button></div>`;
-};
-
-// 5. Gravedad Zero
+// 5. Gravedad Zero (COMPLETO)
 window.startGravitySort = () => {
     showBoard();
-    // Simplified visuals for brevity
-    gameBoard.innerHTML = `<div class="text-center"><h3 class="text-2xl mb-4">Ordenando Planetas...</h3><p class="text-gray-400">Próximamente: Arrastra planetas a su órbita.</p><button onclick="closeGame()" class="btn-galaxy mt-4">Volver</button></div>`;
+    let score = 0;
+    const planets = [
+        { name: 'Mercurio', mass: 0.3, emoji: '🪨' },
+        { name: 'Venus', mass: 0.8, emoji: '🌟' },
+        { name: 'Tierra', mass: 1.0, emoji: '🌍' },
+        { name: 'Marte', mass: 0.4, emoji: '🔴' },
+        { name: 'Júpiter', mass: 11.2, emoji: '🪐' }
+    ];
+    let items = [...planets].sort(() => Math.random() - 0.5);
+
+    gameBoard.innerHTML = `
+        <div class="max-w-xl mx-auto text-center animate-in">
+            <div class="flex justify-between mb-4 text-sm">
+                <span class="text-cyan-400">ORDENA POR MASA (menor a mayor)</span>
+                <span class="text-purple-400">ACIERTOS: <span id="grav-score">0</span></span>
+            </div>
+            <h3 class="text-2xl font-bold mb-2 text-blue-400">🌌 Gravedad Zero</h3>
+            <p class="text-xs text-gray-500 mb-4">Arrastra los planetas para ordenarlos</p>
+            <div id="grav-container" class="space-y-2 mb-6"></div>
+            <button onclick="checkGravity()" class="btn-glow px-8 py-3 rounded-xl font-bold">✓ Verificar</button>
+        </div>`;
+
+    const container = document.getElementById('grav-container');
+    const renderItems = () => {
+        container.innerHTML = items.map((p, i) => `
+            <div draggable="true" ondragstart="dragStart(event, ${i})" 
+                ondragover="allowDrop(event)" ondrop="drop(event, ${i})"
+                class="drag-item p-4 bg-white/5 rounded-xl border border-white/10 flex items-center gap-4 cursor-grab active:cursor-grabbing hover:bg-white/10">
+                <span class="text-2xl">${p.emoji}</span>
+                <span class="font-bold">${p.name}</span>
+                <span class="text-xs text-gray-500 ml-auto">${p.mass} M⊕</span>
+            </div>
+        `).join('');
+    };
+
+    window.dragStart = (e, i) => {
+        e.dataTransfer.setData('idx', i);
+    };
+
+    window.allowDrop = (e) => e.preventDefault();
+
+    window.drop = (e, targetIdx) => {
+        const sourceIdx = parseInt(e.dataTransfer.getData('idx'));
+        const item = items.splice(sourceIdx, 1)[0];
+        items.splice(targetIdx, 0, item);
+        renderItems();
+    };
+
+    window.checkGravity = () => {
+        const correct = items.map(p => p.name).join(',') === planets.map(p => p.name).join(',');
+        if (correct) {
+            score = 100;
+            document.getElementById('grav-score').textContent = '100%';
+        } else {
+            score = 50;
+            document.getElementById('grav-score').textContent = '50%';
+        }
+        endGame(score, 100, 'startGravitySort');
+    };
+
+    renderItems();
+};
+
+// 6. Crono-Explorador (COMPLETO)
+window.startChronoExplorer = () => {
+    showBoard();
+    let score = 0;
+    const events = [
+        { y: -13800000000, t: "Big Bang", emoji: "💥" },
+        { y: -4500000000, t: "Formación Tierra", emoji: "🌍" },
+        { y: -65000000, t: "Extinción Dinosaurios", emoji: "🦕" },
+        { y: 1969, t: "Hombre en la Luna", emoji: "🚀" },
+        { y: 1990, t: "Lanzamiento Hubble", emoji: "🔭" },
+        { y: 2020, t: "Misión Marte", emoji: "🔴" }
+    ];
+    let shuffled = [...events].sort(() => Math.random() - 0.5);
+
+    gameBoard.innerHTML = `
+        <div class="max-w-xl mx-auto text-center animate-in">
+            <div class="flex justify-between mb-4 text-sm">
+                <span class="text-red-400">ORDENA DEL MÁS ANTIGUO AL MÁS RECIENTE</span>
+                <span class="text-yellow-400">PASOS: <span id="chrono-steps">0</span></span>
+            </div>
+            <h3 class="text-2xl font-bold mb-2 text-red-400">⏳ Crono-Explorador</h3>
+            <div id="chrono-container" class="space-y-2 mb-6"></div>
+            <button onclick="checkChrono()" class="btn-glow px-8 py-3 rounded-xl font-bold">✓ Verificar Línea Temporal</button>
+        </div>`;
+
+    const container = document.getElementById('chrono-container');
+    let steps = 0;
+
+    const renderEvents = () => {
+        container.innerHTML = shuffled.map((e, i) => `
+            <div draggable="true" ondragstart="chronoDrag(event, ${i})" 
+                ondragover="allowDrop(event)" ondrop="chronoDrop(event, ${i})"
+                class="drag-item p-3 bg-white/5 rounded-xl border border-white/10 flex items-center gap-3 cursor-grab active:cursor-grabbing hover:bg-white/10">
+                <span class="text-xl">${e.emoji}</span>
+                <span class="font-bold text-sm">${e.t}</span>
+                <span class="text-xs text-gray-500 ml-auto">${e.y < 0 ? Math.abs(e.y / 1000000000) + 'B años' : e.y}</span>
+            </div>
+        `).join('');
+    };
+
+    window.chronoDrag = (e, i) => {
+        e.dataTransfer.setData('idx', i);
+    };
+
+    window.chronoDrop = (e, targetIdx) => {
+        const sourceIdx = parseInt(e.dataTransfer.getData('idx'));
+        const item = shuffled.splice(sourceIdx, 1)[0];
+        shuffled.splice(targetIdx, 0, item);
+        steps++;
+        document.getElementById('chrono-steps').textContent = steps;
+        renderEvents();
+    };
+
+    window.checkChrono = () => {
+        const correct = shuffled.map(e => e.y).join(',') === events.map(e => e.y).join(',');
+        score = correct ? 100 - steps * 5 : 30;
+        score = Math.max(score, 20);
+        endGame(score, 100, 'startChronoExplorer');
+    };
+
+    renderEvents();
+};
+
+// Global user rankings marquee
+window.renderUserRankings = () => {
+    let marquee = document.getElementById('user-rankings');
+    const rankings = JSON.parse(localStorage.getItem('rankings') || '{}');
+    const sorted = Object.values(rankings)
+        .sort((a, b) => (b.totalXP || 0) - (a.totalXP || 0))
+        .slice(0, 10);
+
+    if (!marquee) {
+        marquee = document.createElement('div');
+        marquee.id = 'user-rankings';
+        marquee.className = 'fixed top-20 right-0 w-64 bg-black/40 backdrop-blur border-l border-white/10 p-4 hidden xl:block z-40 rounded-l-2xl';
+        document.body.appendChild(marquee);
+    }
+
+    if (sorted.length === 0) {
+        marquee.innerHTML = `
+            <h4 class="text-xs font-bold text-cyan-400 tracking-widest mb-3 uppercase border-b border-white/10 pb-2">Top Exploradores</h4>
+            <p class="text-[10px] text-gray-500 text-center py-4">¡Inicia sesión y juega para aparecer!</p>`;
+    } else {
+        marquee.innerHTML = `
+            <h4 class="text-xs font-bold text-cyan-400 tracking-widest mb-3 uppercase border-b border-white/10 pb-2">🏆 Top Exploradores</h4>
+            <div class="space-y-2 text-xs font-mono max-h-64 overflow-y-auto">
+                ${sorted.map((u, i) => `
+                    <div class="flex justify-between items-center ${i === 0 ? 'text-yellow-400' : 'text-gray-300'}">
+                        <div class="flex items-center gap-2">
+                            <span class="w-5 text-center">${i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : '#' + (i + 1)}</span>
+                            <span class="truncate max-w-[100px]">${u.name || 'Anon'}</span>
+                        </div>
+                        <span class="text-yellow-400 font-bold">${u.totalXP || 0} XP</span>
+                    </div>
+                `).join('')}
+            </div>`;
+    }
+};
 };
 
 // 6. NEW GAME: Crono-Explorador
@@ -1082,52 +1448,6 @@ window.startChronoExplorer = () => {
             <button onclick="endGame(4,4)" class="btn-galaxy w-full">Verificar Línea Temporal</button>
         </div>`;
 };
-
-function endGame(score, total) {
-    const isWin = score >= total * 0.7; // 70% to win
-    gameBoard.innerHTML = `
-        <div class="text-center animate-in max-w-md mx-auto">
-            <div class="text-6xl mb-6">${isWin ? '🏆' : '🧪'}</div>
-            <h2 class="text-3xl font-bold mb-2">${isWin ? '¡Misión Cumplida!' : 'Resultados Preliminares'}</h2>
-            <p class="text-xl mb-8 text-cyan-400 font-mono">Puntuación: ${score}</p>
-            <p class="text-gray-400 mb-8">${isWin ? 'Has demostrado ser un verdadero explorador del conocimiento.' : 'No te rindas. La ciencia requiere perseverancia.'}</p>
-            <button onclick="closeGame()" class="btn-galaxy px-8">Volver al Laboratorio</button>
-        </div>`;
-}
-
-// Global user rankings marquee
-function renderUserRankings() {
-    const marquee = document.createElement('div');
-    marquee.className = 'fixed top-20 right-0 w-64 bg-black/40 backdrop-blur border-l border-white/10 p-4 hidden xl:block z-40 rounded-l-2xl';
-    marquee.innerHTML = `
-        <h4 class="text-xs font-bold text-cyan-400 tracking-widest mb-3 uppercase border-b border-white/10 pb-2">Top Exploradores</h4>
-        <div class="space-y-3 text-xs font-mono h-48 overflow-hidden relative">
-            <div class="animate-marquee-vertical space-y-3">
-                ${[
-            { n: 'AstroGirl_99', s: 4500 }, { n: 'QuantumBob', s: 4200 }, { n: 'NeutronStar', s: 3950 },
-            { n: 'BioHacker', s: 3800 }, { n: 'LunarWalker', s: 3600 }, { n: 'DinoFan', s: 3100 }
-        ].map((u, i) => `
-                    <div class="flex justify-between items-center">
-                        <span class="text-gray-300">#${i + 1} ${u.n}</span>
-                        <span class="text-yellow-400">${u.s} XP</span>
-                    </div>
-                `).join('')}
-            </div>
-        </div>
-    `;
-    document.body.appendChild(marquee);
-
-    // Add CSS for vertical marquee
-    const style = document.createElement('style');
-    style.textContent = `
-        @keyframes marquee-vertical {
-            0% { transform: translateY(0); }
-            100% { transform: translateY(-50%); }
-        }
-        .animate-marquee-vertical { animation: marquee-vertical 10s linear infinite; }
-    `;
-    document.head.appendChild(style);
-}
 
 // Add ranking to initialization
 window.addEventListener('load', renderUserRankings);
