@@ -293,13 +293,110 @@ function initMarquee(items) {
 }
 
 async function initWeather() {
+    const cityEl = document.getElementById('nav-weather-city');
+    const tempEl = document.getElementById('nav-weather-temp');
+    const iconEl = document.getElementById('nav-weather-icon');
+
+    // Valores por defecto
+    const DEFAULT_CITY = 'Montevideo';
+    const DEFAULT_LAT = -34.9011;
+    const DEFAULT_LON = -56.1645;
+
+    async function fetchWeatherData(lat, lon, cityName) {
+        try {
+            const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`;
+            const weatherRes = await Promise.race([
+                fetch(weatherUrl),
+                new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 5000))
+            ]);
+
+            if (!weatherRes.ok) throw new Error('Weather API failed');
+
+            const weatherData = await weatherRes.json();
+            const temp = Math.round(weatherData.current_weather.temperature);
+            const weatherCode = weatherData.current_weather.weathercode;
+
+            // Mapeo de códigos a iconos
+            const iconMap = {
+                0: '☀️', 1: '🌤️', 2: '⛅', 3: '☁️',
+                45: '🌫️', 48: '🌫️',
+                51: '🌦️', 53: '🌦️', 55: '🌧️',
+                61: '🌧️', 63: '🌧️', 65: '⛈️',
+                71: '🌨️', 73: '🌨️', 75: '❄️',
+                80: '🌦️', 81: '⛈️', 82: '⛈️',
+                95: '⛈️'
+            };
+
+            const icon = iconMap[weatherCode] || '🌤️';
+
+            if (cityEl) cityEl.textContent = cityName || DEFAULT_CITY;
+            if (tempEl) tempEl.textContent = `${temp}°C`;
+            if (iconEl) {
+                iconEl.textContent = icon;
+                iconEl.classList.remove('hidden');
+            }
+
+            return true;
+        } catch (error) {
+            console.warn('Weather fetch error:', error);
+            return false;
+        }
+    }
+
+    // Intento 1: Geolocalización del navegador
+    if (navigator.geolocation) {
+        try {
+            const position = await new Promise((resolve, reject) => {
+                navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 5000 });
+            });
+
+            const success = await fetchWeatherData(
+                position.coords.latitude,
+                position.coords.longitude,
+                'Tu ubicación'
+            );
+
+            if (success) return;
+        } catch (geoError) {
+            console.log('Geolocalización no disponible, intentando IP...');
+        }
+    }
+
+    // Intento 2: Geolocalización por IP
     try {
-        const res = await fetch('https://ipapi.co/json/');
-        const data = await res.json();
-        const weather = await (await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${data.latitude}&longitude=${data.longitude}&current_weather=true`)).json();
-        document.getElementById('nav-weather-city').textContent = data.city;
-        document.getElementById('nav-weather-temp').textContent = `${Math.round(weather.current_weather.temperature)}°C`;
-    } catch (e) { console.error("Weather error"); }
+        const ipRes = await Promise.race([
+            fetch('https://ipapi.co/json/'),
+            new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 5000))
+        ]);
+
+        if (ipRes.ok) {
+            const ipData = await ipRes.json();
+            if (ipData.latitude && ipData.longitude) {
+                const success = await fetchWeatherData(
+                    ipData.latitude,
+                    ipData.longitude,
+                    ipData.city || DEFAULT_CITY
+                );
+
+                if (success) return;
+            }
+        }
+    } catch (ipError) {
+        console.log('IP geolocation failed, usando valores por defecto...');
+    }
+
+    // Intento 3: Valores por defecto (Montevideo)
+    const defaultSuccess = await fetchWeatherData(DEFAULT_LAT, DEFAULT_LON, DEFAULT_CITY);
+
+    if (!defaultSuccess) {
+        // Último recurso: mostrar placeholder
+        if (cityEl) cityEl.textContent = DEFAULT_CITY;
+        if (tempEl) tempEl.textContent = '--°C';
+        if (iconEl) {
+            iconEl.textContent = '🌤️';
+            iconEl.classList.remove('hidden');
+        }
+    }
 }
 
 window.checkAuth = () => {
